@@ -1,0 +1,16 @@
+@import url('https://fonts.font.im/css2?family=Fira+Code&family=Noto+Serif+JP&family=Noto+Serif+KR&family=Noto+Serif:wght@100..900&family=Noto+Serif+HK&family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Serif+TC:wght@300;400&display=swap');
+@import url('https://static.zeoseven.com/zsft/73/main/result.css');
+
+body {
+  background-color: #f9f2e0;
+  color: #000;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* 暗色模式 */
+body.dark-mode {
+  background-color: #424242;
+  color: #e0e0e0;
+}

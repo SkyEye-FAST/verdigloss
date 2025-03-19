@@ -1,0 +1,3 @@
+[submodule "src/assets/mc_lang"]
+	path = src/assets/mc_lang
+	url = https://github.com/SkyEye-FAST/mc_lang
