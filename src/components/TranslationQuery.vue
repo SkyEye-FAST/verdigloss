@@ -23,7 +23,7 @@
               <label for="queryLang">查询语言：</label>
               <select id="queryLang" v-model="queryLang">
                 <option
-                  v-for="lang in languages.filter((l) => l.code !== 'en-us')"
+                  v-for="lang in filteredLanguages"
                   :key="lang.code"
                   :value="lang.name"
                 >
@@ -58,7 +58,7 @@
                 v-model="enableOtherLang"
                 @change="search"
               />
-              <label for="enableOtherLang">启用其他语言</label>
+              <label for="enableOtherLang">启用非中文语言</label>
             </div>
           </div>
         </div>
@@ -193,7 +193,6 @@ interface SelectedTranslation {
     code: string
     name: string
     text: string
-    htmlLang: string
   }[]
 }
 
@@ -201,7 +200,6 @@ interface LanguageInfo {
   code: string
   name: string
   displayName: string
-  htmlLang: string
 }
 
 export default defineComponent({
@@ -209,46 +207,43 @@ export default defineComponent({
     const languages: LanguageInfo[] = [
       {
         code: 'en-us',
-        name: 'English (US)',
+        name: 'en_us',
         displayName: 'English (US)',
-        htmlLang: 'en-US',
       },
       {
         code: 'zh-cn',
         name: 'zh_cn',
         displayName: '简体中文 (中国大陆)',
-        htmlLang: 'zh-Hans-CN',
       },
       {
         code: 'zh-hk',
         name: 'zh_hk',
         displayName: '繁體中文 (香港特別行政區)',
-        htmlLang: 'zh-Hant-HK',
       },
       {
         code: 'zh-tw',
         name: 'zh_tw',
         displayName: '繁體中文 (台灣)',
-        htmlLang: 'zh-Hant-TW',
       },
-      { code: 'lzh', name: 'lzh', displayName: '文言 (華夏)', htmlLang: 'lzh' },
+      {
+        code: 'lzh',
+        name: 'lzh',
+        displayName: '文言 (華夏)',
+      },
       {
         code: 'ja',
         name: 'ja_jp',
         displayName: '日本語 (日本)',
-        htmlLang: 'ja',
       },
       {
         code: 'ko',
         name: 'ko_kr',
         displayName: '한국어 (대한민국)',
-        htmlLang: 'ko',
       },
       {
         code: 'vi',
         name: 'vi_vn',
         displayName: 'Tiếng Việt (Việt Nam)',
-        htmlLang: 'vi',
       },
     ]
 
@@ -337,6 +332,14 @@ export default defineComponent({
     },
     timezone() {
       return '中国标准时间'
+    },
+    filteredLanguages(): LanguageInfo[] {
+      return this.languages.filter((lang) => {
+        if (!this.enableOtherLang) {
+          return ['zh-cn', 'zh-hk', 'zh-tw', 'lzh'].includes(lang.code)
+        }
+        return lang.code !== 'en-us'
+      })
     },
   },
 
@@ -477,7 +480,6 @@ export default defineComponent({
             code: lang.code,
             name: lang.displayName,
             text: this.langFiles[lang.code][key],
-            htmlLang: lang.htmlLang,
           })),
       }
     },
