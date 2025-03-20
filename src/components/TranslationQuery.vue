@@ -45,7 +45,6 @@
             <div class="input-group" v-show="availableKeys.length">
               <label for="localeKey">选择本地化键名：</label>
               <select id="localeKey" v-model="localeKey" @change="search">
-                <option value="">请选择键名</option>
                 <option v-for="key in availableKeys" :key="key" :value="key">
                   {{ key }}
                 </option>
@@ -255,12 +254,13 @@ export default defineComponent({
 
     return {
       isSidebarOpen: true,
-      queryMode: 'source',
-      queryLang: 'zh_cn',
-      queryContent: '',
-      localeKey: '',
+      queryMode: localStorage.getItem('queryMode') || 'source',
+      queryLang: localStorage.getItem('queryLang') || 'zh_cn',
+      queryContent: localStorage.getItem('queryContent') || 'The End',
+      localeKey:
+        localStorage.getItem('localeKey') ||
+        'advancements.end.respawn_dragon.title',
       enableOtherLang: false,
-      title: 'Minecraft 本地化查询',
       translations: [] as Translation[],
       error: '',
       source: '',
@@ -279,19 +279,53 @@ export default defineComponent({
     }
   },
 
+  watch: {
+    queryMode(newValue) {
+      localStorage.setItem('queryMode', newValue)
+    },
+    queryLang(newValue) {
+      localStorage.setItem('queryLang', newValue)
+    },
+    queryContent(newValue) {
+      localStorage.setItem('queryContent', newValue)
+    },
+    localeKey(newValue) {
+      localStorage.setItem('localeKey', newValue)
+    },
+  },
+
+  mounted() {
+    this.search()
+  },
+
   computed: {
     availableKeys(): string[] {
-      if (!this.queryContent) {
-        return []
-      }
+      if (!this.queryContent) return []
+
       const searchText = this.queryContent.trim().toLowerCase()
-      return Object.keys(this.langFiles['en-us']).filter((key) => {
-        const sourceText = this.langFiles['en-us'][key].toLowerCase()
-        return (
-          key.toLowerCase().includes(searchText) ||
-          sourceText.includes(searchText)
-        )
-      })
+
+      switch (this.queryMode) {
+        case 'key':
+          return Object.keys(this.langFiles['en-us']).filter((key) =>
+            key.toLowerCase().includes(searchText),
+          )
+
+        case 'source':
+          return Object.entries(this.langFiles['en-us'])
+            .filter(([, value]) => value.toLowerCase().includes(searchText))
+            .map(([key]) => key)
+
+        case 'translation':
+          const langCode = this.getLanguageCode(this.queryLang)
+          if (!langCode || !this.langFiles[langCode]) return []
+
+          return Object.entries(this.langFiles[langCode])
+            .filter(([, value]) => value.toLowerCase().includes(searchText))
+            .map(([key]) => key)
+
+        default:
+          return []
+      }
     },
     currentDateTime() {
       const date = new Date()
@@ -344,89 +378,70 @@ export default defineComponent({
 
       if (this.translations.length === 0) {
         this.error = '未找到匹配的翻译'
+        this.selectedTranslation = null
         return
       }
 
-      // 如果有localeKey，直接使用它；否则使用第一个找到的键
-      const keyToUse = this.localeKey || this.translations[0].key
-      if (keyToUse) {
-        this.localeKey = keyToUse
-        this.updateSelectedTranslation(keyToUse)
+      if (this.translations.length === 1 || this.localeKey) {
+        const keyToUse = this.localeKey || this.translations[0].key
+        if (keyToUse) {
+          this.updateSelectedTranslation(keyToUse)
+        }
+      } else if (this.translations[0].key) {
+        this.localeKey = this.translations[0].key
+        this.updateSelectedTranslation(this.translations[0].key)
       }
     },
 
     searchByKey(key: string) {
-      for (const [lang, file] of Object.entries(this.langFiles)) {
-        if (key in file) {
-          this.translations.push({
-            language: lang,
-            name: file[key],
-            key: key,
-          })
-        }
-      }
+      const searchText = key.trim().toLowerCase()
+      if (!searchText) return
+
+      Object.keys(this.langFiles['en-us'])
+        .filter((key) => key.toLowerCase().includes(searchText))
+        .forEach((key) => this.collectTranslationsForKey(key))
     },
 
     searchBySourceText(text: string) {
       const searchText = text.trim().toLowerCase()
       if (!searchText) return
 
-      for (const [key, value] of Object.entries(enUS)) {
-        if (value.toLowerCase().includes(searchText)) {
-          this.collectTranslationsForKey(key)
-        }
-      }
+      Object.entries(this.langFiles['en-us'])
+        .filter(([, value]) => value.toLowerCase().includes(searchText))
+        .forEach(([key]) => this.collectTranslationsForKey(key))
     },
 
     searchByTranslation(text: string) {
       const searchText = text.trim().toLowerCase()
       if (!searchText) return
 
-      for (const [, file] of Object.entries(this.langFiles)) {
-        for (const [key, value] of Object.entries(file)) {
-          if (value.toLowerCase().includes(searchText)) {
-            this.collectTranslationsForKey(key)
-          }
-        }
-      }
+      const langCode = this.getLanguageCode(this.queryLang)
+      if (!langCode || !this.langFiles[langCode]) return
+
+      Object.entries(this.langFiles[langCode])
+        .filter(([, value]) => value.toLowerCase().includes(searchText))
+        .forEach(([key]) => this.collectTranslationsForKey(key))
     },
 
     collectTranslationsForKey(key: string) {
-      for (const [lang, file] of Object.entries(this.langFiles)) {
-        if (key in file) {
-          this.translations.push({
-            language: lang,
-            name: file[key],
-            key: key,
-          })
-        }
-      }
+      this.translations.push({
+        language: 'en-us',
+        name: this.langFiles['en-us'][key],
+        key: key,
+      })
     },
 
     getLanguageCode(lang: string): string {
       const codeMap: { [key: string]: string } = {
-        '简体中文 (中国大陆)': 'zh-cn',
-        '繁體中文 (香港特別行政區)': 'zh-hk',
-        '繁體中文 (台灣)': 'zh-tw',
-        '文言 (華夏)': 'lzh',
-        '日本語 (日本)': 'ja',
-        '한국어 (대한민국)': 'ko',
-        'Tiếng Việt (Việt Nam)': 'vi',
+        zh_cn: 'zh-cn',
+        zh_hk: 'zh-hk',
+        zh_tw: 'zh-tw',
+        lzh: 'lzh',
+        ja_jp: 'ja',
+        ko_kr: 'ko',
+        vi_vn: 'vi',
       }
       return codeMap[lang] || ''
-    },
-
-    getHtmlLang(lang: string): string {
-      const langMap: { [key: string]: string } = {
-        '简体中文 (中国大陆)': 'zh-Hans-CN',
-        '繁體中文 (香港特別行政區)': 'zh-Hant-HK',
-        '繁體中文 (台灣)': 'zh-Hant-TW',
-        '文言 (華夏)': 'lzh',
-        '日本語 (日本)': 'ja',
-        '한국어 (대한민국)': 'ko',
-        'Tiếng Việt (Việt Nam)': 'vi',
-      }
-      return langMap[lang] || ''
     },
 
     onQueryInput: debounce(function (
@@ -442,8 +457,9 @@ export default defineComponent({
       this.selectedTranslation = null
       this.error = ''
       this.translations = []
+      this.localeKey = ''
 
-      if (!this.queryContent.trim() && !this.localeKey) {
+      if (!this.queryContent.trim()) {
         return
       }
 
