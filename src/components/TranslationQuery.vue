@@ -157,9 +157,7 @@
           </table>
           <footer class="minecraft-title">
             Minecraft Standard Translations<br />
-            <span style="font-size: smaller"
-              >{{ currentDateTime }} - {{ timezone }}</span
-            >
+            {{ currentDateTime }}
           </footer>
         </div>
       </div>
@@ -331,14 +329,13 @@ export default defineComponent({
     },
     currentDateTime() {
       const date = new Date()
-      return date.toLocaleDateString('zh-CN', {
+      const timeZone = -date.getTimezoneOffset() / 60
+      const timeZoneStr = `UTC${timeZone >= 0 ? '+' : '-'}${Math.abs(timeZone)}`
+      return `${date.toLocaleString('zh-CN', {
         year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    },
-    timezone() {
-      return '中国标准时间'
+        month: '2-digit',
+        day: '2-digit',
+      })} (${timeZoneStr})`
     },
     filteredLanguages(): LanguageInfo[] {
       return this.languages.filter((lang) => {
@@ -717,7 +714,7 @@ function debounce<T extends (...args: unknown[]) => void>(
   border-bottom-color: #444;
 }
 
-/* 基础表格样式 */
+/* Base table styles */
 table {
   border-collapse: collapse;
   margin: 1em auto;
@@ -726,18 +723,17 @@ table {
 table td,
 table th {
   text-align: center;
-  padding: 0.5em 2em;
+  padding: 0.4em 1em;
   border-width: 2px;
   border-style: solid;
   font-size: 1.5em;
 }
 
-/* 不同类别的表格样式 */
+/* Table styles by category */
 .table-advancements td,
 .table-advancements th {
   border-color: #a02b93;
 }
-
 .table-advancements tr:nth-child(even) {
   background-color: #a02b9333;
 }
@@ -746,7 +742,6 @@ table th {
 .table-block th {
   border-color: #5b9bd5;
 }
-
 .table-block tr:nth-child(even) {
   background-color: #5b9bd533;
 }
@@ -755,7 +750,6 @@ table th {
 .table-effect th {
   border-color: #ffc000;
 }
-
 .table-effect tr:nth-child(even) {
   background-color: #ffc00033;
 }
@@ -764,7 +758,6 @@ table th {
 .table-enchantment th {
   border-color: #44546a;
 }
-
 .table-enchantment tr:nth-child(even) {
   background-color: #44546a33;
 }
@@ -773,7 +766,6 @@ table th {
 .table-entity th {
   border-color: #ed7d31;
 }
-
 .table-entity tr:nth-child(even) {
   background-color: #ed7d3133;
 }
@@ -782,12 +774,11 @@ table th {
 .table-item th {
   border-color: #70ad47;
 }
-
 .table-item tr:nth-child(even) {
   background-color: #70ad4733;
 }
 
-/* 标题样式 */
+/* Table content styles */
 .title {
   font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
   font-size: 2.5em;
@@ -809,7 +800,6 @@ table th {
   white-space: nowrap;
 }
 
-/* 单元格样式 */
 .string {
   font-size: 1.75em;
   min-width: 20vw;
@@ -820,7 +810,6 @@ table th {
   white-space: nowrap;
 }
 
-/* 语言字体类 */
 .zh-cn {
   font-family:
     'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
@@ -862,7 +851,6 @@ table th {
   font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
 }
 
-/* 页脚样式 */
 .minecraft-title {
   font-family:
     'Noto Serif', 'Source Han Serif', 'Times New Roman', SimSun, Times, serif;
@@ -872,13 +860,11 @@ table th {
   color: #bfbfbf;
 }
 
-/* 暗色模式适配 */
 :deep(body.dark-mode) table td,
 :deep(body.dark-mode) table th {
   border-color: #666;
 }
 
-/* 响应式设计 */
 @media (max-width: 1200px) {
   .two-column-layout {
     grid-template-columns: 1fr;
@@ -894,12 +880,57 @@ table th {
 }
 
 @media (max-width: 768px) {
+  .sidebar-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    width: 100% !important;
+    height: auto;
+    min-height: auto;
+    padding-top: 1rem;
+  }
+
+  .settings {
+    padding: 1rem;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 1rem;
+  }
+
+  .form-container {
+    gap: 0.75rem;
+  }
+
+  .input-group input,
+  .input-group select {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  table {
+    width: 100%;
+    margin: 0.5em auto;
+  }
+
+  table td,
+  table th {
+    padding: 0.25em 0.5em;
+    font-size: 1em;
+  }
+
   .title {
-    font-size: 1.5em;
+    font-size: 1.75em;
+    padding: 0 10px;
   }
 
   .subtitle {
-    font-size: 0.75em;
+    font-size: 0.9em;
+    word-break: break-all;
+    padding: 0 10px;
   }
 
   .table-header {
@@ -907,23 +938,275 @@ table th {
   }
 
   .string {
-    font-size: 1em;
+    font-size: 0.9em;
+    min-width: auto;
+    max-width: none;
+    word-break: break-word;
   }
 
   .lang-name {
-    white-space: pre;
-    font-size: 0.6em;
+    font-size: 0.8em;
+    padding: 0.25em;
   }
 
   .minecraft-title {
-    font-size: 1.25em;
+    font-size: 1em;
+    margin-top: 1em;
+  }
+
+  .result-section {
+    max-width: 100%;
+    overflow-x: auto;
     padding: 0 10px;
+  }
+
+  .input-group {
+    margin-bottom: 0.5rem;
+  }
+
+  .checkbox-group {
+    margin-top: 0.25rem;
+  }
+
+  td.string {
+    max-width: 60vw;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  table td,
+  table th {
+    padding: 0.25em;
+    font-size: 0.8em;
+  }
+
+  .title {
+    font-size: 1.5em;
+  }
+
+  .subtitle {
+    font-size: 0.7em;
+  }
+
+  .minecraft-title {
+    font-size: 0.9em;
+  }
+
+  .form-container {
+    gap: 0.5rem;
+  }
+}
+
+@media screen and (max-height: 480px) and (orientation: landscape) {
+  .sidebar {
+    position: fixed;
+    width: 250px !important;
+    height: 100vh;
+    overflow-y: auto;
+    padding-top: 0.5rem;
+  }
+
+  .main-content {
+    margin-left: 250px;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+
+  .sidebar-collapsed .main-content {
+    margin-left: 40px;
+  }
+
+  .result-section {
+    transform: scale(0.85);
+    transform-origin: center top;
+  }
+
+  .title {
+    font-size: 2em;
+    margin-bottom: 0.3em;
+  }
+
+  .subtitle {
+    font-size: 0.9em;
+    margin-bottom: 0.5em;
   }
 
   table td,
   table th {
-    border-width: 1px;
-    padding: 0.5em;
+    padding: 0.3em 1em;
+    font-size: 1em;
+  }
+
+  .string {
+    font-size: 1em;
+  }
+
+  .minecraft-title {
+    font-size: 1.2em;
+    margin-top: 0.5em;
+  }
+
+  .form-container {
+    padding: 0.5rem;
+  }
+
+  .input-group {
+    margin-bottom: 0.4rem;
+  }
+
+  .input-group label {
+    font-size: 0.9em;
+  }
+
+  .input-group input,
+  .input-group select {
+    padding: 0.4rem;
+    font-size: 0.9em;
+  }
+
+  .checkbox-group {
+    margin: 0.3rem 0;
+  }
+
+  .toggle-button {
+    width: 25px;
+    height: 35px;
+    right: -25px;
+  }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .sidebar-layout {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    position: fixed;
+    width: 280px !important;
+    height: 100vh;
+    padding-top: 0.5rem;
+  }
+
+  .settings {
+    padding: 0.5rem;
+    height: calc(100vh - 1rem);
+    overflow-y: auto;
+  }
+
+  .main-content {
+    margin-left: 280px;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .result-section {
+    transform: scale(0.75);
+    transform-origin: top center;
+    margin: 0;
+    width: 100%;
+    min-height: min-content;
+  }
+
+  .title {
+    margin-top: 0;
+  }
+
+  table {
+    margin: 1rem auto;
+    max-width: 100%;
+    overflow-x: visible;
+  }
+
+  table td,
+  table th {
+    padding: 0.25em 0.75em;
+    font-size: 1.1em;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .sidebar-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1rem;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    width: 300px !important;
+    height: 100vh;
+    padding-top: 1rem;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .result-section {
+    max-width: 100%;
+  }
+
+  table {
+    width: auto;
+    min-width: 90%;
+  }
+
+  table td,
+  table th {
+    padding: 0.4em 1.5em;
+    font-size: 1.3em;
+  }
+
+  .title {
+    font-size: 2em;
+  }
+
+  .subtitle {
+    font-size: 1.1em;
+  }
+
+  .string {
+    font-size: 1.3em;
+    min-width: 15vw;
+    max-width: 35vw;
+  }
+
+  .table-header {
+    font-size: 1.5em;
+  }
+
+  .minecraft-title {
+    font-size: 1.4em;
+  }
+
+  .form-container {
+    gap: 0.8rem;
+  }
+
+  .input-group input,
+  .input-group select {
+    padding: 0.6rem;
+    font-size: 1rem;
+  }
+
+  @media (orientation: landscape) {
+    .sidebar-layout {
+      height: 100vh;
+    }
+
+    .main-content {
+      overflow-y: auto;
+      height: 100vh;
+    }
   }
 }
 </style>
