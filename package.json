@@ -13,11 +13,14 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@vueuse/core": "^13.0.0",
     "vue": "^3.5.13",
     "vue-i18n": "v11",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@iconify-json/material-symbols": "^1.2.17",
+    "@iconify/vue": "^4.3.0",
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.13.9",
     "@vitejs/plugin-vue": "^5.2.1",
@@ -30,6 +33,9 @@
     "npm-run-all2": "^7.0.2",
     "prettier": "3.5.3",
     "typescript": "~5.8.0",
+    "unplugin-auto-import": "^19.1.2",
+    "unplugin-icons": "^22.1.0",
+    "unplugin-vue-components": "^28.4.1",
     "vite": "^6.2.1",
     "vite-plugin-vue-devtools": "^7.7.2",
     "vue-tsc": "^2.2.8"

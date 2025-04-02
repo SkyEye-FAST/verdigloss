@@ -6,7 +6,14 @@
     >
       <div class="sidebar">
         <button class="toggle-button" @click="toggleSidebar">
-          {{ isSidebarOpen ? '<<' : '>>' }}
+          <i-material-symbols-chevron-left
+            v-if="isSidebarOpen"
+            style="font-size: 1.5em; color: #fff"
+          />
+          <i-material-symbols-chevron-right
+            v-else
+            style="font-size: 1.5em; color: #fff"
+          />
         </button>
         <div class="settings" v-show="isSidebarOpen">
           <div class="form-container">

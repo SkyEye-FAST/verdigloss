@@ -7,7 +7,6 @@ const routes = [
     name: 'TranslationQuery',
     component: TranslationQuery,
   },
-  // ...existing code...
 ]
 
 const router = createRouter({
