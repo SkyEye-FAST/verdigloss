@@ -103,8 +103,9 @@ import lzh from '@#/lzh.json'
 import ja from '@#/ja_jp.json'
 import ko from '@#/ko_kr.json'
 import vi from '@#/vi_vn.json'
+import mcVersion from '@/assets/mc_lang/version.txt?raw'
 
-const minecraftVersion = ref('')
+const minecraftVersion = ref(mcVersion)
 
 const languages = [
   'en_us',
@@ -144,19 +145,6 @@ const toggleDarkMode = () => {
 }
 
 onMounted(async () => {
-  try {
-    const response = await fetch('/src/assets/mc_lang/version.txt')
-    if (response.ok) {
-      minecraftVersion.value = await response.text()
-    } else {
-      console.error('Failed to load version.txt')
-      minecraftVersion.value = 'Unknown version'
-    }
-  } catch (error) {
-    console.error('Error loading version.txt:', error)
-    minecraftVersion.value = 'Error loading version'
-  }
-
   setTimeout(async () => {
     const keys = Object.keys(translations.value.en_us)
     tableData.value = keys.map((key) => {

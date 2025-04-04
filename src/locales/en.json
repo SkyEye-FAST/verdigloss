@@ -20,11 +20,7 @@
       "langName": "Language Name",
       "translation": "Translation"
     },
-    "title": "Minecraft Standard Translations",
-    "version": {
-      "error": "Error loading Minecraft version",
-      "unknown": "Unknown Minecraft version"
-    }
+    "title": "Minecraft Standard Translations"
   },
   "table": {
     "author": "Compiled by SkyEye_FAST",

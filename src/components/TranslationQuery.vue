@@ -177,8 +177,10 @@ import lzh from '@#/lzh.json'
 import ja from '@#/ja_jp.json'
 import ko from '@#/ko_kr.json'
 import vi from '@#/vi_vn.json'
+import mcVersion from '@/assets/mc_lang/version.txt?raw'
 
 const { t } = useI18n()
+const minecraftVersion = ref(mcVersion)
 
 interface Translation {
   language: string
@@ -264,7 +266,6 @@ const languages: LanguageInfo[] = [
 ]
 
 const isSidebarOpen = ref(true)
-const minecraftVersion = ref('')
 const queryMode = ref(localStorage.getItem('queryMode') || 'source')
 const queryLang = ref(localStorage.getItem('queryLang') || 'zh_cn')
 const queryContent = ref(localStorage.getItem('queryContent') || 'The End')
@@ -499,19 +500,6 @@ watch(localeKey, (newValue) => {
 })
 
 onMounted(async () => {
-  try {
-    const response = await fetch('/src/assets/mc_lang/version.txt')
-    if (response.ok) {
-      minecraftVersion.value = await response.text()
-    } else {
-      console.error('Failed to load version.txt')
-      minecraftVersion.value = t('query.version.unknown')
-    }
-  } catch (error) {
-    console.error('Error loading version.txt:', error)
-    minecraftVersion.value = t('query.version.error')
-  }
-
   const savedDarkMode = localStorage.getItem('darkMode')
   if (savedDarkMode === 'true') {
     document.body.classList.add('dark-mode')

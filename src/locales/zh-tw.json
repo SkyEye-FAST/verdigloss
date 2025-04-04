@@ -20,11 +20,7 @@
       "langName": "語言名稱",
       "translation": "譯名"
     },
-    "title": "Minecraft 標準譯名",
-    "version": {
-      "error": "載入 Minecraft 版本時發生錯誤",
-      "unknown": "未知的 Minecraft 版本"
-    }
+    "title": "Minecraft 標準譯名"
   },
   "table": {
     "author": "由 SkyEye_FAST 整理",
