@@ -67,7 +67,12 @@
       </div>
     </header>
 
-    <table>
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>{{ $t('table.loading') }}</p>
+    </div>
+
+    <table v-else>
       <thead>
         <tr>
           <th class="key-column">keys</th>
@@ -127,6 +132,7 @@ interface TableRow extends Record<string, string> {
   key: string
 }
 
+const loading = ref(true)
 const tableData = ref<TableRow[]>([])
 
 const isDarkMode = ref(document.body.classList.contains('dark-mode'))
@@ -151,18 +157,20 @@ onMounted(async () => {
     minecraftVersion.value = 'Error loading version'
   }
 
-  const keys = Object.keys(translations.value.en_us)
-  tableData.value = keys.map((key) => {
-    const row: TableRow = { key }
-    languages.forEach((lang) => {
-      const langData =
-        translations.value[lang as keyof typeof translations.value]
-      row[lang] = (langData as Record<string, string>)[key] || '？'
+  setTimeout(async () => {
+    const keys = Object.keys(translations.value.en_us)
+    tableData.value = keys.map((key) => {
+      const row: TableRow = { key }
+      languages.forEach((lang) => {
+        const langData =
+          translations.value[lang as keyof typeof translations.value]
+        row[lang] = (langData as Record<string, string>)[key] || '？'
+      })
+      return row
     })
-    return row
-  })
+    loading.value = false
+  }, 0)
 
-  // 初始化深色模式
   const savedDarkMode = localStorage.getItem('darkMode')
   if (savedDarkMode === 'true') {
     document.body.classList.add('dark-mode')
@@ -602,6 +610,34 @@ table tr:hover td {
 
   .button .icon {
     font-size: 1.1rem;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  margin: 2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #5b9bd5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 </style>

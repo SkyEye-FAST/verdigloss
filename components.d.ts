@@ -20,6 +20,7 @@ declare module 'vue' {
     IMaterialSymbolsSearch: typeof import('~icons/material-symbols/search')['default']
     IMaterialSymbolsSettingsOutline: typeof import('~icons/material-symbols/settings-outline')['default']
     IMaterialSymbolsTableViewOutline: typeof import('~icons/material-symbols/table-view-outline')['default']
+    IMaterialSymbolsTranslate: typeof import('~icons/material-symbols/translate')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TranslationQuery: typeof import('./src/components/TranslationQuery.vue')['default']

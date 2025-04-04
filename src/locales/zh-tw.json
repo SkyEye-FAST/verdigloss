@@ -20,12 +20,17 @@
       "langName": "語言名稱",
       "translation": "譯名"
     },
-    "title": "Minecraft 標準譯名"
+    "title": "Minecraft 標準譯名",
+    "version": {
+      "error": "載入 Minecraft 版本時發生錯誤",
+      "unknown": "未知的 Minecraft 版本"
+    }
   },
   "table": {
     "author": "由 SkyEye_FAST 整理",
     "download_tsv": "下載 TSV",
     "java_edition": "Java版",
+    "loading": "載入中...",
     "query_page": "查詢頁面",
     "search_placeholder": "搜尋內容...",
     "title": "Minecraft 標準譯名表"

@@ -138,72 +138,17 @@
               </tr>
             </thead>
             <tbody>
-              <tr lang="zh-Hans-CN" class="zh-cn">
-                <td class="lang-name">简体中文 (中国大陆)</td>
+              <tr
+                v-for="lang in displayLanguages"
+                :key="lang.code"
+                :lang="lang.htmlLang"
+                :class="lang.code"
+              >
+                <td class="lang-name">{{ lang.displayName }}</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
-                      (t) => t.code === 'zh-cn',
-                    )?.text
-                  }}
-                </td>
-              </tr>
-              <tr lang="zh-Hant-HK" class="zh-hk">
-                <td class="lang-name">繁體中文 (香港特別行政區)</td>
-                <td class="string">
-                  {{
-                    selectedTranslation?.translations.find(
-                      (t) => t.code === 'zh-hk',
-                    )?.text
-                  }}
-                </td>
-              </tr>
-              <tr lang="zh-Hant-TW" class="zh-tw">
-                <td class="lang-name">繁體中文 (台灣)</td>
-                <td class="string">
-                  {{
-                    selectedTranslation?.translations.find(
-                      (t) => t.code === 'zh-tw',
-                    )?.text
-                  }}
-                </td>
-              </tr>
-              <tr lang="lzh" class="lzh">
-                <td class="lang-name">文言 (華夏)</td>
-                <td class="string">
-                  {{
-                    selectedTranslation?.translations.find(
-                      (t) => t.code === 'lzh',
-                    )?.text
-                  }}
-                </td>
-              </tr>
-              <tr v-if="enableOtherLang" lang="ja" class="ja">
-                <td class="lang-name">日本語 (日本)</td>
-                <td class="string">
-                  {{
-                    selectedTranslation?.translations.find(
-                      (t) => t.code === 'ja',
-                    )?.text
-                  }}
-                </td>
-              </tr>
-              <tr v-if="enableOtherLang" lang="ko" class="ko">
-                <td class="lang-name">한국어 (대한민국)</td>
-                <td class="string">
-                  {{
-                    selectedTranslation?.translations.find(
-                      (t) => t.code === 'ko',
-                    )?.text
-                  }}
-                </td>
-              </tr>
-              <tr v-if="enableOtherLang" lang="vi" class="vi">
-                <td class="lang-name">Tiếng Việt (Việt Nam)</td>
-                <td class="string">
-                  {{
-                    selectedTranslation?.translations.find(
-                      (t) => t.code === 'vi',
+                      (t) => t.code === lang.code,
                     )?.text
                   }}
                 </td>
@@ -220,8 +165,9 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, type ComponentPublicInstance } from 'vue'
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { currentLocale } from '@/main'
 import enUS from '@#/en_us.json'
 import zhCN from '@#/zh_cn.json'
@@ -231,6 +177,8 @@ import lzh from '@#/lzh.json'
 import ja from '@#/ja_jp.json'
 import ko from '@#/ko_kr.json'
 import vi from '@#/vi_vn.json'
+
+const { t } = useI18n()
 
 interface Translation {
   language: string
@@ -261,311 +209,267 @@ interface LanguageInfo {
   code: string
   name: string
   displayName: string
+  htmlLang: string
 }
 
-export default defineComponent({
-  data() {
-    const languages: LanguageInfo[] = [
-      {
-        code: 'en-us',
-        name: 'en_us',
-        displayName: 'English (US)',
-      },
-      {
-        code: 'zh-cn',
-        name: 'zh_cn',
-        displayName: '简体中文 (中国大陆)',
-      },
-      {
-        code: 'zh-hk',
-        name: 'zh_hk',
-        displayName: '繁體中文 (香港特別行政區)',
-      },
-      {
-        code: 'zh-tw',
-        name: 'zh_tw',
-        displayName: '繁體中文 (台灣)',
-      },
-      {
-        code: 'lzh',
-        name: 'lzh',
-        displayName: '文言 (華夏)',
-      },
-      {
-        code: 'ja',
-        name: 'ja_jp',
-        displayName: '日本語 (日本)',
-      },
-      {
-        code: 'ko',
-        name: 'ko_kr',
-        displayName: '한국어 (대한민국)',
-      },
-      {
-        code: 'vi',
-        name: 'vi_vn',
-        displayName: 'Tiếng Việt (Việt Nam)',
-      },
-    ]
-
-    return {
-      isSidebarOpen: true,
-      minecraftVersion: '',
-      queryMode: localStorage.getItem('queryMode') || 'source',
-      queryLang: localStorage.getItem('queryLang') || 'zh_cn',
-      queryContent: localStorage.getItem('queryContent') || 'The End',
-      localeKey:
-        localStorage.getItem('localeKey') ||
-        'advancements.end.respawn_dragon.title',
-      enableOtherLang: false,
-      translations: [] as Translation[],
-      error: '',
-      source: '',
-      langFiles: {
-        'en-us': enUS,
-        'zh-cn': zhCN,
-        'zh-hk': zhHK,
-        'zh-tw': zhTW,
-        lzh: lzh,
-        ja: ja,
-        ko: ko,
-        vi: vi,
-      } as LangFiles,
-      selectedTranslation: null as SelectedTranslation | null,
-      languages,
-      isDarkMode: document.body.classList.contains('dark-mode'),
-    }
+const languages: LanguageInfo[] = [
+  {
+    code: 'en-us',
+    name: 'en_us',
+    displayName: 'English (United States)',
+    htmlLang: 'en',
   },
-
-  async mounted() {
-    try {
-      const response = await fetch('/src/assets/mc_lang/version.txt')
-      if (response.ok) {
-        this.minecraftVersion = await response.text()
-      } else {
-        console.error('Failed to load version.txt')
-        this.minecraftVersion = 'Unknown version'
-      }
-    } catch (error) {
-      console.error('Error loading version.txt:', error)
-      this.minecraftVersion = 'Error loading version'
-    }
-
-    this.search()
-
-    // 初始化暗色模式
-    const savedDarkMode = localStorage.getItem('darkMode')
-    if (savedDarkMode === 'true') {
-      document.body.classList.add('dark-mode')
-      this.isDarkMode = true
-    }
+  {
+    code: 'zh-cn',
+    name: 'zh_cn',
+    displayName: '简体中文 (中国大陆)',
+    htmlLang: 'zh-Hans-CN',
   },
-
-  watch: {
-    queryMode(newValue) {
-      localStorage.setItem('queryMode', newValue)
-    },
-    queryLang(newValue) {
-      localStorage.setItem('queryLang', newValue)
-    },
-    queryContent(newValue) {
-      localStorage.setItem('queryContent', newValue)
-    },
-    localeKey(newValue) {
-      localStorage.setItem('localeKey', newValue)
-    },
+  {
+    code: 'zh-hk',
+    name: 'zh_hk',
+    displayName: '繁體中文 (香港特別行政區)',
+    htmlLang: 'zh-Hant-HK',
   },
-
-  computed: {
-    currentLang(): string {
-      return currentLocale.value
-    },
-    availableKeys(): string[] {
-      if (!this.queryContent) return []
-
-      const searchText = this.queryContent.trim().toLowerCase()
-
-      switch (this.queryMode) {
-        case 'key':
-          return Object.keys(this.langFiles['en-us']).filter((key) =>
-            key.toLowerCase().includes(searchText),
-          )
-
-        case 'source':
-          return Object.entries(this.langFiles['en-us'])
-            .filter(([, value]) => value.toLowerCase().includes(searchText))
-            .map(([key]) => key)
-
-        case 'translation':
-          const langCode = this.getLanguageCode(this.queryLang)
-          if (!langCode || !this.langFiles[langCode]) return []
-
-          return Object.entries(this.langFiles[langCode])
-            .filter(([, value]) => value.toLowerCase().includes(searchText))
-            .map(([key]) => key)
-
-        default:
-          return []
-      }
-    },
-    filteredLanguages(): LanguageInfo[] {
-      return this.languages.filter((lang) => {
-        if (!this.enableOtherLang) {
-          return ['zh-cn', 'zh-hk', 'zh-tw', 'lzh'].includes(lang.code)
-        }
-        return lang.code !== 'en-us'
-      })
-    },
+  {
+    code: 'zh-tw',
+    name: 'zh_tw',
+    displayName: '繁體中文 (台灣)',
+    htmlLang: 'zh-Hant-TW',
   },
+  {
+    code: 'lzh',
+    name: 'lzh',
+    displayName: '文言 (華夏)',
+    htmlLang: 'lzh',
+  },
+  {
+    code: 'ja',
+    name: 'ja_jp',
+    displayName: '日本語 (日本)',
+    htmlLang: 'ja',
+  },
+  {
+    code: 'ko',
+    name: 'ko_kr',
+    displayName: '한국어 (대한민국)',
+    htmlLang: 'ko',
+  },
+  {
+    code: 'vi',
+    name: 'vi_vn',
+    displayName: 'Tiếng Việt (Việt Nam)',
+    htmlLang: 'vi',
+  },
+]
 
-  methods: {
-    toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen
-    },
-    getCategoryFromKey(key: string): string {
-      if (key.includes('advancement')) return 'advancements'
-      if (key.includes('biome')) return 'biome'
-      if (key.includes('block')) return 'block'
-      if (key.includes('effect')) return 'effect'
-      if (key.includes('enchantment')) return 'enchantment'
-      if (key.includes('entity')) return 'entity'
-      if (key.includes('item')) return 'item'
-      return 'block'
-    },
+const isSidebarOpen = ref(true)
+const minecraftVersion = ref('')
+const queryMode = ref(localStorage.getItem('queryMode') || 'source')
+const queryLang = ref(localStorage.getItem('queryLang') || 'zh_cn')
+const queryContent = ref(localStorage.getItem('queryContent') || 'The End')
+const localeKey = ref(
+  localStorage.getItem('localeKey') || 'advancements.end.respawn_dragon.title',
+)
+const enableOtherLang = ref(false)
+const translations = ref<Translation[]>([])
+const error = ref('')
+const selectedTranslation = ref<SelectedTranslation | null>(null)
+const isDarkMode = ref(document.body.classList.contains('dark-mode'))
 
-    search() {
-      this.error = ''
-      this.translations = []
+const langFiles: LangFiles = {
+  'en-us': enUS,
+  'zh-cn': zhCN,
+  'zh-hk': zhHK,
+  'zh-tw': zhTW,
+  lzh: lzh,
+  ja: ja,
+  ko: ko,
+  vi: vi,
+}
 
-      if (!this.queryContent.trim() && !this.localeKey) {
-        this.error = 'Please enter query content'
-        return
-      }
+const currentLang = computed(() => currentLocale.value)
 
-      switch (this.queryMode) {
-        case 'key':
-          this.searchByKey(this.queryContent || this.localeKey)
-          break
-        case 'source':
-          this.searchBySourceText(this.queryContent)
-          break
-        case 'translation':
-          this.searchByTranslation(this.queryContent)
-          break
-      }
+const availableKeys = computed(() => {
+  if (!queryContent.value) return []
 
-      if (this.translations.length === 0) {
-        this.error = 'No matching translations found'
-        this.selectedTranslation = null
-        return
-      }
+  const searchText = queryContent.value.trim().toLowerCase()
 
-      if (this.translations.length === 1 || this.localeKey) {
-        const keyToUse = this.localeKey || this.translations[0].key
-        if (keyToUse) {
-          this.updateSelectedTranslation(keyToUse)
-        }
-      } else if (this.translations[0].key) {
-        this.localeKey = this.translations[0].key
-        this.updateSelectedTranslation(this.translations[0].key)
-      }
-    },
-
-    searchByKey(key: string) {
-      const searchText = key.trim().toLowerCase()
-      if (!searchText) return
-
-      Object.keys(this.langFiles['en-us'])
-        .filter((key) => key.toLowerCase().includes(searchText))
-        .forEach((key) => this.collectTranslationsForKey(key))
-    },
-
-    searchBySourceText(text: string) {
-      const searchText = text.trim().toLowerCase()
-      if (!searchText) return
-
-      Object.entries(this.langFiles['en-us'])
+  switch (queryMode.value) {
+    case 'key':
+      return Object.keys(langFiles['en-us']).filter((key) =>
+        key.toLowerCase().includes(searchText),
+      )
+    case 'source':
+      return Object.entries(langFiles['en-us'])
         .filter(([, value]) => value.toLowerCase().includes(searchText))
-        .forEach(([key]) => this.collectTranslationsForKey(key))
-    },
-
-    searchByTranslation(text: string) {
-      const searchText = text.trim().toLowerCase()
-      if (!searchText) return
-
-      const langCode = this.getLanguageCode(this.queryLang)
-      if (!langCode || !this.langFiles[langCode]) return
-
-      Object.entries(this.langFiles[langCode])
+        .map(([key]) => key)
+    case 'translation':
+      const langCode = getLanguageCode(queryLang.value)
+      if (!langCode || !langFiles[langCode]) return []
+      return Object.entries(langFiles[langCode])
         .filter(([, value]) => value.toLowerCase().includes(searchText))
-        .forEach(([key]) => this.collectTranslationsForKey(key))
-    },
-
-    collectTranslationsForKey(key: string) {
-      this.translations.push({
-        language: 'en-us',
-        name: this.langFiles['en-us'][key],
-        key: key,
-      })
-    },
-
-    getLanguageCode(lang: string): string {
-      const codeMap: { [key: string]: string } = {
-        zh_cn: 'zh-cn',
-        zh_hk: 'zh-hk',
-        zh_tw: 'zh-tw',
-        lzh: 'lzh',
-        ja_jp: 'ja',
-        ko_kr: 'ko',
-        vi_vn: 'vi',
-      }
-      return codeMap[lang] || ''
-    },
-
-    onQueryInput: debounce(function (
-      this: ComponentPublicInstance & {
-        selectedTranslation: SelectedTranslation | null
-        error: string
-        translations: Translation[]
-        queryContent: string
-        localeKey: string
-        search: () => void
-      },
-    ) {
-      this.selectedTranslation = null
-      this.error = ''
-      this.translations = []
-      this.localeKey = ''
-
-      if (!this.queryContent.trim()) {
-        return
-      }
-
-      this.search()
-    }, 300),
-
-    updateSelectedTranslation(key: string) {
-      this.selectedTranslation = {
-        source: this.langFiles['en-us'][key],
-        key: key,
-        category: this.getCategoryFromKey(key),
-        translations: this.languages
-          .filter((lang) => lang.code !== 'en-us')
-          .map((lang) => ({
-            code: lang.code,
-            name: lang.displayName,
-            text: this.langFiles[lang.code][key],
-          })),
-      }
-    },
-
-    toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode
-      document.body.classList.toggle('dark-mode')
-      localStorage.setItem('darkMode', this.isDarkMode ? 'true' : 'false')
-    },
-  },
+        .map(([key]) => key)
+    default:
+      return []
+  }
 })
+
+const filteredLanguages = computed(() =>
+  languages.filter((lang) => {
+    if (!enableOtherLang.value) {
+      return ['zh-cn', 'zh-hk', 'zh-tw', 'lzh'].includes(lang.code)
+    }
+    return lang.code !== 'en-us'
+  }),
+)
+
+const displayLanguages = computed(() => {
+  return languages.filter((lang) => {
+    if (!enableOtherLang.value) {
+      return ['zh-cn', 'zh-hk', 'zh-tw', 'lzh'].includes(lang.code)
+    }
+    return true
+  })
+})
+
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
+const getCategoryFromKey = (key: string): string => {
+  if (key.includes('advancement')) return 'advancements'
+  if (key.includes('biome')) return 'biome'
+  if (key.includes('block')) return 'block'
+  if (key.includes('effect')) return 'effect'
+  if (key.includes('enchantment')) return 'enchantment'
+  if (key.includes('entity')) return 'entity'
+  if (key.includes('item')) return 'item'
+  return 'block'
+}
+
+const search = () => {
+  error.value = ''
+  translations.value = []
+
+  if (!queryContent.value.trim() && !localeKey.value) {
+    error.value = 'Please enter query content'
+    return
+  }
+
+  switch (queryMode.value) {
+    case 'key':
+      searchByKey(queryContent.value || localeKey.value)
+      break
+    case 'source':
+      searchBySourceText(queryContent.value)
+      break
+    case 'translation':
+      searchByTranslation(queryContent.value)
+      break
+  }
+
+  if (translations.value.length === 0) {
+    error.value = 'No matching translations found'
+    selectedTranslation.value = null
+    return
+  }
+
+  if (translations.value.length === 1 || localeKey.value) {
+    const keyToUse = localeKey.value || translations.value[0].key
+    if (keyToUse) {
+      updateSelectedTranslation(keyToUse)
+    }
+  } else if (translations.value[0].key) {
+    localeKey.value = translations.value[0].key
+    updateSelectedTranslation(translations.value[0].key)
+  }
+}
+
+const searchByKey = (key: string) => {
+  const searchText = key.trim().toLowerCase()
+  if (!searchText) return
+
+  Object.keys(langFiles['en-us'])
+    .filter((key) => key.toLowerCase().includes(searchText))
+    .forEach((key) => collectTranslationsForKey(key))
+}
+
+const searchBySourceText = (text: string) => {
+  const searchText = text.trim().toLowerCase()
+  if (!searchText) return
+
+  Object.entries(langFiles['en-us'])
+    .filter(([, value]) => value.toLowerCase().includes(searchText))
+    .forEach(([key]) => collectTranslationsForKey(key))
+}
+
+const searchByTranslation = (text: string) => {
+  const searchText = text.trim().toLowerCase()
+  if (!searchText) return
+
+  const langCode = getLanguageCode(queryLang.value)
+  if (!langCode || !langFiles[langCode]) return
+
+  Object.entries(langFiles[langCode])
+    .filter(([, value]) => value.toLowerCase().includes(searchText))
+    .forEach(([key]) => collectTranslationsForKey(key))
+}
+
+const collectTranslationsForKey = (key: string) => {
+  translations.value.push({
+    language: 'en-us',
+    name: langFiles['en-us'][key],
+    key: key,
+  })
+}
+
+const getLanguageCode = (lang: string): string => {
+  const codeMap: { [key: string]: string } = {
+    zh_cn: 'zh-cn',
+    zh_hk: 'zh-hk',
+    zh_tw: 'zh-tw',
+    lzh: 'lzh',
+    ja_jp: 'ja',
+    ko_kr: 'ko',
+    vi_vn: 'vi',
+  }
+  return codeMap[lang] || ''
+}
+
+const onQueryInput = debounce(() => {
+  selectedTranslation.value = null
+  error.value = ''
+  translations.value = []
+  localeKey.value = ''
+
+  if (!queryContent.value.trim()) {
+    return
+  }
+
+  search()
+}, 300)
+
+const updateSelectedTranslation = (key: string) => {
+  selectedTranslation.value = {
+    source: langFiles['en-us'][key],
+    key: key,
+    category: getCategoryFromKey(key),
+    translations: languages
+      .filter((lang) => lang.code !== 'en-us')
+      .map((lang) => ({
+        code: lang.code,
+        name: lang.displayName,
+        text: langFiles[lang.code][key],
+      })),
+  }
+}
+
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+  document.body.classList.toggle('dark-mode')
+  localStorage.setItem('darkMode', isDarkMode.value ? 'true' : 'false')
+}
 
 function debounce<T extends (...args: unknown[]) => void>(
   fn: T,
@@ -577,6 +481,49 @@ function debounce<T extends (...args: unknown[]) => void>(
     timer = setTimeout(() => fn.apply(this, args), delay)
   }
 }
+
+watch(queryMode, (newValue) => {
+  localStorage.setItem('queryMode', newValue)
+})
+
+watch(queryLang, (newValue) => {
+  localStorage.setItem('queryLang', newValue)
+})
+
+watch(queryContent, (newValue) => {
+  localStorage.setItem('queryContent', newValue)
+})
+
+watch(localeKey, (newValue) => {
+  localStorage.setItem('localeKey', newValue)
+})
+
+onMounted(async () => {
+  try {
+    const response = await fetch('/src/assets/mc_lang/version.txt')
+    if (response.ok) {
+      minecraftVersion.value = await response.text()
+    } else {
+      console.error('Failed to load version.txt')
+      minecraftVersion.value = t('query.version.unknown')
+    }
+  } catch (error) {
+    console.error('Error loading version.txt:', error)
+    minecraftVersion.value = t('query.version.error')
+  }
+
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode === 'true') {
+    document.body.classList.add('dark-mode')
+    isDarkMode.value = true
+  }
+
+  if (localeKey.value) {
+    search()
+  } else if (queryContent.value) {
+    onQueryInput()
+  }
+})
 </script>
 
 <style scoped>
