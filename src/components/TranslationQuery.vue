@@ -18,16 +18,20 @@
         <div class="settings" v-show="isSidebarOpen">
           <div class="form-container">
             <div class="input-group">
-              <label for="queryMode">查询模式：</label>
+              <label for="queryMode">{{ $t('query.query_mode') }}：</label>
               <select id="queryMode" v-model="queryMode" @change="onQueryInput">
-                <option value="source">按源字符串查询</option>
-                <option value="key">按本地化键名查询</option>
-                <option value="translation">按翻译后字符串查询</option>
+                <option value="source">
+                  {{ $t('query.query_modes.source') }}
+                </option>
+                <option value="key">{{ $t('query.query_modes.key') }}</option>
+                <option value="translation">
+                  {{ $t('query.query_modes.translation') }}
+                </option>
               </select>
             </div>
 
             <div class="input-group" v-show="queryMode === 'translation'">
-              <label for="queryLang">查询语言：</label>
+              <label for="queryLang">{{ $t('query.query_lang') }}：</label>
               <select id="queryLang" v-model="queryLang">
                 <option
                   v-for="lang in filteredLanguages"
@@ -40,7 +44,9 @@
             </div>
 
             <div class="input-group">
-              <label for="queryContent">查询内容：</label>
+              <label for="queryContent"
+                >{{ $t('query.query_content') }}：</label
+              >
               <input
                 id="queryContent"
                 v-model="queryContent"
@@ -50,7 +56,7 @@
             </div>
 
             <div class="input-group" v-show="availableKeys.length">
-              <label for="localeKey">选择本地化键名：</label>
+              <label for="localeKey">{{ $t('query.locale_key') }}：</label>
               <select id="localeKey" v-model="localeKey" @change="search">
                 <option v-for="key in availableKeys" :key="key" :value="key">
                   {{ key }}
@@ -65,7 +71,9 @@
                 v-model="enableOtherLang"
                 @change="search"
               />
-              <label for="enableOtherLang">启用非中文语言</label>
+              <label for="enableOtherLang">{{
+                $t('query.enable_other_lang')
+              }}</label>
             </div>
           </div>
         </div>
@@ -78,8 +86,10 @@
           <table :class="'table-' + (selectedTranslation?.category || 'block')">
             <thead>
               <tr>
-                <th class="table-header">语言名称</th>
-                <th class="table-header">译名</th>
+                <th class="table-header">{{ $t('query.table.langName') }}</th>
+                <th class="table-header">
+                  {{ $t('query.table.translation') }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -155,9 +165,9 @@
               </tr>
             </tbody>
           </table>
-          <footer class="minecraft-title">
-            Minecraft Standard Translations<br />
-            Java Edition {{ minecraftVersion }}
+          <footer class="minecraft-title" :lang="currentLang">
+            {{ $t('query.title') }}<br />
+            {{ $t('query.java_edition') }}{{ minecraftVersion }}
           </footer>
         </div>
       </div>
@@ -167,6 +177,7 @@
 
 <script lang="ts">
 import { defineComponent, type ComponentPublicInstance } from 'vue'
+import { currentLocale } from '@/main'
 import enUS from '@#/en_us.json'
 import zhCN from '@#/zh_cn.json'
 import zhHK from '@#/zh_hk.json'
@@ -254,7 +265,7 @@ export default defineComponent({
 
     return {
       isSidebarOpen: true,
-      minecraftVersion: '', // 初始化为空字符串
+      minecraftVersion: '',
       queryMode: localStorage.getItem('queryMode') || 'source',
       queryLang: localStorage.getItem('queryLang') || 'zh_cn',
       queryContent: localStorage.getItem('queryContent') || 'The End',
@@ -313,6 +324,9 @@ export default defineComponent({
   },
 
   computed: {
+    currentLang(): string {
+      return currentLocale.value
+    },
     availableKeys(): string[] {
       if (!this.queryContent) return []
 
@@ -371,7 +385,7 @@ export default defineComponent({
       this.translations = []
 
       if (!this.queryContent.trim() && !this.localeKey) {
-        this.error = '请输入查询内容'
+        this.error = 'Please enter query content'
         return
       }
 
@@ -388,7 +402,7 @@ export default defineComponent({
       }
 
       if (this.translations.length === 0) {
-        this.error = '未找到匹配的翻译'
+        this.error = 'No matching translations found'
         this.selectedTranslation = null
         return
       }
@@ -542,6 +556,7 @@ function debounce<T extends (...args: unknown[]) => void>(
 .toggle-button {
   position: absolute;
   top: 1rem;
+  right: -30px;
   width: 30px;
   height: 40px;
   background: #7aa2ea;
@@ -813,18 +828,21 @@ table th {
   white-space: nowrap;
 }
 
+.minecraft-title[lang='zh-CN'],
 .zh-cn {
   font-family:
     'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
     'Times New Roman', SimSun, Times, serif;
 }
 
+.minecraft-title[lang='zh-HK'],
 .zh-hk {
   font-family:
     'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK',
     '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
 }
 
+.minecraft-title[lang='zh-TW'],
 .zh-tw {
   font-family:
     'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
@@ -838,25 +856,26 @@ table th {
     'Times New Roman', SimSun, Times, serif;
 }
 
+.minecraft-title[lang='ja'],
 .ja {
   font-family:
     'Noto Serif JP', 'Source Han Serif', 'Source Han Serif JP',
     'Times New Roman', SimSun, Times, serif;
 }
 
+.minecraft-title[lang='ko'],
 .ko {
   font-family:
     'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR',
     'Times New Roman', Times, serif;
 }
 
+.minecraft-title,
 .vi {
   font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title {
-  font-family:
-    'Noto Serif', 'Source Han Serif', 'Times New Roman', SimSun, Times, serif;
   text-align: center;
   font-size: 2.25em;
   font-weight: 900;

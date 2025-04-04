@@ -1,0 +1,20 @@
+{
+  "query": {
+    "enable_other_lang": "Enable Non-Chinese Languages",
+    "java_edition": "Java Edition ",
+    "locale_key": "Select a translation key",
+    "query_content": "Query Content",
+    "query_lang": "Query Language",
+    "query_mode": "Query Mode",
+    "query_modes": {
+      "key": "Query by translation key",
+      "source": "Query by source string",
+      "translation": "Query by translated Text"
+    },
+    "table": {
+      "langName": "Language Name",
+      "translation": "Translation"
+    },
+    "title": "Minecraft Standard Translations"
+  }
+}

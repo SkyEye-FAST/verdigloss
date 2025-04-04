@@ -1,0 +1,20 @@
+{
+  "query": {
+    "enable_other_lang": "启用非中文语言",
+    "java_edition": "Java版",
+    "locale_key": "选择本地化键名",
+    "query_content": "查询内容",
+    "query_lang": "查询语言",
+    "query_mode": "查询模式",
+    "query_modes": {
+      "key": "按本地化键名查询",
+      "source": "按源字符串查询",
+      "translation": "按翻译后字符串查询"
+    },
+    "table": {
+      "langName": "语言名称",
+      "translation": "译名"
+    },
+    "title": "Minecraft 标准译名"
+  }
+}
