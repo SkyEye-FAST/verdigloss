@@ -205,7 +205,6 @@ const filteredTableData = computed(() => {
 
 <style scoped>
 .translation-table {
-  background-color: #f9f2e0;
   min-height: 100vh;
   padding: 10px 0;
   width: 100%;
