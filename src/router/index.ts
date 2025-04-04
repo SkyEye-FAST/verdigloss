@@ -7,11 +7,17 @@ const routes = [
     path: '/',
     name: 'TranslationQuery',
     component: TranslationQuery,
+    meta: {
+      titleKey: 'query.title',
+    },
   },
   {
     path: '/table',
     name: 'TranslationTable',
     component: TranslationTable,
+    meta: {
+      titleKey: 'table.title',
+    },
   },
 ]
 

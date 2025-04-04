@@ -66,10 +66,14 @@ watch(languages, (newLanguages) => {
 
 watch(i18n.global.locale, (newLocale) => {
   updateHtmlLang(newLocale)
-  useTitle(i18n.global.t('query.title'))
 })
 
-useTitle(i18n.global.t('query.title'))
+router.beforeEach((to, from, next) => {
+  if (to.meta.titleKey) {
+    useTitle(i18n.global.t(to.meta.titleKey as string) + ' - Verdigloss')
+  }
+  next()
+})
 
 const app = createApp(App)
 app.use(i18n)
