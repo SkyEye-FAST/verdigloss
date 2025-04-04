@@ -215,12 +215,6 @@ interface LanguageInfo {
 
 const languages: LanguageInfo[] = [
   {
-    code: 'en-us',
-    name: 'en_us',
-    displayName: 'English (United States)',
-    htmlLang: 'en',
-  },
-  {
     code: 'zh-cn',
     name: 'zh_cn',
     displayName: '简体中文 (中国大陆)',
