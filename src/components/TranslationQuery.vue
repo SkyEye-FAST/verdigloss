@@ -830,9 +830,9 @@ table th {
 
 .lzh {
   font-family:
-    'I.Ming', 'Noto Serif TC Light', 'Source Han Serif TC Light',
-    'Source Han Serif TW Light', '思源宋體 Light', 'Times New Roman', SimSun,
-    Times, serif;
+    'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light',
+    'Source Han Serif TC Light', 'Source Han Serif TW Light', '思源宋體 Light',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 .ja {
