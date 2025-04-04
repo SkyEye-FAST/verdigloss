@@ -3,7 +3,7 @@
     <header class="header">
       <div class="title">
         <h1>Minecraft Standard Translation Table</h1>
-        <div class="update-info">Latest Update: {{ currentDate }}</div>
+        <div class="update-info">Java Edition {{ minecraftVersion }}</div>
         <div class="author">Made by SkyEye_FAST</div>
       </div>
 
@@ -89,6 +89,8 @@ import ja from '@#/ja_jp.json'
 import ko from '@#/ko_kr.json'
 import vi from '@#/vi_vn.json'
 
+const minecraftVersion = ref('')
+
 const languages = [
   'en_us',
   'zh_cn',
@@ -111,23 +113,28 @@ const translations = ref({
   vi_vn: vi,
 })
 
-const currentDate = (() => {
-  const date = new Date()
-  const timeZone = -date.getTimezoneOffset() / 60
-  return `${date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })} (UTC${timeZone >= 0 ? '+' : '-'}${Math.abs(timeZone)})`
-})()
-
 interface TableRow extends Record<string, string> {
   key: string
 }
 
 const tableData = ref<TableRow[]>([])
 
-onMounted(() => {
+onMounted(async () => {
+  // 加载版本信息
+  try {
+    const response = await fetch('/src/assets/mc_lang/version.txt')
+    if (response.ok) {
+      minecraftVersion.value = await response.text()
+    } else {
+      console.error('Failed to load version.txt')
+      minecraftVersion.value = 'Unknown version'
+    }
+  } catch (error) {
+    console.error('Error loading version.txt:', error)
+    minecraftVersion.value = 'Error loading version'
+  }
+
+  // 原有的表格数据加载逻辑
   const keys = Object.keys(translations.value.en_us)
   tableData.value = keys.map((key) => {
     const row: TableRow = { key }

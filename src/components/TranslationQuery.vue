@@ -157,7 +157,7 @@
           </table>
           <footer class="minecraft-title">
             Minecraft Standard Translations<br />
-            {{ currentDate }}
+            Java Edition {{ minecraftVersion }}
           </footer>
         </div>
       </div>
@@ -254,6 +254,7 @@ export default defineComponent({
 
     return {
       isSidebarOpen: true,
+      minecraftVersion: '', // 初始化为空字符串
       queryMode: localStorage.getItem('queryMode') || 'source',
       queryLang: localStorage.getItem('queryLang') || 'zh_cn',
       queryContent: localStorage.getItem('queryContent') || 'The End',
@@ -279,6 +280,23 @@ export default defineComponent({
     }
   },
 
+  async mounted() {
+    try {
+      const response = await fetch('/src/assets/mc_lang/version.txt')
+      if (response.ok) {
+        this.minecraftVersion = await response.text()
+      } else {
+        console.error('Failed to load version.txt')
+        this.minecraftVersion = 'Unknown version'
+      }
+    } catch (error) {
+      console.error('Error loading version.txt:', error)
+      this.minecraftVersion = 'Error loading version'
+    }
+
+    this.search()
+  },
+
   watch: {
     queryMode(newValue) {
       localStorage.setItem('queryMode', newValue)
@@ -292,10 +310,6 @@ export default defineComponent({
     localeKey(newValue) {
       localStorage.setItem('localeKey', newValue)
     },
-  },
-
-  mounted() {
-    this.search()
   },
 
   computed: {
@@ -326,16 +340,6 @@ export default defineComponent({
         default:
           return []
       }
-    },
-    currentDate() {
-      const date = new Date()
-      const timeZone = -date.getTimezoneOffset() / 60
-      const timeZoneStr = `UTC${timeZone >= 0 ? '+' : '-'}${Math.abs(timeZone)}`
-      return `${date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      })} (${timeZoneStr})`
     },
     filteredLanguages(): LanguageInfo[] {
       return this.languages.filter((lang) => {
@@ -537,7 +541,6 @@ function debounce<T extends (...args: unknown[]) => void>(
 
 .toggle-button {
   position: absolute;
-  right: -30px;
   top: 1rem;
   width: 30px;
   height: 40px;
