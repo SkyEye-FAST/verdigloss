@@ -9,7 +9,7 @@
         <i-material-symbols-table-view-outline style="font-size: 1.5em" />
       </router-link>
       <a
-        href="https://github.com/Teahouse-Studios/mcwzh-meme-web-builder"
+        href="https://github.com/SkyEye-FAST/verdigloss"
         target="_blank"
         class="nav-button"
         :title="$t('query.nav.github')"
