@@ -167,7 +167,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { usePreferredDark } from '@vueuse/core'
 import { currentLocale } from '@/main'
 import enUS from '@#/en_us.json'
 import zhCN from '@#/zh_cn.json'
@@ -179,7 +179,6 @@ import ko from '@#/ko_kr.json'
 import vi from '@#/vi_vn.json'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 
-const { t } = useI18n()
 const minecraftVersion = ref(mcVersion)
 
 interface Translation {
@@ -276,7 +275,18 @@ const enableOtherLang = ref(false)
 const translations = ref<Translation[]>([])
 const error = ref('')
 const selectedTranslation = ref<SelectedTranslation | null>(null)
-const isDarkMode = ref(document.body.classList.contains('dark-mode'))
+const preferredDark = usePreferredDark()
+const isDarkMode = ref(false)
+
+const initDarkMode = () => {
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode !== null) {
+    isDarkMode.value = savedDarkMode === 'true'
+  } else {
+    isDarkMode.value = preferredDark.value
+  }
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+}
 
 const langFiles: LangFiles = {
   'en-us': enUS,
@@ -466,6 +476,13 @@ const updateSelectedTranslation = (key: string) => {
   }
 }
 
+watch(preferredDark, (newValue) => {
+  if (localStorage.getItem('darkMode') === null) {
+    isDarkMode.value = newValue
+    document.body.classList.toggle('dark-mode', newValue)
+  }
+})
+
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
   document.body.classList.toggle('dark-mode')
@@ -500,11 +517,7 @@ watch(localeKey, (newValue) => {
 })
 
 onMounted(async () => {
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode === 'true') {
-    document.body.classList.add('dark-mode')
-    isDarkMode.value = true
-  }
+  initDarkMode()
 
   if (localeKey.value) {
     search()

@@ -95,6 +95,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { usePreferredDark } from '@vueuse/core'
 import enUS from '@#/en_us.json'
 import zhCN from '@#/zh_cn.json'
 import zhHK from '@#/zh_hk.json'
@@ -136,15 +137,22 @@ interface TableRow extends Record<string, string> {
 const loading = ref(true)
 const tableData = ref<TableRow[]>([])
 
-const isDarkMode = ref(document.body.classList.contains('dark-mode'))
+const isDarkMode = ref(
+  localStorage.getItem('darkMode') === null
+    ? usePreferredDark().value
+    : localStorage.getItem('darkMode') === 'true',
+)
 
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode')
-  localStorage.setItem('darkMode', isDarkMode.value ? 'true' : 'false')
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+  localStorage.setItem('darkMode', isDarkMode.value.toString())
 }
 
-onMounted(async () => {
+onMounted(() => {
+  if (isDarkMode.value) {
+    document.body.classList.add('dark-mode')
+  }
   setTimeout(async () => {
     const keys = Object.keys(translations.value.en_us)
     tableData.value = keys.map((key) => {
