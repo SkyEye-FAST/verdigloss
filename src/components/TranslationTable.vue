@@ -2,9 +2,11 @@
   <div class="translation-table">
     <header class="header">
       <div class="title">
-        <h1>Minecraft Standard Translation Table</h1>
-        <div class="update-info">Java Edition {{ minecraftVersion }}</div>
-        <div class="author">Made by SkyEye_FAST</div>
+        <h1>{{ $t('table.title') }}</h1>
+        <div class="update-info">
+          {{ $t('table.java_edition') }}{{ minecraftVersion }} ·
+          {{ $t('table.author') }}
+        </div>
       </div>
 
       <div class="filter-section">
@@ -13,7 +15,7 @@
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="搜索内容..."
+            :placeholder="$t('table.search_placeholder')"
             class="search-input"
           />
         </div>
@@ -35,7 +37,7 @@
         <div class="buttons">
           <RouterLink to="/" class="button">
             <i-material-symbols-manage-search class="icon" />
-            Query Page
+            {{ $t('table.query_page') }}
           </RouterLink>
           <a
             href="https://github.com/SkyEye-FAST/verdigloss"
@@ -51,7 +53,7 @@
           </a>
           <a href="/table.tsv" class="button">
             <i-material-symbols-download class="icon" />
-            Download TSV
+            {{ $t('table.download_tsv') }}
           </a>
         </div>
       </div>
@@ -120,7 +122,6 @@ interface TableRow extends Record<string, string> {
 const tableData = ref<TableRow[]>([])
 
 onMounted(async () => {
-  // 加载版本信息
   try {
     const response = await fetch('/src/assets/mc_lang/version.txt')
     if (response.ok) {
@@ -134,7 +135,6 @@ onMounted(async () => {
     minecraftVersion.value = 'Error loading version'
   }
 
-  // 原有的表格数据加载逻辑
   const keys = Object.keys(translations.value.en_us)
   tableData.value = keys.map((key) => {
     const row: TableRow = { key }
@@ -222,26 +222,6 @@ const filteredTableData = computed(() => {
   margin-top: 0.3rem;
 }
 
-.author {
-  font-family:
-    'Noto Sans',
-    'Source Han Sans',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
-  font-style: italic;
-  color: #666;
-  margin-top: 0.3rem;
-}
-
 .filter-section {
   margin: 1rem 0;
   padding: 0.5rem;
@@ -325,6 +305,7 @@ const filteredTableData = computed(() => {
 }
 
 .checkbox-text {
+  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
   color: #2c3e50;
   font-size: 0.9rem;
 }
@@ -366,6 +347,7 @@ const filteredTableData = computed(() => {
   height: 1.2rem;
   display: inline-block;
   vertical-align: middle;
+  filter: brightness(0) invert(1);
 }
 
 .icon {

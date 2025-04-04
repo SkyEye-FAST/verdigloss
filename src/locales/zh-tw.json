@@ -16,5 +16,13 @@
       "translation": "譯名"
     },
     "title": "Minecraft 標準譯名"
+  },
+  "table": {
+    "author": "由 SkyEye_FAST 整理",
+    "download_tsv": "下載 TSV",
+    "java_edition": "Java版",
+    "query_page": "查詢頁面",
+    "search_placeholder": "搜尋內容...",
+    "title": "Minecraft 標準譯名表"
   }
 }

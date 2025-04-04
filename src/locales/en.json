@@ -16,5 +16,13 @@
       "translation": "Translation"
     },
     "title": "Minecraft Standard Translations"
+  },
+  "table": {
+    "author": "Compiled by SkyEye_FAST",
+    "download_tsv": "Download TSV",
+    "java_edition": "Java Edition ",
+    "query_page": "Query Page",
+    "search_placeholder": "Search content...",
+    "title": "Minecraft Standard Translation Table"
   }
 }
