@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/SkyEye-FAST/verdigloss/master/src/assets/icon.png">
+<img src="https://raw.githubusercontent.com/SkyEye-FAST/verdigloss/master/src/assets/images/icon.png">
 
 ----
 
