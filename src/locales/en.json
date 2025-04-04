@@ -3,6 +3,11 @@
     "enable_other_lang": "Enable Non-Chinese Languages",
     "java_edition": "Java Edition ",
     "locale_key": "Select a translation key",
+    "nav": {
+      "dark_mode": "Toggle Dark Mode",
+      "github": "GitHub Repository",
+      "table": "Translation Table"
+    },
     "query_content": "Query Content",
     "query_lang": "Query Language",
     "query_mode": "Query Mode",

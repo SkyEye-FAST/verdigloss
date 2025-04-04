@@ -55,6 +55,14 @@
             <i-material-symbols-download class="icon" />
             {{ $t('table.download_tsv') }}
           </a>
+          <button
+            class="button"
+            @click="toggleDarkMode"
+            :title="$t('query.nav.dark_mode')"
+          >
+            <i-material-symbols-dark-mode v-if="isDarkMode" class="icon" />
+            <i-material-symbols-light-mode v-else class="icon" />
+          </button>
         </div>
       </div>
     </header>
@@ -121,6 +129,14 @@ interface TableRow extends Record<string, string> {
 
 const tableData = ref<TableRow[]>([])
 
+const isDarkMode = ref(document.body.classList.contains('dark-mode'))
+
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+  document.body.classList.toggle('dark-mode')
+  localStorage.setItem('darkMode', isDarkMode.value ? 'true' : 'false')
+}
+
 onMounted(async () => {
   try {
     const response = await fetch('/src/assets/mc_lang/version.txt')
@@ -145,6 +161,13 @@ onMounted(async () => {
     })
     return row
   })
+
+  // 初始化深色模式
+  const savedDarkMode = localStorage.getItem('darkMode')
+  if (savedDarkMode === 'true') {
+    document.body.classList.add('dark-mode')
+    isDarkMode.value = true
+  }
 })
 
 const searchQuery = ref('')
@@ -340,6 +363,14 @@ const filteredTableData = computed(() => {
 
 .button:hover {
   background: #4a8ac4;
+}
+
+.button .icon {
+  color: inherit;
+}
+
+button.button {
+  border: none;
 }
 
 .github-icon {
@@ -567,6 +598,10 @@ table tr:hover td {
 
   .filter-label {
     font-size: 0.9rem;
+  }
+
+  .button .icon {
+    font-size: 1.1rem;
   }
 }
 </style>

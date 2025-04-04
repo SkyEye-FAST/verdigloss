@@ -1,5 +1,38 @@
 <template>
   <div class="translation-query">
+    <div class="nav-buttons">
+      <router-link
+        to="/table"
+        class="nav-button"
+        :title="$t('query.nav.table')"
+      >
+        <i-material-symbols-table-view-outline style="font-size: 1.5em" />
+      </router-link>
+      <a
+        href="https://github.com/Teahouse-Studios/mcwzh-meme-web-builder"
+        target="_blank"
+        class="nav-button"
+        :title="$t('query.nav.github')"
+      >
+        <img
+          src="@/assets/images/github-icon.svg"
+          alt="GitHub"
+          class="github-icon"
+          style="width: 1.5em; height: 1.5em"
+        />
+      </a>
+      <button
+        class="nav-button"
+        @click="toggleDarkMode"
+        :title="$t('query.nav.dark_mode')"
+      >
+        <i-material-symbols-dark-mode
+          v-if="isDarkMode"
+          style="font-size: 1.5em"
+        />
+        <i-material-symbols-light-mode v-else style="font-size: 1.5em" />
+      </button>
+    </div>
     <div
       class="sidebar-layout"
       :class="{ 'sidebar-collapsed': !isSidebarOpen }"
@@ -18,12 +51,17 @@
         <div class="settings" v-show="isSidebarOpen">
           <div class="form-container">
             <div class="input-group">
-              <label for="queryMode">{{ $t('query.query_mode') }}：</label>
+              <label for="queryMode">
+                <i-material-symbols-settings-outline class="label-icon" />
+                {{ $t('query.query_mode') }}
+              </label>
               <select id="queryMode" v-model="queryMode" @change="onQueryInput">
                 <option value="source">
                   {{ $t('query.query_modes.source') }}
                 </option>
-                <option value="key">{{ $t('query.query_modes.key') }}</option>
+                <option value="key">
+                  {{ $t('query.query_modes.key') }}
+                </option>
                 <option value="translation">
                   {{ $t('query.query_modes.translation') }}
                 </option>
@@ -31,7 +69,10 @@
             </div>
 
             <div class="input-group" v-show="queryMode === 'translation'">
-              <label for="queryLang">{{ $t('query.query_lang') }}：</label>
+              <label for="queryLang">
+                <i-material-symbols-language class="label-icon" />
+                {{ $t('query.query_lang') }}
+              </label>
               <select id="queryLang" v-model="queryLang">
                 <option
                   v-for="lang in filteredLanguages"
@@ -44,9 +85,10 @@
             </div>
 
             <div class="input-group">
-              <label for="queryContent"
-                >{{ $t('query.query_content') }}：</label
-              >
+              <label for="queryContent">
+                <i-material-symbols-search class="label-icon" />
+                {{ $t('query.query_content') }}
+              </label>
               <input
                 id="queryContent"
                 v-model="queryContent"
@@ -56,7 +98,10 @@
             </div>
 
             <div class="input-group" v-show="availableKeys.length">
-              <label for="localeKey">{{ $t('query.locale_key') }}：</label>
+              <label for="localeKey">
+                <i-material-symbols-key class="label-icon" />
+                {{ $t('query.locale_key') }}
+              </label>
               <select id="localeKey" v-model="localeKey" @change="search">
                 <option v-for="key in availableKeys" :key="key" :value="key">
                   {{ key }}
@@ -71,9 +116,9 @@
                 v-model="enableOtherLang"
                 @change="search"
               />
-              <label for="enableOtherLang">{{
-                $t('query.enable_other_lang')
-              }}</label>
+              <label for="enableOtherLang">
+                {{ $t('query.enable_other_lang') }}
+              </label>
             </div>
           </div>
         </div>
@@ -94,7 +139,7 @@
             </thead>
             <tbody>
               <tr lang="zh-Hans-CN" class="zh-cn">
-                <td class="lang-name">简体中文&#10;(中国大陆)</td>
+                <td class="lang-name">简体中文 (中国大陆)</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
@@ -104,7 +149,7 @@
                 </td>
               </tr>
               <tr lang="zh-Hant-HK" class="zh-hk">
-                <td class="lang-name">繁體中文&#10;(香港特別行政區)</td>
+                <td class="lang-name">繁體中文 (香港特別行政區)</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
@@ -114,7 +159,7 @@
                 </td>
               </tr>
               <tr lang="zh-Hant-TW" class="zh-tw">
-                <td class="lang-name">繁體中文&#10;(台灣)</td>
+                <td class="lang-name">繁體中文 (台灣)</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
@@ -124,7 +169,7 @@
                 </td>
               </tr>
               <tr lang="lzh" class="lzh">
-                <td class="lang-name">文言&#10;(華夏)</td>
+                <td class="lang-name">文言 (華夏)</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
@@ -134,7 +179,7 @@
                 </td>
               </tr>
               <tr v-if="enableOtherLang" lang="ja" class="ja">
-                <td class="lang-name">日本語&#10;(日本)</td>
+                <td class="lang-name">日本語 (日本)</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
@@ -144,7 +189,7 @@
                 </td>
               </tr>
               <tr v-if="enableOtherLang" lang="ko" class="ko">
-                <td class="lang-name">한국어&#10;(대한민국)</td>
+                <td class="lang-name">한국어 (대한민국)</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
@@ -154,7 +199,7 @@
                 </td>
               </tr>
               <tr v-if="enableOtherLang" lang="vi" class="vi">
-                <td class="lang-name">Tiếng Việt&#10;(Việt Nam)</td>
+                <td class="lang-name">Tiếng Việt (Việt Nam)</td>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find(
@@ -288,6 +333,7 @@ export default defineComponent({
       } as LangFiles,
       selectedTranslation: null as SelectedTranslation | null,
       languages,
+      isDarkMode: document.body.classList.contains('dark-mode'),
     }
   },
 
@@ -306,6 +352,13 @@ export default defineComponent({
     }
 
     this.search()
+
+    // 初始化暗色模式
+    const savedDarkMode = localStorage.getItem('darkMode')
+    if (savedDarkMode === 'true') {
+      document.body.classList.add('dark-mode')
+      this.isDarkMode = true
+    }
   },
 
   watch: {
@@ -505,6 +558,12 @@ export default defineComponent({
           })),
       }
     },
+
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode
+      document.body.classList.toggle('dark-mode')
+      localStorage.setItem('darkMode', this.isDarkMode ? 'true' : 'false')
+    },
   },
 })
 
@@ -528,6 +587,51 @@ function debounce<T extends (...args: unknown[]) => void>(
   padding: 0;
 }
 
+.main-content {
+  flex: 1;
+  min-width: 0;
+  margin-left: 350px;
+  padding: 2rem;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Nav */
+.nav-buttons {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.nav-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  color: #666;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  color: #7aa2ea;
+}
+
+/* Sidebar */
 .sidebar-layout {
   display: flex;
   align-items: stretch;
@@ -567,52 +671,16 @@ function debounce<T extends (...args: unknown[]) => void>(
   z-index: 100;
 }
 
-.main-content {
-  flex: 1;
-  min-width: 0;
-  margin-left: 350px;
-  padding: 2rem;
-  transition: margin-left 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
 .sidebar-collapsed .main-content {
   margin-left: 40px;
 }
 
 .settings {
   height: auto;
-  max-height: calc(100vh - 4rem);
   overflow-y: auto;
   padding: 1.5rem;
   box-sizing: border-box;
   width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .sidebar {
-    position: relative;
-    width: 100% !important;
-    height: auto;
-    min-height: auto;
-  }
-
-  .main-content {
-    margin-left: 0;
-    padding: 1rem;
-    min-height: auto;
-  }
-
-  .sidebar-collapsed .main-content {
-    margin-left: 0;
-  }
-
-  .toggle-button {
-    display: none;
-  }
 }
 
 .form-container {
@@ -630,6 +698,13 @@ function debounce<T extends (...args: unknown[]) => void>(
 .input-group label {
   font-weight: 500;
   color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label-icon {
+  font-size: 1.2em;
 }
 
 .input-group input,
@@ -652,10 +727,6 @@ function debounce<T extends (...args: unknown[]) => void>(
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.5rem;
-}
-
-.submit-button {
-  display: none;
 }
 
 .result-card {
@@ -700,39 +771,8 @@ function debounce<T extends (...args: unknown[]) => void>(
   font-size: 1.1rem;
 }
 
-@media (max-width: 768px) {
-  .translation-item {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .lang-name {
-    font-size: 0.9rem;
-  }
-
-  .translation-text {
-    font-size: 1rem;
-  }
-}
-
-/* Dark mode styles */
-:deep(body.dark-mode) .settings,
-:deep(body.dark-mode) .result-card {
-  background: #333;
-}
-
-:deep(body.dark-mode) .input-group input,
-:deep(body.dark-mode) .input-group select {
-  background: #424242;
-  border-color: #555;
-  color: #e0e0e0;
-}
-
-:deep(body.dark-mode) .translation-item {
-  border-bottom-color: #444;
-}
-
-/* Base table styles */
+/* Table */
+/* Table base styles */
 table {
   border-collapse: collapse;
   margin: 1em auto;
@@ -747,7 +787,7 @@ table th {
   font-size: 1.5em;
 }
 
-/* Table styles by category */
+/* Table themes */
 .table-advancements td,
 .table-advancements th {
   border-color: #a02b93;
@@ -796,7 +836,7 @@ table th {
   background-color: #70ad4733;
 }
 
-/* Table content styles */
+/* Table contents */
 .title {
   font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
   font-size: 2.5em;
@@ -875,16 +915,12 @@ table th {
   font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
 }
 
+/* Footer */
 .minecraft-title {
   text-align: center;
   font-size: 2.25em;
   font-weight: 900;
   color: #bfbfbf;
-}
-
-:deep(body.dark-mode) table td,
-:deep(body.dark-mode) table th {
-  border-color: #666;
 }
 
 @media (max-width: 1200px) {
@@ -902,6 +938,25 @@ table th {
 }
 
 @media (max-width: 768px) {
+  .nav-buttons {
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .translation-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .lang-name {
+    font-size: 0.9rem;
+  }
+
+  .translation-text {
+    font-size: 1rem;
+  }
+
   .sidebar-layout {
     flex-direction: column;
   }
@@ -921,6 +976,7 @@ table th {
   .main-content {
     margin-left: 0 !important;
     padding: 1rem;
+    min-height: auto;
   }
 
   .form-container {
@@ -1013,7 +1069,7 @@ table th {
   }
 
   .minecraft-title {
-    font-size: 0.9em;
+    font-size: 1.2em;
   }
 
   .form-container {
@@ -1022,81 +1078,39 @@ table th {
 }
 
 @media screen and (max-height: 480px) and (orientation: landscape) {
+  .sidebar-layout {
+    flex-direction: column;
+  }
+
   .sidebar {
-    position: fixed;
-    width: 250px !important;
-    height: 100vh;
-    overflow-y: auto;
-    padding-top: 0.5rem;
+    position: relative;
+    width: 100% !important;
+    height: auto;
+    min-height: auto;
   }
 
   .main-content {
-    margin-left: 250px;
-    height: 100vh;
-    overflow-y: auto;
-    padding: 0.5rem;
-  }
-
-  .sidebar-collapsed .main-content {
-    margin-left: 40px;
+    margin-left: 0 !important;
+    height: auto;
+    min-height: calc(100vh - 250px);
   }
 
   .result-section {
-    transform: scale(0.85);
-    transform-origin: center top;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    margin: 0.5em auto;
+    font-size: 0.85em;
   }
 
   .title {
-    font-size: 2em;
-    margin-bottom: 0.3em;
+    font-size: 1.8em;
   }
 
   .subtitle {
-    font-size: 0.9em;
-    margin-bottom: 0.5em;
-  }
-
-  table td,
-  table th {
-    padding: 0.3em 1em;
     font-size: 1em;
-  }
-
-  .string {
-    font-size: 1em;
-  }
-
-  .minecraft-title {
-    font-size: 1.2em;
-    margin-top: 0.5em;
-  }
-
-  .form-container {
-    padding: 0.5rem;
-  }
-
-  .input-group {
-    margin-bottom: 0.4rem;
-  }
-
-  .input-group label {
-    font-size: 0.9em;
-  }
-
-  .input-group input,
-  .input-group select {
-    padding: 0.4rem;
-    font-size: 0.9em;
-  }
-
-  .checkbox-group {
-    margin: 0.3rem 0;
-  }
-
-  .toggle-button {
-    width: 25px;
-    height: 35px;
-    right: -25px;
   }
 }
 
@@ -1116,8 +1130,6 @@ table th {
 
   .settings {
     padding: 0.5rem;
-    height: calc(100vh - 1rem);
-    overflow-y: auto;
   }
 
   .main-content {
@@ -1166,11 +1178,12 @@ table th {
     top: 0;
     width: 300px !important;
     height: 100vh;
-    padding-top: 1rem;
+    padding: 1rem;
   }
 
   .main-content {
     margin-left: 0;
+    min-height: auto;
   }
 
   .result-section {
@@ -1229,6 +1242,40 @@ table th {
       overflow-y: auto;
       height: 100vh;
     }
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    position: relative;
+    width: 100% !important;
+    height: auto;
+    min-height: auto;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 1rem;
+  }
+
+  .toggle-button {
+    display: none;
+  }
+
+  .settings {
+    display: block !important;
+    padding: 1rem;
+  }
+
+  .result-section {
+    margin-top: 1rem;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 100%;
+    font-size: 0.9em;
   }
 }
 </style>

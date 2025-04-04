@@ -3,6 +3,11 @@
     "enable_other_lang": "啟用非中文語言",
     "java_edition": "Java版",
     "locale_key": "選擇本地化鍵名",
+    "nav": {
+      "dark_mode": "切換深色模式",
+      "github": "GitHub 倉庫",
+      "table": "譯名表"
+    },
     "query_content": "查詢內容",
     "query_lang": "查詢語言",
     "query_mode": "查詢模式",
