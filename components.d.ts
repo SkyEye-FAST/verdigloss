@@ -10,8 +10,13 @@ declare module 'vue' {
   export interface GlobalComponents {
     IMaterialSymbolsChevronLeft: typeof import('~icons/material-symbols/chevron-left')['default']
     IMaterialSymbolsChevronRight: typeof import('~icons/material-symbols/chevron-right')['default']
+    IMaterialSymbolsDownload: typeof import('~icons/material-symbols/download')['default']
+    IMaterialSymbolsManage_search: typeof import('~icons/material-symbols/manage_search')['default']
+    IMaterialSymbolsManageSearch: typeof import('~icons/material-symbols/manage-search')['default']
+    IMaterialSymbolsSearch: typeof import('~icons/material-symbols/search')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TranslationQuery: typeof import('./src/components/TranslationQuery.vue')['default']
+    TranslationTable: typeof import('./src/components/TranslationTable.vue')['default']
   }
 }

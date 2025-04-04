@@ -15,6 +15,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@#/*": [
+        "./src/assets/mc_lang/valid/*"
       ]
     }
   }

@@ -9,7 +9,6 @@ body {
     color 0.3s ease;
 }
 
-/* 暗色模式 */
 body.dark-mode {
   background-color: #424242;
   color: #e0e0e0;

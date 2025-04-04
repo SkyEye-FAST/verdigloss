@@ -157,7 +157,7 @@
           </table>
           <footer class="minecraft-title">
             Minecraft Standard Translations<br />
-            {{ currentDateTime }}
+            {{ currentDate }}
           </footer>
         </div>
       </div>
@@ -167,14 +167,14 @@
 
 <script lang="ts">
 import { defineComponent, type ComponentPublicInstance } from 'vue'
-import enUS from '../assets/mc_lang/valid/en_us.json'
-import zhCN from '../assets/mc_lang/valid/zh_cn.json'
-import zhHK from '../assets/mc_lang/valid/zh_hk.json'
-import zhTW from '../assets/mc_lang/valid/zh_tw.json'
-import lzh from '../assets/mc_lang/valid/lzh.json'
-import ja from '../assets/mc_lang/valid/ja_jp.json'
-import ko from '../assets/mc_lang/valid/ko_kr.json'
-import vi from '../assets/mc_lang/valid/vi_vn.json'
+import enUS from '@#/en_us.json'
+import zhCN from '@#/zh_cn.json'
+import zhHK from '@#/zh_hk.json'
+import zhTW from '@#/zh_tw.json'
+import lzh from '@#/lzh.json'
+import ja from '@#/ja_jp.json'
+import ko from '@#/ko_kr.json'
+import vi from '@#/vi_vn.json'
 
 interface Translation {
   language: string
@@ -327,7 +327,7 @@ export default defineComponent({
           return []
       }
     },
-    currentDateTime() {
+    currentDate() {
       const date = new Date()
       const timeZone = -date.getTimezoneOffset() / 60
       const timeZoneStr = `UTC${timeZone >= 0 ? '+' : '-'}${Math.abs(timeZone)}`
