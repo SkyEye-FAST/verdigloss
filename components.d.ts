@@ -24,8 +24,11 @@ declare module 'vue' {
     IMaterialSymbolsSettingsOutline: typeof import('~icons/material-symbols/settings-outline')['default']
     IMaterialSymbolsTableViewOutline: typeof import('~icons/material-symbols/table-view-outline')['default']
     IMaterialSymbolsTranslate: typeof import('~icons/material-symbols/translate')['default']
+    Pagination: typeof import('./src/components/Table/Pagination.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TableHeader: typeof import('./src/components/Table/TableHeader.vue')['default']
+    TablePagination: typeof import('./src/components/Table/TablePagination.vue')['default']
     TranslationQuery: typeof import('./src/components/TranslationQuery.vue')['default']
     TranslationTable: typeof import('./src/components/TranslationTable.vue')['default']
   }

@@ -1,116 +1,25 @@
 <template>
   <div class="translation-table">
-    <header class="header">
-      <div class="title">
-        <h1>{{ $t('table.title') }}</h1>
-        <div class="update-info">
-          {{ $t('table.java_edition') }}{{ minecraftVersion }} ·
-          {{ $t('table.author') }}
-        </div>
-      </div>
-
-      <div class="filter-section">
-        <div class="search-wrapper">
-          <i-material-symbols-search class="search-icon" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            :placeholder="$t('table.search_placeholder')"
-            class="search-input"
-          />
-        </div>
-        <div class="language-filter">
-          <div class="checkbox-group">
-            <label v-for="lang in languages" :key="lang" class="lang-checkbox">
-              <input
-                type="checkbox"
-                v-model="selectedLanguages"
-                :value="lang"
-              />
-              <span class="checkbox-text">{{ lang }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="actions">
-        <div class="buttons">
-          <RouterLink to="/" class="button">
-            <i-material-symbols-manage-search class="icon" />
-            {{ $t('table.query_page') }}
-          </RouterLink>
-          <a
-            href="https://github.com/SkyEye-FAST/verdigloss"
-            class="button"
-            target="_blank"
-          >
-            <i-fa6-brands-github class="icon" />
-            GitHub
-          </a>
-          <a href="/table.tsv" class="button">
-            <i-material-symbols-download class="icon" />
-            {{ $t('table.download_tsv') }}
-          </a>
-          <button
-            class="button"
-            @click="toggleDarkMode"
-            :title="$t('query.nav.dark_mode')"
-          >
-            <i-material-symbols-dark-mode v-if="isDarkMode" class="icon" />
-            <i-material-symbols-light-mode v-else class="icon" />
-          </button>
-        </div>
-      </div>
-    </header>
+    <Header
+      v-model:search-query="searchQuery"
+      v-model:selected-languages="selectedLanguages"
+      :minecraft-version="minecraftVersion"
+      :languages="languages"
+      :is-dark-mode="isDarkMode"
+      @toggle-dark-mode="toggleDarkMode"
+    />
 
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>{{ $t('table.loading') }}</p>
     </div>
     <template v-else>
-      <div class="pagination-controls">
-        <div class="pagination-info">
-          {{ $t('table.pagination.total_rows') }}{{ filteredTableData.length }}
-        </div>
-        <div class="pagination-buttons">
-          <button
-            v-if="currentPage > 1"
-            @click="currentPage--"
-            class="page-button prev"
-          >
-            <i-material-symbols-arrow-back class="icon" />
-            {{ $t('table.pagination.previous') }}
-          </button>
-
-          <div class="page-numbers">
-            <template v-for="(pageNum, index) in displayedPages" :key="index">
-              <input
-                v-if="typeof pageNum === 'object'"
-                type="text"
-                class="page-input"
-                :placeholder="'...'"
-                @change="handlePageInputChange"
-              />
-              <button
-                v-else
-                @click="typeof pageNum === 'number' && (currentPage = pageNum)"
-                :class="['page-number', { active: currentPage === pageNum }]"
-              >
-                {{ pageNum }}
-              </button>
-            </template>
-          </div>
-
-          <button
-            v-if="currentPage < totalPages"
-            @click="currentPage++"
-            class="page-button next"
-          >
-            {{ $t('table.pagination.next') }}
-            <i-material-symbols-arrow-forward class="icon" />
-          </button>
-        </div>
-      </div>
+      <Pagination
+        v-model:current-page="currentPage"
+        :total-items="filteredTableData.length"
+        :items-per-page="itemsPerPage"
+        :show-info="true"
+      />
 
       <table>
         <thead>
@@ -131,46 +40,11 @@
         </tbody>
       </table>
 
-      <div class="pagination-controls">
-        <div class="pagination-buttons">
-          <button
-            v-if="currentPage > 1"
-            @click="currentPage--"
-            class="page-button prev"
-          >
-            <i-material-symbols-arrow-back class="icon" />
-            {{ $t('table.pagination.previous') }}
-          </button>
-
-          <div class="page-numbers">
-            <template v-for="(pageNum, index) in displayedPages" :key="index">
-              <input
-                v-if="typeof pageNum === 'object'"
-                type="text"
-                class="page-input"
-                :placeholder="'...'"
-                @change="handlePageInputChange"
-              />
-              <button
-                v-else
-                @click="typeof pageNum === 'number' && (currentPage = pageNum)"
-                :class="['page-number', { active: currentPage === pageNum }]"
-              >
-                {{ pageNum }}
-              </button>
-            </template>
-          </div>
-
-          <button
-            v-if="currentPage < totalPages"
-            @click="currentPage++"
-            class="page-button next"
-          >
-            {{ $t('table.pagination.next') }}
-            <i-material-symbols-arrow-forward class="icon" />
-          </button>
-        </div>
-      </div>
+      <Pagination
+        v-model:current-page="currentPage"
+        :total-items="filteredTableData.length"
+        :items-per-page="itemsPerPage"
+      />
     </template>
   </div>
 </template>
@@ -178,6 +52,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { usePreferredDark } from '@vueuse/core'
+import Header from './Table/TableHeader.vue'
+import Pagination from './Table/TablePagination.vue'
 import enUS from '@#/en_us.json'
 import zhCN from '@#/zh_cn.json'
 import zhHK from '@#/zh_hk.json'
@@ -289,54 +165,6 @@ const paginatedData = computed(() => {
   return filteredTableData.value.slice(start, end)
 })
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredTableData.value.length / itemsPerPage)
-})
-
-const handlePageInputChange = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const value = parseInt(input.value)
-  if (!isNaN(value) && value > 0 && value <= totalPages.value) {
-    currentPage.value = value
-  }
-  input.value = ''
-}
-
-const displayedPages = computed(() => {
-  const delta = 2
-  const range = []
-  const rangeWithDots = []
-  let l
-
-  range.push(1)
-
-  for (let i = currentPage.value - delta; i <= currentPage.value + delta; i++) {
-    if (i < totalPages.value && i > 1) {
-      range.push(i)
-    }
-  }
-
-  if (!range.includes(totalPages.value)) {
-    range.push(totalPages.value)
-  }
-
-  for (let i = 0; i < range.length; i++) {
-    if (l) {
-      if (i === range.length - 1 && range[i] - l > 2) {
-        rangeWithDots.push({ type: 'input', position: l + 1 })
-      } else if (range[i] - l === 2) {
-        rangeWithDots.push(l + 1)
-      } else if (range[i] - l !== 1) {
-        rangeWithDots.push('...')
-      }
-    }
-    rangeWithDots.push(range[i])
-    l = range[i]
-  }
-
-  return rangeWithDots
-})
-
 watch(filteredTableData, () => {
   currentPage.value = 1
 })
@@ -351,189 +179,6 @@ watch(filteredTableData, () => {
   flex-direction: column;
   align-items: center;
 }
-
-.header {
-  margin: 0 auto 0.2rem;
-  max-width: 1200px;
-  padding: 1rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.title {
-  font-family:
-    'Noto Sans',
-    'Source Han Sans',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
-  text-align: center;
-}
-
-.title h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  color: #2c3e50;
-}
-
-.update-info {
-  color: #666;
-  font-size: 1rem;
-  margin-top: 0.3rem;
-}
-
-.filter-section {
-  margin: 1rem 0;
-  padding: 0.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
-
-.search-wrapper {
-  max-width: 500px;
-  margin: 0 auto;
-  width: 100%;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-  font-size: 1.2rem;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  margin: 0 auto;
-  display: block;
-}
-
-.search-input:focus {
-  border-color: #5b9bd5;
-  box-shadow: 0 0 0 3px rgba(91, 155, 213, 0.2);
-  outline: none;
-}
-
-.language-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  justify-content: center;
-}
-
-.lang-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.8rem;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.lang-checkbox:hover {
-  background: #f0f7ff;
-  border-color: #5b9bd5;
-}
-
-.lang-checkbox input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
-}
-
-.checkbox-text {
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
-  color: #2c3e50;
-  font-size: 0.9rem;
-}
-
-.actions {
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.buttons {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  background: #5b9bd5;
-  color: white;
-  text-decoration: none;
-  transition: background-color 0.2s;
-  font-weight: 600;
-}
-
-.button:hover {
-  background: #4a8ac4;
-}
-
-.button .icon {
-  color: inherit;
-}
-
-button.button {
-  border: none;
-}
-
-.github-icon {
-  width: 1.2rem;
-  height: 1.2rem;
-  display: inline-block;
-  vertical-align: middle;
-  filter: brightness(0) invert(1);
-}
-
-.icon {
-  font-size: 1.2rem;
-  color: white;
-  display: inline-block;
-  vertical-align: middle;
-}
-
 table {
   width: calc(100% - 20px);
   max-width: 1600px;
@@ -699,120 +344,7 @@ table tr:hover td {
   }
 }
 
-.pagination-controls {
-  margin: 1.5rem auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  max-width: 1600px;
-  width: calc(100% - 20px);
-}
-
-.pagination-info {
-  color: #70757a;
-  font-size: 0.9rem;
-}
-
-.pagination-buttons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.page-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  background: none;
-  color: #1a73e8;
-  font-size: 0.9rem;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.page-button:hover {
-  background: #f8f9fa;
-}
-
-.page-button .icon {
-  font-size: 1.2rem;
-}
-
-.page-numbers {
-  display: flex;
-  gap: 0.3rem;
-}
-
-.page-number {
-  min-width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  color: #4d5156;
-  font-size: 0.9rem;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.page-number.active {
-  background: #1a73e8;
-  color: white;
-}
-
-.page-number:not(.active):hover {
-  background: #f8f9fa;
-}
-
-.page-input {
-  width: 50px;
-  height: 40px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: none;
-  color: #4d5156;
-  font-size: 0.9rem;
-  padding: 0 8px;
-  margin: 0 4px;
-  transition: all 0.3s ease;
-}
-
-.page-input:focus {
-  outline: none;
-  border-color: #1a73e8;
-  background: #f8f9fa;
-}
-
-.page-input::placeholder {
-  color: #70757a;
-}
-
 @media (max-width: 768px) {
-  .header {
-    padding: 1rem;
-    margin: 0.5rem;
-    border-radius: 8px;
-  }
-
-  .title h1 {
-    font-size: 1.4rem;
-  }
-
-  .buttons {
-    gap: 0.5rem;
-  }
-
-  .button {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-  }
-
   table {
     width: calc(100% - 20px);
     font-size: 13px;
@@ -830,10 +362,6 @@ table tr:hover td {
     min-width: 140px;
   }
 
-  .translation-table {
-    padding: 10px 0;
-  }
-
   table td:first-child {
     min-width: 140px;
   }
@@ -842,50 +370,6 @@ table tr:hover td {
   table th {
     min-width: 100px;
     padding: 6px 8px;
-  }
-
-  .filter-section {
-    padding: 0.8rem;
-    margin: 1rem 0;
-    gap: 1rem;
-  }
-
-  .search-input {
-    padding: 0.6rem 1rem 0.6rem 2.2rem;
-    font-size: 0.9rem;
-  }
-
-  .lang-checkbox {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.8rem;
-  }
-
-  .checkbox-group {
-    gap: 0.5rem;
-  }
-
-  .filter-label {
-    font-size: 0.9rem;
-  }
-
-  .button .icon {
-    font-size: 1.1rem;
-  }
-
-  .pagination-controls {
-    flex-direction: column;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .page-button {
-    padding: 0.2rem 0.6rem;
-  }
-
-  .page-input {
-    width: 32px;
-    height: 32px;
-    font-size: 0.8rem;
   }
 }
 </style>

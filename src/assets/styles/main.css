@@ -83,11 +83,6 @@ body.dark-mode .nav-button:hover {
   color: #7aa2ea;
 }
 
-body.dark-mode .github-icon {
-  filter: brightness(0) invert(1);
-  transition: filter 0.3s ease;
-}
-
 /* Table */
 body.dark-mode .translation-table {
   background-color: #424242;
