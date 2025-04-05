@@ -171,6 +171,8 @@ watch(filteredTableData, () => {
 </script>
 
 <style scoped>
+@import '@/assets/styles/table.css';
+
 .translation-table {
   min-height: 100vh;
   padding: 10px 0;
@@ -179,6 +181,7 @@ watch(filteredTableData, () => {
   flex-direction: column;
   align-items: center;
 }
+
 table {
   width: calc(100% - 20px);
   max-width: 1600px;

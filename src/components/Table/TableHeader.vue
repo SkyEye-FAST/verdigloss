@@ -81,6 +81,8 @@ const selectedLanguages = defineModel('selectedLanguages')
 </script>
 
 <style scoped>
+@import '@/assets/styles/table-header.css';
+
 .header {
   margin: 0 auto 0.2rem;
   max-width: 1200px;

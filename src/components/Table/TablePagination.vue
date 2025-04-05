@@ -111,6 +111,8 @@ const displayedPages = computed(() => {
 </script>
 
 <style scoped>
+@import '@/assets/styles/pagination.css';
+
 .pagination-controls {
   margin: 1.5rem auto;
   display: flex;
