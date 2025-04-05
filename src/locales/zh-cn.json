@@ -27,6 +27,11 @@
     "download_tsv": "下载 TSV",
     "java_edition": "Java版",
     "loading": "加载中…",
+    "pagination": {
+      "next": "下一页",
+      "previous": "上一页",
+      "total_rows": "字符串总数："
+    },
     "query_page": "查询页面",
     "search_placeholder": "搜索内容…",
     "title": "Minecraft 标准译名表"

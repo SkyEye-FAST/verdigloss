@@ -27,6 +27,11 @@
     "download_tsv": "Download TSV",
     "java_edition": "Java Edition ",
     "loading": "Loading...",
+    "pagination": {
+      "next": "Next page",
+      "previous": "Previous page",
+      "total_rows": "Total number of strings: "
+    },
     "query_page": "Query Page",
     "search_placeholder": "Search content...",
     "title": "Minecraft Standard Translation Table"

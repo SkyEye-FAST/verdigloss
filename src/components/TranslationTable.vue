@@ -67,30 +67,116 @@
       <div class="loading-spinner"></div>
       <p>{{ $t('table.loading') }}</p>
     </div>
+    <template v-else>
+      <div class="pagination-controls">
+        <div class="pagination-info">
+          {{ $t('table.pagination.total_rows') }}{{ filteredTableData.length }}
+        </div>
+        <div class="pagination-buttons">
+          <button
+            v-if="currentPage > 1"
+            @click="currentPage--"
+            class="page-button prev"
+          >
+            <i-material-symbols-arrow-back class="icon" />
+            {{ $t('table.pagination.previous') }}
+          </button>
 
-    <table v-else>
-      <thead>
-        <tr>
-          <th class="key-column">keys</th>
-          <th v-for="lang in displayLanguages" :key="lang" :class="lang">
-            {{ lang }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in filteredTableData" :key="row.key">
-          <td class="key-column">{{ row.key }}</td>
-          <td v-for="lang in displayLanguages" :key="lang" :class="lang">
-            {{ row[lang] }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <div class="page-numbers">
+            <template v-for="(pageNum, index) in displayedPages" :key="index">
+              <input
+                v-if="typeof pageNum === 'object'"
+                type="text"
+                class="page-input"
+                :placeholder="'...'"
+                @change="handlePageInputChange"
+              />
+              <button
+                v-else
+                @click="typeof pageNum === 'number' && (currentPage = pageNum)"
+                :class="['page-number', { active: currentPage === pageNum }]"
+              >
+                {{ pageNum }}
+              </button>
+            </template>
+          </div>
+
+          <button
+            v-if="currentPage < totalPages"
+            @click="currentPage++"
+            class="page-button next"
+          >
+            {{ $t('table.pagination.next') }}
+            <i-material-symbols-arrow-forward class="icon" />
+          </button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="key-column">keys</th>
+            <th v-for="lang in displayLanguages" :key="lang" :class="lang">
+              {{ lang }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in paginatedData" :key="row.key">
+            <td class="key-column">{{ row.key }}</td>
+            <td v-for="lang in displayLanguages" :key="lang" :class="lang">
+              {{ row[lang] }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination-controls">
+        <div class="pagination-buttons">
+          <button
+            v-if="currentPage > 1"
+            @click="currentPage--"
+            class="page-button prev"
+          >
+            <i-material-symbols-arrow-back class="icon" />
+            {{ $t('table.pagination.previous') }}
+          </button>
+
+          <div class="page-numbers">
+            <template v-for="(pageNum, index) in displayedPages" :key="index">
+              <input
+                v-if="typeof pageNum === 'object'"
+                type="text"
+                class="page-input"
+                :placeholder="'...'"
+                @change="handlePageInputChange"
+              />
+              <button
+                v-else
+                @click="typeof pageNum === 'number' && (currentPage = pageNum)"
+                :class="['page-number', { active: currentPage === pageNum }]"
+              >
+                {{ pageNum }}
+              </button>
+            </template>
+          </div>
+
+          <button
+            v-if="currentPage < totalPages"
+            @click="currentPage++"
+            class="page-button next"
+          >
+            {{ $t('table.pagination.next') }}
+            <i-material-symbols-arrow-forward class="icon" />
+          </button>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { usePreferredDark } from '@vueuse/core'
 import enUS from '@#/en_us.json'
 import zhCN from '@#/zh_cn.json'
@@ -193,6 +279,67 @@ const filteredTableData = computed(() => {
     })
   })
 })
+
+const currentPage = ref(1)
+const itemsPerPage = 50
+
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredTableData.value.slice(start, end)
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredTableData.value.length / itemsPerPage)
+})
+
+const handlePageInputChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const value = parseInt(input.value)
+  if (!isNaN(value) && value > 0 && value <= totalPages.value) {
+    currentPage.value = value
+  }
+  input.value = ''
+}
+
+const displayedPages = computed(() => {
+  const delta = 2
+  const range = []
+  const rangeWithDots = []
+  let l
+
+  range.push(1)
+
+  for (let i = currentPage.value - delta; i <= currentPage.value + delta; i++) {
+    if (i < totalPages.value && i > 1) {
+      range.push(i)
+    }
+  }
+
+  if (!range.includes(totalPages.value)) {
+    range.push(totalPages.value)
+  }
+
+  for (let i = 0; i < range.length; i++) {
+    if (l) {
+      if (i === range.length - 1 && range[i] - l > 2) {
+        rangeWithDots.push({ type: 'input', position: l + 1 })
+      } else if (range[i] - l === 2) {
+        rangeWithDots.push(l + 1)
+      } else if (range[i] - l !== 1) {
+        rangeWithDots.push('...')
+      }
+    }
+    rangeWithDots.push(range[i])
+    l = range[i]
+  }
+
+  return rangeWithDots
+})
+
+watch(filteredTableData, () => {
+  currentPage.value = 1
+})
 </script>
 
 <style scoped>
@@ -206,7 +353,7 @@ const filteredTableData = computed(() => {
 }
 
 .header {
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 0.2rem;
   max-width: 1200px;
   padding: 1rem;
   background: white;
@@ -524,6 +671,128 @@ table tr:hover td {
     'Times New Roman', SimSun, Times, serif;
 }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  margin: 2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #5b9bd5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.pagination-controls {
+  margin: 1.5rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 1600px;
+  width: calc(100% - 20px);
+}
+
+.pagination-info {
+  color: #70757a;
+  font-size: 0.9rem;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  color: #1a73e8;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.page-button:hover {
+  background: #f8f9fa;
+}
+
+.page-button .icon {
+  font-size: 1.2rem;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.page-number {
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: #4d5156;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.page-number.active {
+  background: #1a73e8;
+  color: white;
+}
+
+.page-number:not(.active):hover {
+  background: #f8f9fa;
+}
+
+.page-input {
+  width: 50px;
+  height: 40px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: none;
+  color: #4d5156;
+  font-size: 0.9rem;
+  padding: 0 8px;
+  margin: 0 4px;
+  transition: all 0.3s ease;
+}
+
+.page-input:focus {
+  outline: none;
+  border-color: #1a73e8;
+  background: #f8f9fa;
+}
+
+.page-input::placeholder {
+  color: #70757a;
+}
+
 @media (max-width: 768px) {
   .header {
     padding: 1rem;
@@ -602,33 +871,21 @@ table tr:hover td {
   .button .icon {
     font-size: 1.1rem;
   }
-}
 
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  margin: 2rem;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #5b9bd5;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+  .pagination-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
   }
-  100% {
-    transform: rotate(360deg);
+
+  .page-button {
+    padding: 0.2rem 0.6rem;
+  }
+
+  .page-input {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
   }
 }
 </style>

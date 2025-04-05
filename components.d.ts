@@ -9,6 +9,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     IFa6BrandsGithub: typeof import('~icons/fa6-brands/github')['default']
+    IMaterialSymbolsArrowBack: typeof import('~icons/material-symbols/arrow-back')['default']
+    IMaterialSymbolsArrowForward: typeof import('~icons/material-symbols/arrow-forward')['default']
     IMaterialSymbolsChevronLeft: typeof import('~icons/material-symbols/chevron-left')['default']
     IMaterialSymbolsChevronRight: typeof import('~icons/material-symbols/chevron-right')['default']
     IMaterialSymbolsDarkMode: typeof import('~icons/material-symbols/dark-mode')['default']
