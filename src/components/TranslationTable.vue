@@ -44,11 +44,7 @@
             class="button"
             target="_blank"
           >
-            <img
-              class="github-icon"
-              src="@/assets/images/github-icon.svg"
-              alt="GitHub"
-            />
+            <i-fa6-brands-github class="icon" />
             GitHub
           </a>
           <a href="/table.tsv" class="button">

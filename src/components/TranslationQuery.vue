@@ -14,12 +14,7 @@
         class="nav-button"
         :title="$t('query.nav.github')"
       >
-        <img
-          src="@/assets/images/github-icon.svg"
-          alt="GitHub"
-          class="github-icon"
-          style="width: 1.5em; height: 1.5em"
-        />
+        <i-fa6-brands-github style="font-size: 1.5em" />
       </a>
       <button
         class="nav-button"

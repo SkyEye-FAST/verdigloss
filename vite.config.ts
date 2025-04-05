@@ -27,7 +27,7 @@ export default defineConfig({
     Components({
       resolvers: [
         IconsResolver({
-          enabledCollections: ['material-symbols'],
+          enabledCollections: ['material-symbols', 'fa6-brands'],
         }),
       ],
     }),

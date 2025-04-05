@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    IFa6BrandsGithub: typeof import('~icons/fa6-brands/github')['default']
     IMaterialSymbolsChevronLeft: typeof import('~icons/material-symbols/chevron-left')['default']
     IMaterialSymbolsChevronRight: typeof import('~icons/material-symbols/chevron-right')['default']
     IMaterialSymbolsDarkMode: typeof import('~icons/material-symbols/dark-mode')['default']
