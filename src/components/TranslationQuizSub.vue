@@ -129,6 +129,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { usePreferredDark } from '@vueuse/core'
 import { getSegmentedText } from '@/utils/text'
 import ratingData from '@/assets/data/rating.json'
@@ -138,6 +139,8 @@ import zhCN from '@#/zh_cn.json'
 import zhHK from '@#/zh_hk.json'
 import zhTW from '@#/zh_tw.json'
 import lzh from '@/assets/mc_lang/valid/lzh.json'
+
+const { t } = useI18n()
 
 interface Question {
   source: string
@@ -326,8 +329,8 @@ const copyCode = async () => {
 const shareResult = () => {
   if (canShare.value) {
     navigator.share({
-      title: 'Minecraft Translation Quiz',
-      text: `My score: ${totalScore.value.toFixed(2)} pts`,
+      title: t('quiz.title'),
+      text: t('quiz.description'),
       url: window.location.href,
     })
   }
