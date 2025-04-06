@@ -20,6 +20,7 @@ The project name **"Verdigloss"** comes from **"verdant + glossary + glossostigm
 
 You can try the demo at the following links:
 
+* <https://mcst.teahouse.team/>
 * <https://verdigloss.vercel.app/>
 
 ## Usage
