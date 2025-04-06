@@ -1,0 +1,36 @@
+name: Update language files
+
+on:
+  schedule:
+    - cron: "30 16 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4.3.0
+        with:
+          node-version: 22
+
+      - name: Update language files
+        run: |
+          git submodule sync
+          git submodule update --remote --recursive --force
+
+      - name: Generate translation table
+        run: pnpm generate-tsv
+
+      - name: Generate ID mapping
+        run: pnpm generate-id-mapping
+
+      - name: Commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: "Update language files"

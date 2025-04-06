@@ -22,26 +22,26 @@ function sha256ToBase62(inputString, length = 3) {
 }
 
 async function generateIdMap() {
+  const enUsPath = path.join(
+    __dirname,
+    '../src/assets/mc_lang/valid/en_us.json',
+  )
+  const idMapPath = path.join(__dirname, '../src/assets/data/id.json')
+
   try {
-    const enUsPath = path.join(
-      __dirname,
-      '../src/assets/mc_lang/valid/en_us.json',
-    )
-    const idMapPath = path.join(__dirname, '../src/assets/data/id.json')
-
     const enUsData = JSON.parse(await fs.readFile(enUsPath, 'utf8'))
-    const codeToKeyMap = Object.fromEntries(
-      Object.keys(enUsData).map((key) => {
-        const code = sha256ToBase62(key)
-        console.log(`Code: ${code} -> Key: ${key}`)
-        return [code, key]
-      }),
-    )
+    const codeToKeyMap = {}
 
-    await fs.writeFile(idMapPath, JSON.stringify(codeToKeyMap, null, 2), 'utf8')
+    for (const key of Object.keys(enUsData)) {
+      const code = sha256ToBase62(key)
+      codeToKeyMap[code] = key
+      console.log(`Code: ${code} -> Key: ${key}`)
+    }
+
+    await fs.writeFile(idMapPath, JSON.stringify(codeToKeyMap, null, 2))
     console.log('ID mapping file generated successfully!')
   } catch (err) {
-    console.error('Error generating ID mapping file:', err)
+    console.error('Error generating ID mapping file:', err.message)
     process.exit(1)
   }
 }

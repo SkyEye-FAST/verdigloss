@@ -30,3 +30,5 @@ coverage
 *.tsbuildinfo
 
 *.ase
+rating_data/
+generate-ratings.js

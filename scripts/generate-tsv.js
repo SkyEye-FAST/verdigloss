@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -18,28 +18,32 @@ const languages = [
 ]
 
 async function generateTsv() {
-  const data = {}
+  try {
+    const data = await Promise.all(
+      languages.map(async (lang) => {
+        const content = await fs.readFile(
+          path.join(langDir, `${lang}.json`),
+          'utf-8',
+        )
+        return [lang, JSON.parse(content)]
+      }),
+    )
 
-  for (const lang of languages) {
-    const filePath = path.join(langDir, `${lang}.json`)
-    const content = await fs.promises.readFile(filePath, 'utf-8')
-    data[lang] = JSON.parse(content)
+    const langData = Object.fromEntries(data)
+    const headers = ['key', ...languages]
+    const rows = [headers.join('\t')]
+
+    Object.keys(langData.en_us).forEach((key) => {
+      const row = [key, ...languages.map((lang) => langData[lang][key] || '？')]
+      rows.push(row.join('\t'))
+    })
+
+    await fs.writeFile(outputPath, rows.join('\n'), 'utf-8')
+    console.log('TSV file generated successfully!')
+  } catch (err) {
+    console.error('Error generating TSV file:', err.message)
+    process.exit(1)
   }
-
-  const headers = ['key', ...languages]
-  const rows = [headers.join('\t')]
-
-  for (const key of Object.keys(data.en_us)) {
-    const row = [key]
-    for (const lang of languages) {
-      const value = data[lang][key] || '？'
-      row.push(value)
-    }
-    rows.push(row.join('\t'))
-  }
-
-  await fs.promises.writeFile(outputPath, rows.join('\n'), 'utf-8')
-  console.log('TSV file generated successfully!')
 }
 
 generateTsv().catch(console.error)
