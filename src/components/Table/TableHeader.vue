@@ -36,10 +36,14 @@
 
     <div class="actions">
       <div class="buttons">
-        <RouterLink to="/" class="button">
+        <router-link to="/" class="button">
           <i-material-symbols-manage-search class="icon" />
-          {{ $t('table.query_page') }}
-        </RouterLink>
+          {{ $t('table.action.query_tool') }}
+        </router-link>
+        <router-link to="/quiz" class="button">
+          <i-material-symbols-quiz class="icon" />
+          {{ $t('table.action.quiz') }}
+        </router-link>
         <a
           href="https://github.com/SkyEye-FAST/verdigloss"
           class="button"
@@ -50,12 +54,12 @@
         </a>
         <a href="/table.tsv" class="button">
           <i-material-symbols-download class="icon" />
-          {{ $t('table.download_tsv') }}
+          {{ $t('table.action.download_tsv') }}
         </a>
         <button
           class="button"
           @click="$emit('toggle-dark-mode')"
-          :title="$t('query.nav.dark_mode')"
+          :title="$t('table.action.dark_mode')"
         >
           <i-material-symbols-dark-mode v-if="isDarkMode" class="icon" />
           <i-material-symbols-light-mode v-else class="icon" />

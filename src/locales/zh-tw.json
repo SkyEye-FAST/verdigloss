@@ -6,6 +6,8 @@
     "nav": {
       "dark_mode": "切換深色模式",
       "github": "GitHub 倉庫",
+      "query": "譯名查詢工具",
+      "quiz": "譯名認知測驗",
       "table": "譯名表"
     },
     "query_content": "查詢內容",
@@ -44,8 +46,13 @@
     "translation": "譯名"
   },
   "table": {
+    "action": {
+      "dark_mode": "切換深色模式",
+      "download_tsv": "下載 TSV",
+      "query_tool": "譯名查詢工具",
+      "quiz": "譯名認知測驗"
+    },
     "author": "由 SkyEye_FAST 整理",
-    "download_tsv": "下載 TSV",
     "java_edition": "Java版",
     "loading": "載入中...",
     "pagination": {
@@ -53,7 +60,6 @@
       "previous": "上一頁",
       "total_rows": "字串總數："
     },
-    "query_page": "查詢頁面",
     "search_placeholder": "搜尋內容...",
     "title": "Minecraft 標準譯名表"
   }

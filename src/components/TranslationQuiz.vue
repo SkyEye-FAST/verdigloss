@@ -1,14 +1,6 @@
 <template>
   <div class="translation-quiz">
-    <div class="nav-buttons">
-      <button class="nav-button" @click="toggleDarkMode">
-        <i-material-symbols-light-mode
-          v-if="isDarkMode"
-          style="font-size: 1.5em"
-        />
-        <i-material-symbols-dark-mode v-else style="font-size: 1.5em" />
-      </button>
-    </div>
+    <Nav :is-dark-mode="isDarkMode" @toggle-dark-mode="toggleDarkMode" />
     <div class="quiz-container">
       <div class="quiz-title" :lang="currentLang">{{ $t('quiz.title') }}</div>
       <button class="quiz-btn-primary" @click="startRandomQuiz">
@@ -65,6 +57,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePreferredDark } from '@vueuse/core'
 import { currentLocale } from '@/main'
+import Nav from './PageNav.vue'
 import idList from '@/assets/data/id.json'
 
 const router = useRouter()
@@ -391,50 +384,6 @@ body.dark-mode .button:hover {
   .quiz-select-group,
   .quiz-input-group {
     width: 90%;
-  }
-}
-
-.nav-buttons {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.nav-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #fff;
-  color: #666;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.nav-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  color: #7aa2ea;
-}
-
-body.dark-mode .nav-button {
-  background: #333;
-  color: #e0e0e0;
-}
-
-@media (max-width: 768px) {
-  .nav-buttons {
-    top: auto;
-    bottom: 1rem;
-    right: 1rem;
   }
 }
 </style>

@@ -6,6 +6,8 @@
     "nav": {
       "dark_mode": "Toggle Dark Mode",
       "github": "GitHub Repository",
+      "query": "Translation Query Tool",
+      "quiz": "Standard Translation Quiz",
       "table": "Translation Table"
     },
     "query_content": "Query Content",
@@ -44,8 +46,13 @@
     "translation": "Translation"
   },
   "table": {
+    "action": {
+      "dark_mode": "Toggle Dark Mode",
+      "download_tsv": "Download TSV",
+      "query_tool": "Query Tool",
+      "quiz": "Quiz"
+    },
     "author": "Compiled by SkyEye_FAST",
-    "download_tsv": "Download TSV",
     "java_edition": "Java Edition ",
     "loading": "Loading...",
     "pagination": {
@@ -53,7 +60,6 @@
       "previous": "Previous page",
       "total_rows": "Total number of strings: "
     },
-    "query_page": "Query Page",
     "search_placeholder": "Search content...",
     "title": "Minecraft Standard Translation Table"
   }

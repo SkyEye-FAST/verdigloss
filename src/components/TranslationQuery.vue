@@ -136,8 +136,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { usePreferredDark } from '@vueuse/core'
-import Nav from './Query/QueryNav.vue'
 import { currentLocale } from '@/main'
+import Nav from './PageNav.vue'
 import enUS from '@#/en_us.json'
 import zhCN from '@#/zh_cn.json'
 import zhHK from '@#/zh_hk.json'
