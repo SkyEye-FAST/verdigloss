@@ -86,7 +86,24 @@ const toggleDarkMode = () => {
   color: #7aa2ea;
 }
 
+body.dark-mode .nav-button {
+  background: #333;
+  color: #e0e0e0;
+}
+
+body.dark-mode .nav-button:hover {
+  color: #7aa2ea;
+}
+
 @media (max-width: 768px) {
+  .nav-buttons {
+    top: auto;
+    bottom: 1rem;
+    right: 1rem;
+  }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
   .nav-buttons {
     top: auto;
     bottom: 1rem;

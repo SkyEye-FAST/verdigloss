@@ -869,15 +869,6 @@ body.dark-mode .toggle-button:hover {
   background: #5a5a5a;
 }
 
-body.dark-mode .nav-button {
-  background: #333;
-  color: #e0e0e0;
-}
-
-body.dark-mode .nav-button:hover {
-  color: #7aa2ea;
-}
-
 /* Responsive styles */
 @media (max-width: 1200px) {
   .two-column-layout {
@@ -1031,43 +1022,6 @@ body.dark-mode .nav-button:hover {
   }
 }
 
-@media screen and (max-height: 480px) and (orientation: landscape) {
-  .sidebar-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    position: relative;
-    width: 100% !important;
-    height: auto;
-    min-height: auto;
-  }
-
-  .main-content {
-    margin-left: 0 !important;
-    height: auto;
-    min-height: calc(100vh - 250px);
-  }
-
-  .result-section {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  table {
-    margin: 0.5em auto;
-    font-size: 0.85em;
-  }
-
-  .title {
-    font-size: 1.8em;
-  }
-
-  .subtitle {
-    font-size: 1em;
-  }
-}
-
 @media (max-height: 480px) and (orientation: landscape) {
   .sidebar-layout {
     flex-direction: row;
@@ -1181,17 +1135,6 @@ body.dark-mode .nav-button:hover {
     padding: 0.6rem;
     font-size: 1rem;
   }
-
-  @media (orientation: landscape) {
-    .sidebar-layout {
-      height: 100vh;
-    }
-
-    .main-content {
-      overflow-y: auto;
-      height: 100vh;
-    }
-  }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
@@ -1215,6 +1158,27 @@ body.dark-mode .nav-button:hover {
     font-size: clamp(0.8em, calc(var(--table-font-size) + 0.6vw), 2.5em);
     min-width: 15vw;
     max-width: 35vw;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 1024px) and (max-height: 480px) and (orientation: landscape) {
+  .sidebar-collapsed .sidebar {
+    width: 40px !important;
+  }
+
+  .sidebar-layout {
+    height: 100vh;
+  }
+
+  .main-content {
+    overflow-y: auto;
+    height: 100vh;
+  }
+
+  .main-content {
+    margin-left: 280px !important;
+    padding: 1rem;
+    transition: margin-left 0.3s ease;
   }
 }
 </style>
