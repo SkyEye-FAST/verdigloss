@@ -1,6 +1,10 @@
 {
   "query": {
     "enable_other_lang": "Enable Non-Chinese Languages",
+    "error": {
+      "missing_query_content": "Please enter query content",
+      "no-matching-translations": "No matching translations found"
+    },
     "java_edition": "Java Edition ",
     "locale_key": "Select a translation key",
     "nav": {

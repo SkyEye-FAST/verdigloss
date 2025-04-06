@@ -106,7 +106,7 @@ onMounted(() => {
       languages.forEach((lang) => {
         const langData =
           translations.value[lang as keyof typeof translations.value]
-        row[lang] = (langData as Record<string, string>)[key] || '？'
+        row[lang] = (langData as Record<string, string>)[key] || '?'
       })
       return row
     })

@@ -135,6 +135,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { currentLocale } from '@/main'
 import Nav from './PageNav.vue'
 import enUS from '@#/en_us.json'
@@ -148,6 +149,7 @@ import vi from '@#/vi_vn.json'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 
+const { t } = useI18n()
 const minecraftVersion = ref(mcVersion)
 
 interface Translation {
@@ -324,7 +326,7 @@ const search = () => {
   translations.value = []
 
   if (!queryContent.value.trim() && !localeKey.value) {
-    error.value = 'Please enter query content'
+    error.value = t('query.error.missing_query_content')
     return
   }
 
@@ -341,7 +343,7 @@ const search = () => {
   }
 
   if (translations.value.length === 0) {
-    error.value = 'No matching translations found'
+    error.value = t('query.error.no-matching-translations')
     selectedTranslation.value = null
     return
   }

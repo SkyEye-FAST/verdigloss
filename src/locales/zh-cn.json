@@ -1,6 +1,10 @@
 {
   "query": {
     "enable_other_lang": "启用非中文语言",
+    "error": {
+      "missing_query_content": "请输入查询内容",
+      "no-matching-translations": "找不到匹配的译名"
+    },
     "java_edition": "Java版",
     "locale_key": "选择本地化键名",
     "nav": {
