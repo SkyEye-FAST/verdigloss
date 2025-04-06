@@ -1189,19 +1189,30 @@ body.dark-mode .nav-button:hover {
 
 @media (max-width: 1024px) {
   .sidebar {
-    position: relative;
-    width: 100% !important;
-    height: auto;
-    min-height: auto;
+    position: fixed;
+    width: 350px !important;
+    height: 100vh;
+    min-height: 100vh;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
   }
 
-  .main-content {
-    margin-left: 0 !important;
-    padding: 1rem;
+  .sidebar-collapsed .sidebar {
+    transform: translateX(-310px);
   }
 
   .toggle-button {
-    display: none;
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 350px !important;
+    padding: 1rem;
+    transition: margin-left 0.3s ease;
+  }
+
+  .sidebar-collapsed .main-content {
+    margin-left: 40px !important;
   }
 
   .settings {
