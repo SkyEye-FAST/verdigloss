@@ -309,6 +309,10 @@ const displayLanguages = computed(() => {
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
+  document.documentElement.style.setProperty(
+    '--table-font-size',
+    isSidebarOpen.value ? '1.8vw' : '2.4vw',
+  )
 }
 
 const getCategoryFromKey = (key: string): string => {
@@ -478,8 +482,12 @@ watch(queryContent, (newValue) => {
 watch(localeKey, (newValue) => {
   localStorage.setItem('localeKey', newValue)
 })
-
 onMounted(async () => {
+  initDarkMode()
+  document.documentElement.style.setProperty(
+    '--table-font-size',
+    isSidebarOpen.value ? '1.8vw' : '2.4vw',
+  )
   initDarkMode()
 
   if (localeKey.value) {
@@ -886,6 +894,10 @@ body.dark-mode .nav-button:hover {
 }
 
 @media (max-width: 768px) {
+  .toggle-button {
+    display: none;
+  }
+
   .translation-item {
     grid-template-columns: 1fr;
     gap: 0.5rem;
@@ -966,7 +978,7 @@ body.dark-mode .nav-button:hover {
 
   .lang-name {
     font-size: 0.8em;
-    padding: 0.25em;
+    padding: 0.4em 0.8em;
   }
 
   .minecraft-title {
@@ -998,7 +1010,7 @@ body.dark-mode .nav-button:hover {
 @media (max-width: 480px) {
   table td,
   table th {
-    padding: 0.25em;
+    padding: 0.4em 1em;
     font-size: 0.8em;
   }
 
@@ -1109,27 +1121,18 @@ body.dark-mode .nav-button:hover {
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
-  .sidebar-layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 1rem;
-  }
-
-  .sidebar {
-    position: sticky;
-    top: 0;
-    width: 300px !important;
-    height: 100vh;
-    padding: 1rem;
-  }
-
-  .main-content {
-    margin-left: 0;
-    min-height: auto;
+  .sidebar-collapsed .main-content {
+    margin-left: 40px !important;
   }
 
   .result-section {
-    max-width: 100%;
+    margin-top: 1rem;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 100%;
   }
 
   table {
@@ -1140,19 +1143,23 @@ body.dark-mode .nav-button:hover {
   table td,
   table th {
     padding: 0.4em 1.5em;
-    font-size: 1.3em;
+    font-size: clamp(1em, 3vw, 3em);
   }
 
   .title {
-    font-size: 2em;
+    font-size: clamp(2em, 3.5vw, 4em);
   }
 
   .subtitle {
-    font-size: 1.1em;
+    font-size: clamp(1.1em, 2vw, 3em);
+  }
+
+  .lang-name {
+    font-size: clamp(1em, 2.5vw, 3em);
   }
 
   .string {
-    font-size: 1.3em;
+    font-size: clamp(1em, 3vw, 3em);
     min-width: 15vw;
     max-width: 35vw;
   }
@@ -1162,7 +1169,7 @@ body.dark-mode .nav-button:hover {
   }
 
   .minecraft-title {
-    font-size: 1.4em;
+    font-size: 1.5em;
   }
 
   .form-container {
@@ -1187,48 +1194,27 @@ body.dark-mode .nav-button:hover {
   }
 }
 
-@media (max-width: 1024px) {
-  .sidebar {
-    position: fixed;
-    width: 350px !important;
-    height: 100vh;
-    min-height: 100vh;
-    transform: translateX(0);
-    transition: transform 0.3s ease;
-  }
-
-  .sidebar-collapsed .sidebar {
-    transform: translateX(-310px);
-  }
-
-  .toggle-button {
-    display: block;
-  }
-
+@media (min-width: 769px) and (max-width: 1024px) {
   .main-content {
     margin-left: 350px !important;
     padding: 1rem;
     transition: margin-left 0.3s ease;
   }
 
-  .sidebar-collapsed .main-content {
-    margin-left: 40px !important;
+  table td,
+  table th {
+    padding: 0.4em 1.5em;
+    font-size: clamp(0.8em, var(--table-font-size), 2.5em);
   }
 
-  .settings {
-    display: block !important;
-    padding: 1rem;
+  .lang-name {
+    font-size: clamp(0.8em, var(--table-font-size), 2.5em);
   }
 
-  .result-section {
-    margin-top: 1rem;
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  table {
-    min-width: 100%;
-    font-size: 0.9em;
+  .string {
+    font-size: clamp(0.8em, calc(var(--table-font-size) + 0.6vw), 2.5em);
+    min-width: 15vw;
+    max-width: 35vw;
   }
 }
 </style>
