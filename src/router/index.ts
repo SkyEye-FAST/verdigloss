@@ -3,13 +3,6 @@ import TranslationQuery from '../components/TranslationQuery.vue'
 import TranslationTable from '../components/TranslationTable.vue'
 import TranslationQuiz from '../components/TranslationQuiz.vue'
 import TranslationQuizSub from '../components/TranslationQuizSub.vue'
-import idList from '@/assets/data/id.json'
-
-const validateQuizCode = (code: string): boolean => {
-  if (!code || code.length !== 30) return false
-  const codeSegments = code.match(/.{3}/g) || []
-  return codeSegments.every((seg) => Object.keys(idList).includes(seg))
-}
 
 const routes = [
   {
@@ -49,19 +42,6 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
-
-router.beforeEach((to, from, next) => {
-  if (to.name === 'TranslationQuizSub') {
-    const code = to.params.code as string
-    if (validateQuizCode(code)) {
-      next()
-    } else {
-      next('/quiz')
-    }
-  } else {
-    next()
-  }
 })
 
 export default router
