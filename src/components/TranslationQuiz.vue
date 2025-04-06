@@ -53,20 +53,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePreferredDark } from '@vueuse/core'
 import { currentLocale } from '@/main'
 import Nav from './PageNav.vue'
 import idList from '@/assets/data/id.json'
+import { useDarkMode } from '@/composables/useDarkMode'
 
 const router = useRouter()
-const isDarkMode = ref(
-  localStorage.getItem('darkMode') === null
-    ? usePreferredDark().value
-    : localStorage.getItem('darkMode') === 'true',
-)
-
+const preferredDark = usePreferredDark()
 const currentLang = computed(() => currentLocale.value)
 
 const queryLang = ref('zh_cn')
@@ -95,17 +91,16 @@ const startQuiz = () => {
   }
 }
 
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-  localStorage.setItem('darkMode', isDarkMode.value.toString())
-}
+const { isDarkMode, toggleDarkMode } = useDarkMode()
 
 onMounted(() => {
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode === 'true') {
-    document.body.classList.add('dark-mode')
-    isDarkMode.value = true
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+})
+
+watch(preferredDark, (newValue) => {
+  if (localStorage.getItem('darkMode') === null) {
+    isDarkMode.value = newValue
+    document.body.classList.toggle('dark-mode', newValue)
   }
 })
 </script>

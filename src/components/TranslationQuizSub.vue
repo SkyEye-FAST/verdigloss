@@ -130,7 +130,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { usePreferredDark } from '@vueuse/core'
 import { getSegmentedText } from '@/utils/text'
 import ratingData from '@/assets/data/rating.json'
 import idList from '@/assets/data/id.json'
@@ -139,6 +138,7 @@ import zhCN from '@#/zh_cn.json'
 import zhHK from '@#/zh_hk.json'
 import zhTW from '@#/zh_tw.json'
 import lzh from '@/assets/mc_lang/valid/lzh.json'
+import { useDarkMode } from '@/composables/useDarkMode'
 
 const { t } = useI18n()
 
@@ -159,11 +159,8 @@ interface Box {
 const route = useRoute()
 const router = useRouter()
 
-const isDarkMode = ref(
-  localStorage.getItem('darkMode') === null
-    ? usePreferredDark().value
-    : localStorage.getItem('darkMode') === 'true',
-)
+const { isDarkMode, toggleDarkMode } = useDarkMode()
+
 const currentIndex = ref(0)
 const inputText = ref('')
 const showSummary = ref(false)
@@ -204,12 +201,6 @@ const hasHalfStar = computed(() => (currentQuestion.value?.rating || 0) % 1 > 0)
 const totalLevel = computed(() =>
   questions.value.reduce((sum, q) => sum + (q.rating || 0), 0),
 )
-
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-  localStorage.setItem('darkMode', isDarkMode.value.toString())
-}
 
 const getBoxes = (): Box[] => {
   if (!currentQuestion.value) return []

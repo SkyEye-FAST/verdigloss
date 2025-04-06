@@ -135,7 +135,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { usePreferredDark } from '@vueuse/core'
 import { currentLocale } from '@/main'
 import Nav from './PageNav.vue'
 import enUS from '@#/en_us.json'
@@ -147,6 +146,7 @@ import ja from '@#/ja_jp.json'
 import ko from '@#/ko_kr.json'
 import vi from '@#/vi_vn.json'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
+import { useDarkMode } from '@/composables/useDarkMode'
 
 const minecraftVersion = ref(mcVersion)
 
@@ -238,18 +238,11 @@ const enableOtherLang = ref(false)
 const translations = ref<Translation[]>([])
 const error = ref('')
 const selectedTranslation = ref<SelectedTranslation | null>(null)
-const preferredDark = usePreferredDark()
-const isDarkMode = ref(false)
+const { isDarkMode, toggleDarkMode } = useDarkMode()
 
-const initDarkMode = () => {
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode !== null) {
-    isDarkMode.value = savedDarkMode === 'true'
-  } else {
-    isDarkMode.value = preferredDark.value
-  }
+onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
-}
+})
 
 const langFiles: LangFiles = {
   'en-us': enUS,
@@ -442,20 +435,6 @@ const updateSelectedTranslation = (key: string) => {
       })),
   }
 }
-
-watch(preferredDark, (newValue) => {
-  if (localStorage.getItem('darkMode') === null) {
-    isDarkMode.value = newValue
-    document.body.classList.toggle('dark-mode', newValue)
-  }
-})
-
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode')
-  localStorage.setItem('darkMode', isDarkMode.value ? 'true' : 'false')
-}
-
 function debounce<T extends (...args: unknown[]) => void>(
   fn: T,
   delay: number,
@@ -483,12 +462,10 @@ watch(localeKey, (newValue) => {
   localStorage.setItem('localeKey', newValue)
 })
 onMounted(async () => {
-  initDarkMode()
   document.documentElement.style.setProperty(
     '--table-font-size',
     isSidebarOpen.value ? '1.8vw' : '2.4vw',
   )
-  initDarkMode()
 
   if (localeKey.value) {
     search()

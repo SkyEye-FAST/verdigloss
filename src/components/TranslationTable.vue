@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { usePreferredDark } from '@vueuse/core'
+import { useDarkMode } from '@/composables/useDarkMode'
 import Header from './Table/TableHeader.vue'
 import Pagination from './Table/TablePagination.vue'
 import enUS from '@#/en_us.json'
@@ -95,22 +95,10 @@ interface TableRow extends Record<string, string> {
 const loading = ref(true)
 const tableData = ref<TableRow[]>([])
 
-const isDarkMode = ref(
-  localStorage.getItem('darkMode') === null
-    ? usePreferredDark().value
-    : localStorage.getItem('darkMode') === 'true',
-)
-
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-  localStorage.setItem('darkMode', isDarkMode.value.toString())
-}
+const { isDarkMode, toggleDarkMode } = useDarkMode()
 
 onMounted(() => {
-  if (isDarkMode.value) {
-    document.body.classList.add('dark-mode')
-  }
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
   setTimeout(async () => {
     const keys = Object.keys(translations.value.en_us)
     tableData.value = keys.map((key) => {
