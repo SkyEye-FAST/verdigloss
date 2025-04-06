@@ -81,8 +81,6 @@ const selectedLanguages = defineModel('selectedLanguages')
 </script>
 
 <style scoped>
-@import '@/assets/styles/table-header.css';
-
 .header {
   margin: 0 auto 0.2rem;
   max-width: 1200px;
@@ -257,6 +255,59 @@ button.button {
   vertical-align: middle;
 }
 
+/* Dark mode */
+body.dark-mode .header {
+  background: #333;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .title h1 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .update-info {
+  color: #aaa;
+}
+
+body.dark-mode .filter-section {
+  background: #2a2a2a;
+}
+
+body.dark-mode .search-input {
+  background: #424242;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .search-input:focus {
+  border-color: #7aa2ea;
+  box-shadow: 0 0 0 3px rgba(91, 155, 213, 0.1);
+}
+
+body.dark-mode .lang-checkbox {
+  background: #333;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .lang-checkbox:hover {
+  background: #4a4a4a;
+  border-color: #7aa2ea;
+}
+
+body.dark-mode .checkbox-text {
+  color: #e0e0e0;
+}
+
+body.dark-mode .button {
+  background: #4a4a4a;
+}
+
+body.dark-mode .button:hover {
+  background: #5a5a5a;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
   .header {
     padding: 1rem;

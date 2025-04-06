@@ -111,8 +111,6 @@ const displayedPages = computed(() => {
 </script>
 
 <style scoped>
-@import '@/assets/styles/pagination.css';
-
 .pagination-controls {
   margin: 1.5rem auto;
   display: flex;
@@ -223,5 +221,46 @@ const displayedPages = computed(() => {
     height: 32px;
     font-size: 0.8rem;
   }
+}
+
+body.dark-mode .pagination-info {
+  color: #9aa0a6;
+}
+
+body.dark-mode .page-button {
+  color: #8ab4f8;
+}
+
+body.dark-mode .page-button:hover {
+  background: #303134;
+}
+
+body.dark-mode .page-number {
+  color: #e8eaed;
+}
+
+body.dark-mode .page-number.active {
+  background: #8ab4f8;
+  color: #202124;
+}
+
+body.dark-mode .page-number:not(.active):hover {
+  background: #303134;
+}
+
+body.dark-mode .page-input {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+body.dark-mode .page-input:focus {
+  border-color: #7aa2ea;
+  background: #333;
+  box-shadow: 0 0 0 2px rgba(122, 162, 234, 0.2);
+}
+
+body.dark-mode .page-input::placeholder {
+  color: #888;
 }
 </style>

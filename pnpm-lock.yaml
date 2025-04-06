@@ -36,6 +36,9 @@ importers:
       '@tsconfig/node22':
         specifier: ^22.0.1
         version: 22.0.1
+      '@types/intl':
+        specifier: ^1.2.2
+        version: 1.2.2
       '@types/node':
         specifier: ^22.14.0
         version: 22.14.0
@@ -681,6 +684,9 @@ packages:
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
+
+  '@types/intl@1.2.2':
+    resolution: {integrity: sha512-A4g5UEAA9c56JWKhc4LSJ9vzDMztjxVXDAXtVK4EbS3hW1V7Sz05VfcTgDQIvkOYJp1NqH222eg62P72HwltfQ==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -2462,6 +2468,8 @@ snapshots:
   '@tsconfig/node22@22.0.1': {}
 
   '@types/estree@1.0.7': {}
+
+  '@types/intl@1.2.2': {}
 
   '@types/json-schema@7.0.15': {}
 
