@@ -28,19 +28,19 @@
           {{ $t('quiz.nav.enter') }}
         </button>
       </div>
-      <div class="actions">
-        <div class="buttons">
-          <router-link to="/" class="button">
+      <div class="quiz-actions">
+        <div class="quiz-actions-buttons">
+          <router-link to="/" class="quiz-actions-button">
             <i-material-symbols-manage-search class="icon" />
             {{ $t('quiz.nav.query') }}
           </router-link>
-          <router-link to="/table" class="button">
+          <router-link to="/table" class="quiz-actions-button">
             <i-material-symbols-table class="icon" />
             {{ $t('quiz.nav.table') }}
           </router-link>
           <a
             href="https://github.com/SkyEye-FAST/verdigloss"
-            class="button"
+            class="quiz-actions-button"
             target="_blank"
           >
             <i-fa6-brands-github class="icon" />
@@ -287,7 +287,7 @@ body.dark-mode button:hover {
   background-color: #3a3a3a;
 }
 
-.actions {
+.quiz-actions {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
@@ -295,14 +295,14 @@ body.dark-mode button:hover {
   gap: 1rem;
 }
 
-.buttons {
+.quiz-actions-buttons {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.button {
+.quiz-actions-button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -315,7 +315,7 @@ body.dark-mode button:hover {
   font-weight: 600;
 }
 
-.button:hover {
+.quiz-actions-button:hover {
   background: #4a8ac4;
 }
 
@@ -326,11 +326,11 @@ body.dark-mode button:hover {
   vertical-align: middle;
 }
 
-body.dark-mode .button {
+body.dark-mode .quiz-actions-button {
   background: #4a4a4a;
 }
 
-body.dark-mode .button:hover {
+body.dark-mode .quiz-actions-button:hover {
   background: #5a5a5a;
 }
 
