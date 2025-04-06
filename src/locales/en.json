@@ -22,6 +22,27 @@
     },
     "title": "Minecraft Standard Translations"
   },
+  "quiz": {
+    "answer_placeholder": "Enter translation here...",
+    "code_placeholder": "Enter question group code...",
+    "complete": "All questions completed!",
+    "description": "Test your mastery of standard translations...",
+    "hint": "Hint",
+    "language": "Language: ",
+    "nav": {
+      "enter": "Enter",
+      "query": "Query Page",
+      "quiz": "Quiz Portal",
+      "table": "Table Page"
+    },
+    "random_quiz": "Random questions (refresh to reselect)",
+    "restart": "One more group",
+    "return": "Return to Quiz Portal",
+    "skip": "Skip",
+    "source": "Source",
+    "title": "Minecraft Standard Translation Quiz",
+    "translation": "Translation"
+  },
   "table": {
     "author": "Compiled by SkyEye_FAST",
     "download_tsv": "Download TSV",

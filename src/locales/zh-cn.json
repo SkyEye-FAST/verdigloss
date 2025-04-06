@@ -22,6 +22,27 @@
     },
     "title": "Minecraft 标准译名"
   },
+  "quiz": {
+    "answer_placeholder": "在此输入译名…",
+    "code_placeholder": "输入题组编号…",
+    "complete": "已完成所有题目！",
+    "description": "测一测你对标准译名的掌握程度…",
+    "hint": "提示",
+    "language": "语言：",
+    "nav": {
+      "enter": "进入",
+      "query": "查询页面",
+      "quiz": "测验门户",
+      "table": "表格页面"
+    },
+    "random_quiz": "随机题组（刷新以重新选择）",
+    "restart": "再来一组",
+    "return": "返回测验门户",
+    "skip": "跳过",
+    "source": "原文",
+    "title": "Minecraft 译名认知测验",
+    "translation": "译名"
+  },
   "table": {
     "author": "由 SkyEye_FAST 整理",
     "download_tsv": "下载 TSV",
