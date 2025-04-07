@@ -45,6 +45,7 @@
       <input
         v-if="!showSummary"
         v-model="inputText"
+        autocomplete="off"
         id="inputBox"
         type="text"
         :class="queryLang.replace(/_/, '-')"
@@ -217,7 +218,7 @@ const getBoxes = (): Box[] => {
     if (isHinted) {
       boxClass = 'hinted'
       if (userChar === char) {
-        boxClass += 'correct'
+        boxClass += ' correct'
       }
     } else if (!userChar) {
       boxClass = ''
@@ -423,22 +424,22 @@ onMounted(async () => {
 
 .translation-character.correct {
   color: #000;
-  background-color: #85df4c;
+  background-color: #64dd17;
 }
 
 .translation-character.hinted {
   color: #000;
-  background-color: #ff6d55;
+  background-color: #ef5350;
 }
 
 .translation-character.hinted.correct {
   color: #000;
-  background-color: #5ab0f3;
+  background-color: #64b5f6;
 }
 
 .translation-character.exist {
   color: #000;
-  background-color: #f3d837;
+  background-color: #ffd600;
 }
 
 .translation-character.dark {
@@ -448,22 +449,22 @@ onMounted(async () => {
 
 .translation-character.correct.dark {
   color: #e0e0e0;
-  background-color: #2b913e;
+  background-color: #43a047;
 }
 
 .translation-character.exist.dark {
   color: #e0e0e0;
-  background-color: #a18b2a;
+  background-color: #afb42b;
 }
 
 .translation-character.hinted.dark {
   color: #e0e0e0;
-  background-color: #a72d19;
+  background-color: #d32f2f;
 }
 
 .translation-character.hinted.correct.dark {
   color: #e0e0e0;
-  background-color: #2f38a5;
+  background-color: #0288d1;
 }
 
 #buttons button,
@@ -485,11 +486,11 @@ input[type='text'] {
 }
 
 #inputBox {
-  border-color: rgba(80, 83, 90, 0.1);
+  border-color: #50535a1a;
 }
 
 body.dark-mode #inputBox {
-  border-color: rgba(224, 224, 224, 0.1);
+  border-color: #e0e0e01a;
 }
 
 .quiz-controls {
