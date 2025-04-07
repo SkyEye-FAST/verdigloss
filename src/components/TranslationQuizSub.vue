@@ -329,7 +329,12 @@ const shareResult = () => {
 }
 
 const restartQuiz = () => {
-  const allKeys = Object.keys(idList)
+  const selectedLang = queryLang.value
+  const langFile = langFiles[selectedLang]
+  const allKeys = Object.keys(idList).filter(
+    (key) =>
+      enUS[key as keyof typeof enUS] !== langFile[key as keyof typeof langFile],
+  )
   const shuffled = allKeys.sort(() => Math.random() - 0.5)
   const selectedKeys = shuffled.slice(0, 10)
   const sortedKeys = selectedKeys.sort((a, b) =>
@@ -370,16 +375,20 @@ const loadQuestions = () => {
   const selectedLang = queryLang.value
   const langFile = langFiles[selectedLang]
 
-  questions.value = selectedKeys.map((key) => ({
-    source: enUS[key as keyof typeof enUS],
-    key: key,
-    translation: langFile[key as keyof typeof langFile],
-    rating:
-      selectedLang === 'zh_cn'
-        ? ratingData[key as keyof typeof ratingData] || 0
-        : undefined,
-    translationChars: getSegmentedText(langFile[key as keyof typeof langFile]),
-  }))
+  questions.value = selectedKeys
+    .map((key) => ({
+      source: enUS[key as keyof typeof enUS],
+      key: key,
+      translation: langFile[key as keyof typeof langFile],
+      rating:
+        selectedLang === 'zh_cn'
+          ? ratingData[key as keyof typeof ratingData] || 0
+          : undefined,
+      translationChars: getSegmentedText(
+        langFile[key as keyof typeof langFile],
+      ),
+    }))
+    .filter((question) => question.source !== question.translation)
 }
 
 onMounted(async () => {
