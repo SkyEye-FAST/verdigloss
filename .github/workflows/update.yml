@@ -4,7 +4,7 @@ permissions:
 
 on:
   schedule:
-    - cron: '31 10 * * *'
+    - cron: '40 10 * * *'
 
 jobs:
   build:
