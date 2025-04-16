@@ -10,12 +10,12 @@
         <label for="query-lang">{{ $t('quiz.language') }}</label>
         <select v-model="queryLang" id="query-lang">
           <option value="zh_cn" lang="zh-Hans-CN">简体中文 (中国大陆)</option>
-          <option value="zh_hk" lang="zh-Hant-HK">
-            繁體中文 (香港特別行政區)
-          </option>
+          <option value="zh_hk" lang="zh-Hant-HK">繁體中文 (香港特別行政區)</option>
           <option value="zh_tw" lang="zh-Hant-TW">繁體中文 (台灣)</option>
           <option value="lzh" lang="lzh">文言 (華夏)</option>
         </select>
+        <input type="checkbox" id="timer-mode" v-model="timerMode" class="timer-checkbox" />
+        <label for="timer-mode" class="timer-label">{{ $t('quiz.timer_mode') }}</label>
       </div>
       <div class="quiz-input-group">
         <input
@@ -67,27 +67,26 @@ const currentLang = computed(() => currentLocale.value)
 
 const queryLang = ref('zh_cn')
 const inputCode = ref('')
+const timerMode = ref(false)
 
 const generateQuizCode = () => {
   const allKeys = Object.keys(idList)
   const shuffled = allKeys.sort(() => Math.random() - 0.5)
   const selectedKeys = shuffled.slice(0, 10)
   const sortedKeys = selectedKeys.sort((a, b) =>
-    idList[a as keyof typeof idList].localeCompare(
-      idList[b as keyof typeof idList],
-    ),
+    idList[a as keyof typeof idList].localeCompare(idList[b as keyof typeof idList]),
   )
   return sortedKeys.join('')
 }
 
 const startRandomQuiz = () => {
   const quizCode = generateQuizCode()
-  router.push(`/quiz/${quizCode}?l=${queryLang.value}`)
+  router.push(`/quiz/${quizCode}?l=${queryLang.value}&t=${timerMode.value ? '1' : '0'}`)
 }
 
 const startQuiz = () => {
   if (inputCode.value.trim() && inputCode.value.length === 30) {
-    router.push(`/quiz/${inputCode.value}?l=${queryLang.value}`)
+    router.push(`/quiz/${inputCode.value}?l=${queryLang.value}&t=${timerMode.value ? '1' : '0'}`)
   }
 }
 
@@ -240,15 +239,15 @@ input[type='text']:hover {
 .quiz-title[lang='zh-CN'] {
   font-size: 2.75em;
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 .quiz-title[lang='zh-TW'] {
   font-size: 2.75em;
   font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 body.dark-mode {
@@ -334,6 +333,18 @@ body.dark-mode .quiz-actions-button:hover {
   background: #5a5a5a;
 }
 
+.timer-label {
+  margin-left: 5px;
+  white-space: nowrap;
+}
+
+.timer-checkbox {
+  width: 20px;
+  height: 20px;
+  margin-left: 15px;
+  cursor: pointer;
+}
+
 @media (orientation: portrait) {
   .quiz-container {
     padding: 2rem 1rem;
@@ -379,6 +390,16 @@ body.dark-mode .quiz-actions-button:hover {
   .quiz-select-group,
   .quiz-input-group {
     width: 90%;
+  }
+
+  .timer-label {
+    margin-left: 10px;
+    font-size: 14px;
+  }
+
+  .timer-checkbox {
+    width: 16px;
+    height: 16px;
   }
 }
 </style>

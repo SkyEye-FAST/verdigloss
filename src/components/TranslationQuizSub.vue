@@ -2,16 +2,16 @@
   <div class="translation-quiz-sub">
     <div class="nav-buttons">
       <button class="nav-button" @click="toggleDarkMode">
-        <i-material-symbols-light-mode
-          v-if="isDarkMode"
-          style="font-size: 1.5em"
-        />
+        <i-material-symbols-light-mode v-if="isDarkMode" style="font-size: 1.5em" />
         <i-material-symbols-dark-mode v-else style="font-size: 1.5em" />
       </button>
     </div>
     <div class="container">
       <div id="info" v-show="!showSummary">
         <div class="info">
+          <div v-if="isTimerMode" class="timer">
+            {{ formatTime(remainingTime) }}
+          </div>
           <div class="source">{{ currentQuestion?.source }}</div>
           <div class="key">{{ currentQuestion?.key }}</div>
           <div class="key rating" v-if="currentQuestion?.rating !== undefined">
@@ -31,11 +31,7 @@
             v-for="(box, index) in boxes"
             :key="index"
             class="translation-character"
-            :class="[
-              queryLang.replace(/_/, '-'),
-              box.class,
-              { dark: isDarkMode },
-            ]"
+            :class="[queryLang.replace(/_/, '-'), box.class, { dark: isDarkMode }]"
           >
             {{ box.char }}
           </div>
@@ -88,10 +84,7 @@
                   v-for="(char, i) in question.translationChars"
                   :key="i"
                   class="transl"
-                  :class="[
-                    charStates[question.key]?.[i]?.replace('box', ''),
-                    { dark: isDarkMode },
-                  ]"
+                  :class="[charStates[question.key]?.[i]?.replace('box', ''), { dark: isDarkMode }]"
                   >{{ char }}</span
                 >
               </td>
@@ -101,17 +94,9 @@
         <div class="code-container">
           <div class="code">{{ quizCode }}</div>
           <span style="font-size: 1.2em">
-            <i-material-symbols-content-copy
-              v-if="!isCopied"
-              class="btn"
-              @click="copyCode"
-            />
+            <i-material-symbols-content-copy v-if="!isCopied" class="btn" @click="copyCode" />
             <i-material-symbols-check v-else class="btn" />
-            <i-material-symbols-share
-              class="btn"
-              v-if="canShare"
-              @click="shareResult"
-            />
+            <i-material-symbols-share class="btn" v-if="canShare" @click="shareResult" />
           </span>
         </div>
         <div class="buttons">
@@ -128,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getSegmentedText } from '@/utils/text'
@@ -179,8 +164,34 @@ const onCompositionEnd = () => {
   onInput()
 }
 
+const isTimerMode = computed(() => route.query.t === '1')
+const remainingTime = ref(180)
+let timerInterval: number | null = null
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
+const startTimer = () => {
+  if (isTimerMode.value) {
+    timerInterval = setInterval(() => {
+      if (remainingTime.value > 0) {
+        remainingTime.value--
+        timeScore.value = remainingTime.value * 0.5
+      } else {
+        clearInterval(timerInterval!)
+        showSummary.value = true
+      }
+    }, 1000)
+  }
+}
+
+const timeScore = ref(90)
+
 const totalScore = ref(0)
-const questionScore = ref(10)
+const questionScore = ref(0)
 
 const queryLang = computed(() => (route.query.l as string) || 'zh_cn')
 const quizCode = computed(() => route.params.code as string)
@@ -190,18 +201,15 @@ const boxes = computed(() => getBoxes())
 const canHint = computed(
   () =>
     !showSummary.value &&
-    boxes.value.filter(
-      (b) => !b.class.includes('correct') && !b.class.includes('hinted'),
-    ).length > 1,
+    boxes.value.filter((b) => !b.class.includes('correct') && !b.class.includes('hinted')).length >
+      1,
 )
 const canSkip = computed(() => !showSummary.value && !canHint.value)
 const canShare = computed(() => !!navigator.share)
 
 const fullStars = computed(() => Math.floor(currentQuestion.value?.rating || 0))
 const hasHalfStar = computed(() => (currentQuestion.value?.rating || 0) % 1 > 0)
-const totalLevel = computed(() =>
-  questions.value.reduce((sum, q) => sum + (q.rating || 0), 0),
-)
+const totalLevel = computed(() => questions.value.reduce((sum, q) => sum + (q.rating || 0), 0))
 
 const getBoxes = (): Box[] => {
   if (!currentQuestion.value) return []
@@ -211,8 +219,7 @@ const getBoxes = (): Box[] => {
 
   return translation.map((char, i) => {
     const userChar = input[i] || ''
-    const isHinted =
-      charStates.value[currentQuestion.value.key]?.[i]?.includes('hinted')
+    const isHinted = charStates.value[currentQuestion.value.key]?.[i]?.includes('hinted')
     let boxClass = ''
 
     if (isHinted) {
@@ -262,6 +269,9 @@ const handleCorrectAnswer = async () => {
   await new Promise((resolve) => setTimeout(resolve, 800))
 
   if (currentIndex.value >= questions.value.length - 1) {
+    if (timerInterval) {
+      clearInterval(timerInterval)
+    }
     showSummary.value = true
   } else {
     currentIndex.value++
@@ -288,8 +298,8 @@ const showHint = () => {
     }
     charStates.value[currentQuestion.value.key][hintIndex] = 'hinted'
 
-    const hintCount = charStates.value[currentQuestion.value.key].filter(
-      (state) => state?.includes('hinted'),
+    const hintCount = charStates.value[currentQuestion.value.key].filter((state) =>
+      state?.includes('hinted'),
     ).length
     questionScore.value = Math.max(0, 10 * (1 - hintCount / translation.length))
   }
@@ -332,15 +342,12 @@ const restartQuiz = () => {
   const selectedLang = queryLang.value
   const langFile = langFiles[selectedLang]
   const allKeys = Object.keys(idList).filter(
-    (key) =>
-      enUS[key as keyof typeof enUS] !== langFile[key as keyof typeof langFile],
+    (key) => enUS[key as keyof typeof enUS] !== langFile[key as keyof typeof langFile],
   )
   const shuffled = allKeys.sort(() => Math.random() - 0.5)
   const selectedKeys = shuffled.slice(0, 10)
   const sortedKeys = selectedKeys.sort((a, b) =>
-    idList[a as keyof typeof idList].localeCompare(
-      idList[b as keyof typeof idList],
-    ),
+    idList[a as keyof typeof idList].localeCompare(idList[b as keyof typeof idList]),
   )
   const keys = sortedKeys.join('')
   router.push(`/quiz/${keys}?l=${queryLang.value}`)
@@ -369,9 +376,7 @@ const loadQuestions = () => {
     return
   }
 
-  const selectedKeys = codeSegments
-    .map((seg) => idList[seg as keyof typeof idList])
-    .sort()
+  const selectedKeys = codeSegments.map((seg) => idList[seg as keyof typeof idList]).sort()
   const selectedLang = queryLang.value
   const langFile = langFiles[selectedLang]
 
@@ -381,12 +386,8 @@ const loadQuestions = () => {
       key: key,
       translation: langFile[key as keyof typeof langFile],
       rating:
-        selectedLang === 'zh_cn'
-          ? ratingData[key as keyof typeof ratingData] || 0
-          : undefined,
-      translationChars: getSegmentedText(
-        langFile[key as keyof typeof langFile],
-      ),
+        selectedLang === 'zh_cn' ? ratingData[key as keyof typeof ratingData] || 0 : undefined,
+      translationChars: getSegmentedText(langFile[key as keyof typeof langFile]),
     }))
     .filter((question) => question.source !== question.translation)
 }
@@ -398,6 +399,13 @@ onMounted(async () => {
     isDarkMode.value = true
   }
   loadQuestions()
+  startTimer()
+})
+
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+  }
 })
 </script>
 
@@ -558,26 +566,25 @@ button:hover {
 
 .zh-cn {
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 .zh-hk {
   font-family:
-    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK',
-    '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
+    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK', '思源宋體 香港',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 .zh-tw {
   font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 .lzh {
   font-family:
-    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR',
-    'Times New Roman', Times, serif;
+    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR', 'Times New Roman', Times, serif;
 }
 
 #title {
@@ -739,8 +746,8 @@ table tr td:nth-child(1) {
 table thead,
 table tr td:nth-child(2) {
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 body.dark-mode .summary {
@@ -806,6 +813,18 @@ body.dark-mode .code {
 body.dark-mode .nav-button {
   background: #333 !important;
   color: #e0e0e0;
+}
+
+.timer {
+  font-family: 'Fira Code', monospace;
+  font-size: 2em;
+  font-weight: bold;
+  color: #5b9bd5;
+  margin-bottom: 10px;
+}
+
+body.dark-mode .timer {
+  color: #64b5f6;
 }
 
 @media (orientation: landscape) and (max-height: 520px) {
