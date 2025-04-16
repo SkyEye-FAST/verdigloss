@@ -38,17 +38,17 @@ jobs:
         uses: super-linter/super-linter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_EXCLUDE: (^pnpm-lock\.yaml|^LICENSE|^README\.md)$
+          FILTER_REGEX_EXCLUDE: ((^|/)pnpm-lock\.yaml|(^|/)LICENSE|(^|/)README\.md)$
           VALIDATE_MARKDOWN: false
           VALIDATE_MARKDOWN_PRETTIER: false
           VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_JAVASCRIPT_ES: false
           VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_TYPESCRIPT_ES: false
           VALIDATE_TYPESCRIPT_STANDARD: false
           FIX_CSS: true
-          FIX_JAVASCRIPT_ES: true
           FIX_JAVASCRIPT_PRETTIER: true
           FIX_JSON: true
-          FIX_TYPESCRIPT_ES: true
           FIX_TYPESCRIPT_PRETTIER: true
 
       - name: Commit and push linting fixes
