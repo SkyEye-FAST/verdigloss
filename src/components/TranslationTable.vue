@@ -26,7 +26,6 @@
           <tr>
             <th class="key-column">keys</th>
             <th v-for="lang in displayLanguages" :key="lang" :class="lang.replace(/_/, '-')">
-              {{ $t(`lang.${lang}`) }}
               {{ lang }}
             </th>
           </tr>
