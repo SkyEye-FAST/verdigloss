@@ -25,7 +25,8 @@
         <thead>
           <tr>
             <th class="key-column">keys</th>
-            <th v-for="lang in displayLanguages" :key="lang" :class="lang">
+            <th v-for="lang in displayLanguages" :key="lang" :class="lang.replace(/_/, '-')">
+              {{ $t(`lang.${lang}`) }}
               {{ lang }}
             </th>
           </tr>
@@ -33,7 +34,7 @@
         <tbody>
           <tr v-for="row in paginatedData" :key="row.key">
             <td class="key-column">{{ row.key }}</td>
-            <td v-for="lang in displayLanguages" :key="lang" :class="lang">
+            <td v-for="lang in displayLanguages" :key="lang" :class="lang.replace(/_/, '-')">
               {{ row[lang] }}
             </td>
           </tr>

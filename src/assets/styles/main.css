@@ -39,24 +39,24 @@ body.dark-mode {
   color: #e0e0e0;
 }
 
-.en_us,
-.vi_vn {
+.en-us,
+.vi-vn {
   font-family: 'Noto Serif', 'Times New Roman', Simsun, Times, serif;
 }
 
-.zh_cn {
+.zh-cn {
   font-family:
     'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
     'Times New Roman', SimSun, Times, serif;
 }
 
-.zh_hk {
+.zh-hk {
   font-family:
     'Noto Serif HK', 'Noto Serif CJK HK', 'Source Han Serif HC', 'Source Han Serif HK',
     '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
 }
 
-.zh_tw {
+.zhtw {
   font-family:
     'Noto Serif TC', 'Noto Serif CJK TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋体',
     'Times New Roman', SimSun, Times, serif;
@@ -69,13 +69,13 @@ body.dark-mode {
     SimSun, Times, serif;
 }
 
-.ja_jp {
+.ja-jp {
   font-family:
     'Noto Serif JP', 'Noto Serif CJK JP', 'Source Han Serif', 'Source Han Serif JP',
     'Times New Roman', SimSun, serif;
 }
 
-.ko_kr {
+.ko-kr {
   font-family:
     'Noto Serif KR', 'Noto Serif CJK KR', 'Source Han Serif K', 'Source Han Serif KR',
     'Times New Roman', SimSun, Times, serif;

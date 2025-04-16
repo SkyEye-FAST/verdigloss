@@ -717,28 +717,28 @@ table th {
 }
 
 .minecraft-title[lang='zh-HK'],
-.minecraft-title[lang='zh-HK'] {
+.table-header[lang='zh-HK'] {
   font-family:
     'Noto Serif HK', 'Noto Serif CJK HK', 'Source Han Serif HC', 'Source Han Serif HK',
     '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title[lang='zh-TW'],
-.minecraft-title[lang='zh-TW'] {
+.table-header[lang='zh-TW'] {
   font-family:
     'Noto Serif TC', 'Noto Serif CJK TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
     'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title[lang='ja'],
-.minecraft-title[lang='ja-JP'] {
+.table-header[lang='ja'] {
   font-family:
     'Noto Serif JP', 'Noto Serif CJK JP', 'Source Han Serif', 'Source Han Serif JP',
     'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title[lang='ko'],
-.minecraft-title[lang='ko-KR'] {
+.table-header[lang='ko'] {
   font-family:
     'Noto Serif KR', 'Noto Serif CJK KR', 'Source Han Serif K', 'Source Han Serif KR',
     'Times New Roman', Times, serif;
