@@ -38,7 +38,7 @@ async function generateTsv() {
       rows.push(row.join('\t'))
     })
 
-    await fs.writeFile(outputPath, rows.join('\n') + '\n', 'utf-8')
+    await fs.writeFile(outputPath, rows.join('\n'), 'utf-8')
     console.log('TSV file generated successfully!')
   } catch (err) {
     console.error('Error generating TSV file:', err.message)

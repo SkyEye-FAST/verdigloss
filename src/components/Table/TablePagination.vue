@@ -24,10 +24,7 @@
           />
           <button
             v-else
-            @click="
-              typeof pageNum === 'number' &&
-              $emit('update:currentPage', pageNum)
-            "
+            @click="typeof pageNum === 'number' && $emit('update:currentPage', pageNum)"
             :class="['page-number', { active: currentPage === pageNum }]"
           >
             {{ pageNum }}

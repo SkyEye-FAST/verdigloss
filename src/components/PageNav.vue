@@ -8,12 +8,7 @@
     >
       <i-material-symbols-manage-search style="font-size: 1.5em" />
     </router-link>
-    <router-link
-      v-else
-      to="/quiz"
-      class="nav-button"
-      :title="$t('query.nav.quiz')"
-    >
+    <router-link v-else to="/quiz" class="nav-button" :title="$t('query.nav.quiz')">
       <i-material-symbols-quiz style="font-size: 1.5em" />
     </router-link>
     <router-link to="/table" class="nav-button" :title="$t('query.nav.table')">
@@ -27,15 +22,8 @@
     >
       <i-fa6-brands-github style="font-size: 1.5em" />
     </a>
-    <button
-      class="nav-button"
-      @click="toggleDarkMode"
-      :title="$t('query.nav.dark_mode')"
-    >
-      <i-material-symbols-dark-mode
-        v-if="isDarkMode"
-        style="font-size: 1.5em"
-      />
+    <button class="nav-button" @click="toggleDarkMode" :title="$t('query.nav.dark_mode')">
+      <i-material-symbols-dark-mode v-if="isDarkMode" style="font-size: 1.5em" />
       <i-material-symbols-light-mode v-else style="font-size: 1.5em" />
     </button>
   </div>

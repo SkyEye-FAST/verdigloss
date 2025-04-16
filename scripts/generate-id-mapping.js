@@ -51,7 +51,7 @@ async function generateIdMap() {
       console.log(`Code: ${code} -> Key: ${key}`)
     }
 
-    await fs.writeFile(idMapPath, JSON.stringify(codeToKeyMap, null, 2)  + '\n')
+    await fs.writeFile(idMapPath, JSON.stringify(codeToKeyMap, null, 2))
     console.log('ID mapping file generated successfully!')
   } catch (err) {
     console.error('Error generating ID mapping file:', err.message)
