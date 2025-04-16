@@ -8,12 +8,11 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Fix Lint Issues
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
-      packages: read
       statuses: write
 
     steps:
@@ -22,31 +21,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Super-linter
-        uses: super-linter/super-linter@v7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  fix-lint-issues:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      statuses: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Super-linter
         uses: super-linter/super-linter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILTER_REGEX_EXCLUDE: (^pnpm-lock\.yaml|^LICENSE|^README\.md)$
+          VALIDATE_MARKDOWN: false
+          VALIDATE_MARKDOWN_PRETTIER: false
+          VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_TYPESCRIPT_STANDARD: false
           FIX_CSS: true
-          FIX_JSON: true
           FIX_JAVASCRIPT_ES: true
           FIX_JAVASCRIPT_PRETTIER: true
+          FIX_JSON: true
           FIX_TYPESCRIPT_ES: true
           FIX_TYPESCRIPT_PRETTIER: true
 
