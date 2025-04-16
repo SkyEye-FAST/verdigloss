@@ -1,7 +1,8 @@
-import fs from 'fs/promises'
-import crypto from 'crypto'
-import path from 'path'
-import { fileURLToPath } from 'url'
+/* global BigInt */
+import fs from 'node:fs/promises'
+import crypto from 'node:crypto'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -24,12 +25,24 @@ function sha256ToBase62(inputString, length = 3) {
 async function generateIdMap() {
   const enUsPath = path.join(
     __dirname,
-    '../src/assets/mc_lang/valid/en_us.json',
+    '..',
+    'src',
+    'assets',
+    'mc_lang',
+    'valid',
+    'en_us.json',
   )
-  const idMapPath = path.join(__dirname, '../src/assets/data/id.json')
+  const idMapPath = path.join(
+    __dirname,
+    '..',
+    'src',
+    'assets',
+    'data',
+    'id.json',
+  )
 
   try {
-    const enUsData = JSON.parse(await fs.readFile(enUsPath, 'utf8'))
+    const enUsData = JSON.parse(await fs.readFile(enUsPath, 'utf-8'))
     const codeToKeyMap = {}
 
     for (const key of Object.keys(enUsData)) {

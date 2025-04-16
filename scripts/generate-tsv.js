@@ -1,10 +1,10 @@
-import fs from 'fs/promises'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const langDir = path.join(__dirname, '../src/assets/mc_lang/valid')
-const outputPath = path.join(__dirname, '../public/table.tsv')
+const langDir = path.join(__dirname, '..', 'src', 'assets', 'mc_lang', 'valid')
+const outputPath = path.join(__dirname, '..', 'public', 'table.tsv')
 
 const languages = [
   'en_us',
@@ -38,7 +38,7 @@ async function generateTsv() {
       rows.push(row.join('\t'))
     })
 
-    await fs.writeFile(outputPath, rows.join('\n'), 'utf-8')
+    await fs.writeFile(outputPath, rows.join('\n') + '\n', 'utf-8')
     console.log('TSV file generated successfully!')
   } catch (err) {
     console.error('Error generating TSV file:', err.message)
