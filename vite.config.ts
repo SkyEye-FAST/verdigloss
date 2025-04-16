@@ -16,10 +16,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     VueI18nPlugin({
-      include: resolve(
-        dirname(fileURLToPath(import.meta.url)),
-        './src/locales/**',
-      ),
+      include: resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
     }),
     AutoImport({
       resolvers: [IconsResolver({ prefix: 'i' })],
@@ -38,9 +35,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@#': fileURLToPath(
-        new URL('./src/assets/mc_lang/valid', import.meta.url),
-      ),
+      '@#': fileURLToPath(new URL('./src/assets/mc_lang/valid', import.meta.url)),
     },
   },
 })

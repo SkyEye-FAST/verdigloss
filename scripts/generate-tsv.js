@@ -6,25 +6,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const langDir = path.join(__dirname, '..', 'src', 'assets', 'mc_lang', 'valid')
 const outputPath = path.join(__dirname, '..', 'public', 'table.tsv')
 
-const languages = [
-  'en_us',
-  'zh_cn',
-  'zh_hk',
-  'zh_tw',
-  'lzh',
-  'ja_jp',
-  'ko_kr',
-  'vi_vn',
-]
+const languages = ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh', 'ja_jp', 'ko_kr', 'vi_vn']
 
 async function generateTsv() {
   try {
     const data = await Promise.all(
       languages.map(async (lang) => {
-        const content = await fs.readFile(
-          path.join(langDir, `${lang}.json`),
-          'utf-8',
-        )
+        const content = await fs.readFile(path.join(langDir, `${lang}.json`), 'utf-8')
         return [lang, JSON.parse(content)]
       }),
     )

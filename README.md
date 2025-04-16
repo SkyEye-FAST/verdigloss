@@ -1,13 +1,14 @@
 <div align="center">
 <img src="https://raw.githubusercontent.com/SkyEye-FAST/verdigloss/master/src/assets/images/icon.png">
 
-----
+---
 
 # Verdigloss
 
 ![GitHub License](https://img.shields.io/github/license/SkyEye-FAST/verdigloss)
 [![GitHub stars](https://img.shields.io/github/stars/SkyEye-FAST/verdigloss)](https://github.com/SkyEye-FAST/verdigloss/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/SkyEye-FAST/verdigloss)](https://github.com/SkyEye-FAST/verdigloss/issues)
+
 </div>
 
 A simple web project for querying standard Minecraft translations, built with [Vue 3](https://vuejs.org/) + [Vite](https://vite.dev/).
@@ -20,8 +21,8 @@ The project name **"Verdigloss"** comes from **"verdant + glossary + glossostigm
 
 You can try the demo at the following links:
 
-* <https://mcst.teahouse.team/>
-* <https://verdigloss.vercel.app/>
+- <https://mcst.teahouse.team/>
+- <https://verdigloss.vercel.app/>
 
 ## Usage
 
@@ -72,7 +73,7 @@ Pull requests are welcome.
 
 This project is released under the [Apache 2.0 license](LICENSE).
 
-``` text
+```text
   Copyright 2025 SkyEye_FAST
 
   Licensed under the Apache License, Version 2.0 (the "License");

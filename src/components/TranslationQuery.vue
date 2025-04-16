@@ -1,20 +1,14 @@
 <template>
   <div class="translation-query">
     <Nav :is-dark-mode="isDarkMode" @toggle-dark-mode="toggleDarkMode" />
-    <div
-      class="sidebar-layout"
-      :class="{ 'sidebar-collapsed': !isSidebarOpen }"
-    >
+    <div class="sidebar-layout" :class="{ 'sidebar-collapsed': !isSidebarOpen }">
       <div class="sidebar">
         <button class="toggle-button" @click="toggleSidebar">
           <i-material-symbols-chevron-left
             v-if="isSidebarOpen"
             style="font-size: 1.5em; color: #fff"
           />
-          <i-material-symbols-chevron-right
-            v-else
-            style="font-size: 1.5em; color: #fff"
-          />
+          <i-material-symbols-chevron-right v-else style="font-size: 1.5em; color: #fff" />
         </button>
         <div class="settings" v-show="isSidebarOpen">
           <div class="form-container">
@@ -42,11 +36,7 @@
                 {{ $t('query.query_lang') }}
               </label>
               <select id="queryLang" v-model="queryLang">
-                <option
-                  v-for="lang in filteredLanguages"
-                  :key="lang.code"
-                  :value="lang.name"
-                >
+                <option v-for="lang in filteredLanguages" :key="lang.code" :value="lang.name">
                   {{ lang.displayName }}
                 </option>
               </select>
@@ -114,11 +104,7 @@
               >
                 <td class="lang-name">{{ lang.displayName }}</td>
                 <td class="string">
-                  {{
-                    selectedTranslation?.translations.find(
-                      (t) => t.code === lang.code,
-                    )?.text
-                  }}
+                  {{ selectedTranslation?.translations.find((t) => t.code === lang.code)?.text }}
                 </td>
               </tr>
             </tbody>
@@ -233,9 +219,7 @@ const isSidebarOpen = ref(true)
 const queryMode = ref(localStorage.getItem('queryMode') || 'source')
 const queryLang = ref(localStorage.getItem('queryLang') || 'zh_cn')
 const queryContent = ref(localStorage.getItem('queryContent') || 'The End')
-const localeKey = ref(
-  localStorage.getItem('localeKey') || 'advancements.end.respawn_dragon.title',
-)
+const localeKey = ref(localStorage.getItem('localeKey') || 'advancements.end.respawn_dragon.title')
 const enableOtherLang = ref(false)
 const translations = ref<Translation[]>([])
 const error = ref('')
@@ -266,9 +250,7 @@ const availableKeys = computed(() => {
 
   switch (queryMode.value) {
     case 'key':
-      return Object.keys(langFiles['en-us']).filter((key) =>
-        key.toLowerCase().includes(searchText),
-      )
+      return Object.keys(langFiles['en-us']).filter((key) => key.toLowerCase().includes(searchText))
     case 'source':
       return Object.entries(langFiles['en-us'])
         .filter(([, value]) => value.toLowerCase().includes(searchText))
@@ -437,10 +419,7 @@ const updateSelectedTranslation = (key: string) => {
       })),
   }
 }
-function debounce<T extends (...args: unknown[]) => void>(
-  fn: T,
-  delay: number,
-) {
+function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number) {
   let timer: number | null = null
   return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
     if (timer) clearTimeout(timer)
@@ -718,8 +697,8 @@ table th {
 
 .table-header {
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
+    SimSun, Times, serif;
   font-size: 2.25em;
   white-space: nowrap;
 }
@@ -737,43 +716,41 @@ table th {
 .minecraft-title[lang='zh-CN'],
 .zh-cn {
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 .minecraft-title[lang='zh-HK'],
 .zh-hk {
   font-family:
-    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK',
-    '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
+    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK', '思源宋體 香港',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title[lang='zh-TW'],
 .zh-tw {
   font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 .lzh {
   font-family:
-    'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light',
-    'Source Han Serif TC Light', 'Source Han Serif TW Light', '思源宋體 Light',
-    'Times New Roman', SimSun, Times, serif;
+    'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light', 'Source Han Serif TC Light',
+    'Source Han Serif TW Light', '思源宋體 Light', 'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title[lang='ja'],
 .ja {
   font-family:
-    'Noto Serif JP', 'Source Han Serif', 'Source Han Serif JP',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif JP', 'Source Han Serif', 'Source Han Serif JP', 'Times New Roman', SimSun, Times,
+    serif;
 }
 
 .minecraft-title[lang='ko'],
 .ko {
   font-family:
-    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR',
-    'Times New Roman', Times, serif;
+    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR', 'Times New Roman', Times, serif;
 }
 
 .minecraft-title,

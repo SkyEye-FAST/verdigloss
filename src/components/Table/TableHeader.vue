@@ -44,11 +44,7 @@
           <i-material-symbols-quiz class="icon" />
           {{ $t('table.action.quiz') }}
         </router-link>
-        <a
-          href="https://github.com/SkyEye-FAST/verdigloss"
-          class="button"
-          target="_blank"
-        >
+        <a href="https://github.com/SkyEye-FAST/verdigloss" class="button" target="_blank">
           <i-fa6-brands-github class="icon" />
           GitHub
         </a>

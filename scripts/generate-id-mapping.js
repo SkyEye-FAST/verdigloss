@@ -23,23 +23,8 @@ function sha256ToBase62(inputString, length = 3) {
 }
 
 async function generateIdMap() {
-  const enUsPath = path.join(
-    __dirname,
-    '..',
-    'src',
-    'assets',
-    'mc_lang',
-    'valid',
-    'en_us.json',
-  )
-  const idMapPath = path.join(
-    __dirname,
-    '..',
-    'src',
-    'assets',
-    'data',
-    'id.json',
-  )
+  const enUsPath = path.join(__dirname, '..', 'src', 'assets', 'mc_lang', 'valid', 'en_us.json')
+  const idMapPath = path.join(__dirname, '..', 'src', 'assets', 'data', 'id.json')
 
   try {
     const enUsData = JSON.parse(await fs.readFile(enUsPath, 'utf-8'))

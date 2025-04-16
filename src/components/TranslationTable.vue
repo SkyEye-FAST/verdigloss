@@ -66,16 +66,7 @@ import mcVersion from '@/assets/mc_lang/version.txt?raw'
 
 const minecraftVersion = ref(mcVersion)
 
-const languages = [
-  'en_us',
-  'zh_cn',
-  'zh_hk',
-  'zh_tw',
-  'lzh',
-  'ja_jp',
-  'ko_kr',
-  'vi_vn',
-]
+const languages = ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh', 'ja_jp', 'ko_kr', 'vi_vn']
 
 const translations = ref({
   en_us: enUS,
@@ -104,8 +95,7 @@ onMounted(() => {
     tableData.value = keys.map((key) => {
       const row: TableRow = { key }
       languages.forEach((lang) => {
-        const langData =
-          translations.value[lang as keyof typeof translations.value]
+        const langData = translations.value[lang as keyof typeof translations.value]
         row[lang] = (langData as Record<string, string>)[key] || '?'
       })
       return row
@@ -201,8 +191,7 @@ table thead th {
   top: 0;
   z-index: 1;
   padding: 10px 8px;
-  font-family:
-    'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace !important;
+  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace !important;
   border: 2px solid #4a8ac4;
   box-shadow:
     inset 1px 0 0 rgba(255, 255, 255, 0.2),
@@ -270,39 +259,37 @@ table tr:hover td {
 
 .zh_cn {
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 .zh_hk {
   font-family:
-    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK',
-    '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
+    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK', '思源宋體 香港',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 .zh_tw {
   font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋体', 'Times New Roman',
+    SimSun, Times, serif;
 }
 
 .lzh {
   font-family:
-    'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light',
-    'Source Han Serif TC Light', 'Source Han Serif TW Light', '思源宋体 Light',
-    'Times New Roman', SimSun, Times, serif;
+    'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light', 'Source Han Serif TC Light',
+    'Source Han Serif TW Light', '思源宋体 Light', 'Times New Roman', SimSun, Times, serif;
 }
 
 .ja_jp {
   font-family:
-    'Noto Serif JP', 'Source Han Serif', 'Source Han Serif JP',
-    'Times New Roman', SimSun, serif;
+    'Noto Serif JP', 'Source Han Serif', 'Source Han Serif JP', 'Times New Roman', SimSun, serif;
 }
 
 .ko_kr {
   font-family:
-    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR',
-    'Times New Roman', SimSun, Times, serif;
+    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR', 'Times New Roman', SimSun, Times,
+    serif;
 }
 
 .loading-container {
