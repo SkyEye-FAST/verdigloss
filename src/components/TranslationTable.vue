@@ -252,46 +252,6 @@ table tr:hover td {
   position: relative;
 }
 
-.en_us,
-.vi_vn {
-  font-family: 'Noto Serif', 'Times New Roman', Simsun, Times, serif;
-}
-
-.zh_cn {
-  font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
-    SimSun, Times, serif;
-}
-
-.zh_hk {
-  font-family:
-    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK', '思源宋體 香港',
-    'Times New Roman', SimSun, Times, serif;
-}
-
-.zh_tw {
-  font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋体', 'Times New Roman',
-    SimSun, Times, serif;
-}
-
-.lzh {
-  font-family:
-    'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light', 'Source Han Serif TC Light',
-    'Source Han Serif TW Light', '思源宋体 Light', 'Times New Roman', SimSun, Times, serif;
-}
-
-.ja_jp {
-  font-family:
-    'Noto Serif JP', 'Source Han Serif', 'Source Han Serif JP', 'Times New Roman', SimSun, serif;
-}
-
-.ko_kr {
-  font-family:
-    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR', 'Times New Roman', SimSun, Times,
-    serif;
-}
-
 .loading-container {
   display: flex;
   flex-direction: column;

@@ -564,29 +564,6 @@ button:hover {
   vertical-align: middle;
 }
 
-.zh-cn {
-  font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
-    SimSun, Times, serif;
-}
-
-.zh-hk {
-  font-family:
-    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK', '思源宋體 香港',
-    'Times New Roman', SimSun, Times, serif;
-}
-
-.zh-tw {
-  font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體', 'Times New Roman',
-    SimSun, Times, serif;
-}
-
-.lzh {
-  font-family:
-    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR', 'Times New Roman', Times, serif;
-}
-
 #title {
   font-size: 2.8em;
   font-weight: 900;

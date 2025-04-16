@@ -683,7 +683,6 @@ table th {
 
 /* Table contents */
 .title {
-  font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
   font-size: 2.5em;
   font-weight: 600;
   text-align: center;
@@ -696,9 +695,6 @@ table th {
 }
 
 .table-header {
-  font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
-    SimSun, Times, serif;
   font-size: 2.25em;
   white-space: nowrap;
 }
@@ -714,47 +710,43 @@ table th {
 }
 
 .minecraft-title[lang='zh-CN'],
-.zh-cn {
+.table-header[lang='zh-CN'] {
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
-    SimSun, Times, serif;
-}
-
-.minecraft-title[lang='zh-HK'],
-.zh-hk {
-  font-family:
-    'Noto Serif HK', 'Source Han Serif HC', 'Source Han Serif HK', '思源宋體 香港',
+    'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
     'Times New Roman', SimSun, Times, serif;
 }
 
-.minecraft-title[lang='zh-TW'],
-.zh-tw {
+.minecraft-title[lang='zh-HK'],
+.minecraft-title[lang='zh-HK'] {
   font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體', 'Times New Roman',
-    SimSun, Times, serif;
+    'Noto Serif HK', 'Noto Serif CJK HK', 'Source Han Serif HC', 'Source Han Serif HK',
+    '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
 }
 
-.lzh {
+.minecraft-title[lang='zh-TW'],
+.minecraft-title[lang='zh-TW'] {
   font-family:
-    'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light', 'Source Han Serif TC Light',
-    'Source Han Serif TW Light', '思源宋體 Light', 'Times New Roman', SimSun, Times, serif;
+    'Noto Serif TC', 'Noto Serif CJK TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title[lang='ja'],
-.ja {
+.minecraft-title[lang='ja-JP'] {
   font-family:
-    'Noto Serif JP', 'Source Han Serif', 'Source Han Serif JP', 'Times New Roman', SimSun, Times,
-    serif;
+    'Noto Serif JP', 'Noto Serif CJK JP', 'Source Han Serif', 'Source Han Serif JP',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 .minecraft-title[lang='ko'],
-.ko {
+.minecraft-title[lang='ko-KR'] {
   font-family:
-    'Noto Serif KR', 'Source Han Serif K', 'Source Han Serif KR', 'Times New Roman', Times, serif;
+    'Noto Serif KR', 'Noto Serif CJK KR', 'Source Han Serif K', 'Source Han Serif KR',
+    'Times New Roman', Times, serif;
 }
 
-.minecraft-title,
-.vi {
+.title,
+.table-header,
+.minecraft-title {
   font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
 }
 

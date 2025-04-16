@@ -239,15 +239,15 @@ input[type='text']:hover {
 .quiz-title[lang='zh-CN'] {
   font-size: 2.75em;
   font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
-    SimSun, Times, serif;
+    'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 .quiz-title[lang='zh-TW'] {
   font-size: 2.75em;
   font-family:
-    'Noto Serif TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體', 'Times New Roman',
-    SimSun, Times, serif;
+    'Noto Serif TC', 'Noto Serif CJK TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
+    'Times New Roman', SimSun, Times, serif;
 }
 
 body.dark-mode {
