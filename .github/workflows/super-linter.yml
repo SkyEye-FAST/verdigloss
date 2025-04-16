@@ -1,6 +1,6 @@
 name: Lint Code Base
 permissions:
-  contents: read
+  contents: write
 
 on:
   push:
@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
-      packages: read
+      contents: write
       statuses: write
 
     steps:
@@ -26,5 +25,11 @@ jobs:
         uses: super-linter/super-linter@v7.3.0
         env:
           VALIDATE_ALL_CODEBASE: false
+          FIX_CSS: true
+          FIX_JSON: true
+          FIX_JAVASCRIPT_ES: true
+          FIX_JAVASCRIPT_PRETTIER: true
+          FIX_TYPESCRIPT_ES: true
+          FIX_TYPESCRIPT_PRETTIER: true
           DEFAULT_BRANCH: 'master'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
