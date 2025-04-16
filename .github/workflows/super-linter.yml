@@ -1,18 +1,19 @@
-name: Lint Code Base
-permissions:
-  contents: write
+name: Lint
+on: # yamllint disable-line rule:truthy
+  push: null
+  pull_request: null
 
-on:
-  push:
-    branches: ['master']
-  pull_request:
-    branches: ['master']
+permissions:
+  contents: read
+
 jobs:
-  run-lint:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
+      packages: read
       statuses: write
 
     steps:
@@ -21,15 +22,41 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Lint Code Base
-        uses: super-linter/super-linter@v7.3.0
+      - name: Super-linter
+        uses: super-linter/super-linter@v7
         env:
-          VALIDATE_ALL_CODEBASE: false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  fix-lint-issues:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      statuses: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Super-linter
+        uses: super-linter/super-linter@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FIX_CSS: true
           FIX_JSON: true
           FIX_JAVASCRIPT_ES: true
           FIX_JAVASCRIPT_PRETTIER: true
           FIX_TYPESCRIPT_ES: true
           FIX_TYPESCRIPT_PRETTIER: true
-          DEFAULT_BRANCH: 'master'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push linting fixes
+        if: >
+          github.event_name == 'pull_request' &&
+          github.ref_name != github.event.repository.default_branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
+          commit_message: 'chore: fix linting issues'
+          commit_user_name: super-linter
+          commit_user_email: super-linter@super-linter.dev
