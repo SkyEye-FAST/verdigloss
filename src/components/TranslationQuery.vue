@@ -1117,7 +1117,7 @@ body.dark-mode .toggle-button:hover {
   }
 }
 
-@media (min-width: 480px) and (max-width: 1024px) and (max-height: 480px) and (orientation: landscape) {
+@media (480px <= width <= 1024px) and (max-height: 480px) and (orientation: landscape) {
   .sidebar-collapsed .sidebar {
     width: 40px !important;
   }
