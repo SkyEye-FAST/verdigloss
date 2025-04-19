@@ -40,6 +40,7 @@ body.dark-mode {
 }
 
 .en-us,
+.vi,
 .vi-vn {
   font-family: 'Noto Serif', 'Times New Roman', Simsun, Times, serif;
 }
@@ -69,12 +70,14 @@ body.dark-mode {
     SimSun, Times, serif;
 }
 
+.ja,
 .ja-jp {
   font-family:
     'Noto Serif JP', 'Noto Serif CJK JP', 'Source Han Serif', 'Source Han Serif JP',
     'Times New Roman', SimSun, serif;
 }
 
+.ko,
 .ko-kr {
   font-family:
     'Noto Serif KR', 'Noto Serif CJK KR', 'Source Han Serif K', 'Source Han Serif KR',
