@@ -35,9 +35,13 @@ jobs:
         run: pnpm install
 
       - name: Prettify code
-        uses: creyD/prettier_action@v4.3
+        run: pnpm exec prettier --write **/*.{js,ts,css,json}
+
+      - name: Commit
+        uses: EndBug/add-and-commit@v9
         with:
-          prettier_options: --write **/*.{js,ts,css,json}
+          default_author: github_actions
+          message: 'chore: fix lint issues'
 
       - name: Super-linter
         uses: super-linter/super-linter@v7.3.0
@@ -55,9 +59,3 @@ jobs:
           FIX_JAVASCRIPT_PRETTIER: true
           FIX_JSON: true
           FIX_TYPESCRIPT_PRETTIER: true
-
-      - name: Commit
-        uses: EndBug/add-and-commit@v9
-        with:
-          default_author: github_actions
-          message: 'chore: fix lint issues'
