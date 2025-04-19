@@ -52,9 +52,6 @@ jobs:
           FIX_TYPESCRIPT_PRETTIER: true
 
       - name: Commit and push linting fixes
-        if: >
-          github.event_name == 'pull_request' &&
-          github.ref_name != github.event.repository.default_branch
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
