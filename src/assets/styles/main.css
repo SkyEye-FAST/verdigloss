@@ -1,13 +1,18 @@
 /* Noto Serif CJK SC */
 @import url('https://fontsapi.zeoseven.com/285/main/result.css');
+
 /* Noto Serif CJK TC */
 @import url('https://fontsapi.zeoseven.com/565/main/result.css');
+
 /* Noto Serif CJK HK */
 @import url('https://fontsapi.zeoseven.com/562/main/result.css');
+
 /* Noto Serif CJK JP */
 @import url('https://fontsapi.zeoseven.com/563/main/result.css');
+
 /* Noto Serif CJK KR */
 @import url('https://fontsapi.zeoseven.com/564/main/result.css');
+
 /* Shanggu Serif VF */
 @import url('https://fontsapi.zeoseven.com/165/main/result.css');
 
@@ -18,6 +23,7 @@
     url('https://fontsapi-storage.zeoseven.com/go/main.woff2') format('woff2');
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Noto Serif';
   src:
