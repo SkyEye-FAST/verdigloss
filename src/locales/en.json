@@ -1,6 +1,5 @@
 {
   "query": {
-    "enable_other_lang": "Enable Non-Chinese Languages",
     "error": {
       "missing_query_content": "Please enter query content",
       "no-matching-translations": "No matching translations found"
@@ -22,6 +21,7 @@
       "source": "Query by source string",
       "translation": "Query by translated Text"
     },
+    "select_languages": "Select Languages",
     "table": {
       "langName": "Language Name",
       "translation": "Translation"

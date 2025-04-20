@@ -238,12 +238,12 @@ input[type='text']:hover {
 
 .quiz-title[lang='zh-CN'] {
   font-size: 2.75em;
-  font-family: var(--zh-cn-sans-font), serif;
+  font-family: var(--zh-cn-serif-font), serif;
 }
 
 .quiz-title[lang='zh-TW'] {
   font-size: 2.75em;
-  font-family: var(--zh-tw-sans-font), serif;
+  font-family: var(--zh-tw-serif-font), serif;
 }
 
 body.dark-mode {

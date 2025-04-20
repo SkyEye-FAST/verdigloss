@@ -35,10 +35,10 @@
 :root {
   --serif-font: 'Noto Serif', 'Times New Roman', SimSun, Georgia, Garamond, Times;
   --monospace-font: 'Fira Code', 'Source Code Pro', Consolas, Monaco;
-  --zh-cn-sans-font:
+  --zh-cn-serif-font:
     'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
     var(--serif-font);
-  --zh-tw-sans-font:
+  --zh-tw-serif-font:
     'Noto Serif TC', 'Noto Serif CJK TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
     var(--serif-font);
 }
@@ -63,7 +63,7 @@ body.dark-mode {
 }
 
 .zh-cn {
-  font-family: var(--zh-cn-sans-font), serif;
+  font-family: var(--zh-cn-serif-font), serif;
 }
 
 .zh-hk {
@@ -73,7 +73,7 @@ body.dark-mode {
 }
 
 .zh-tw {
-  font-family: var(--zh-tw-sans-font), serif;
+  font-family: var(--zh-tw-serif-font), serif;
 }
 
 .lzh {

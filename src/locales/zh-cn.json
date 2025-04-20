@@ -1,6 +1,5 @@
 {
   "query": {
-    "enable_other_lang": "启用非中文语言",
     "error": {
       "missing_query_content": "请输入查询内容",
       "no-matching-translations": "找不到匹配的译名"
@@ -22,6 +21,7 @@
       "source": "按源字符串查询",
       "translation": "按翻译后字符串查询"
     },
+    "select_languages": "选择语言",
     "table": {
       "langName": "语言名称",
       "translation": "译名"

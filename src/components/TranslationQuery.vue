@@ -36,7 +36,7 @@
                 {{ $t('query.query_lang') }}
               </label>
               <select id="queryLang" v-model="queryLang">
-                <option v-for="lang in filteredLanguages" :key="lang.code" :value="lang.name">
+                <option v-for="lang in filteredLanguages" :key="lang.code" :value="lang.code">
                   {{ lang.displayName }}
                 </option>
               </select>
@@ -67,16 +67,22 @@
               </select>
             </div>
 
-            <div class="checkbox-group">
-              <input
-                type="checkbox"
-                id="enableOtherLang"
-                v-model="enableOtherLang"
+            <div class="input-group">
+              <label for="selectedLanguages">
+                <i-material-symbols-language class="label-icon" />
+                {{ $t('query.select_languages') }}
+              </label>
+              <LanguageSelector
+                v-model="selectedLanguages"
+                :options="
+                  languages.map((lang) => ({
+                    value: lang.code,
+                    label: lang.displayName,
+                    htmlLang: lang.htmlLang,
+                  }))
+                "
                 @change="search"
               />
-              <label for="enableOtherLang">
-                {{ $t('query.enable_other_lang') }}
-              </label>
             </div>
           </div>
         </div>
@@ -89,8 +95,8 @@
           <table :class="'table-' + (selectedTranslation?.category || 'block')">
             <thead>
               <tr>
-                <th class="table-header">{{ $t('query.table.langName') }}</th>
-                <th class="table-header">
+                <th :lang="currentLang" class="table-header">{{ $t('query.table.langName') }}</th>
+                <th :lang="currentLang" class="table-header">
                   {{ $t('query.table.translation') }}
                 </th>
               </tr>
@@ -100,7 +106,7 @@
                 v-for="lang in displayLanguages"
                 :key="lang.code"
                 :lang="lang.htmlLang"
-                :class="lang.code"
+                :class="lang.code.replace(/_/, '-')"
               >
                 <td class="lang-name">{{ lang.displayName }}</td>
                 <td class="string">
@@ -121,6 +127,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import LanguageSelector from './Query/LanguageSelector.vue'
 import { useI18n } from 'vue-i18n'
 import { currentLocale } from '@/main'
 import Nav from './PageNav.vue'
@@ -165,51 +172,43 @@ interface SelectedTranslation {
 
 interface LanguageInfo {
   code: string
-  name: string
   displayName: string
   htmlLang: string
 }
 
 const languages: LanguageInfo[] = [
   {
-    code: 'zh-cn',
-    name: 'zh_cn',
+    code: 'zh_cn',
     displayName: '简体中文 (中国大陆)',
     htmlLang: 'zh-Hans-CN',
   },
   {
-    code: 'zh-hk',
-    name: 'zh_hk',
+    code: 'zh_hk',
     displayName: '繁體中文 (香港特別行政區)',
     htmlLang: 'zh-Hant-HK',
   },
   {
-    code: 'zh-tw',
-    name: 'zh_tw',
+    code: 'zh_tw',
     displayName: '繁體中文 (台灣)',
     htmlLang: 'zh-Hant-TW',
   },
   {
     code: 'lzh',
-    name: 'lzh',
     displayName: '文言 (華夏)',
     htmlLang: 'lzh',
   },
   {
-    code: 'ja',
-    name: 'ja_jp',
+    code: 'ja_jp',
     displayName: '日本語 (日本)',
     htmlLang: 'ja',
   },
   {
-    code: 'ko',
-    name: 'ko_kr',
+    code: 'ko_kr',
     displayName: '한국어 (대한민국)',
     htmlLang: 'ko',
   },
   {
-    code: 'vi',
-    name: 'vi_vn',
+    code: 'vi_vn',
     displayName: 'Tiếng Việt (Việt Nam)',
     htmlLang: 'vi',
   },
@@ -220,7 +219,9 @@ const queryMode = ref(localStorage.getItem('queryMode') || 'source')
 const queryLang = ref(localStorage.getItem('queryLang') || 'zh_cn')
 const queryContent = ref(localStorage.getItem('queryContent') || 'The End')
 const localeKey = ref(localStorage.getItem('localeKey') || 'advancements.end.respawn_dragon.title')
-const enableOtherLang = ref(false)
+const selectedLanguages = ref<string[]>(
+  JSON.parse(localStorage.getItem('selectedLanguages') || '["zh_cn", "zh_hk", "zh_tw", "lzh"]'),
+)
 const translations = ref<Translation[]>([])
 const error = ref('')
 const selectedTranslation = ref<SelectedTranslation | null>(null)
@@ -231,14 +232,14 @@ onMounted(() => {
 })
 
 const langFiles: LangFiles = {
-  'en-us': enUS,
-  'zh-cn': zhCN,
-  'zh-hk': zhHK,
-  'zh-tw': zhTW,
+  en_us: enUS,
+  zh_cn: zhCN,
+  zh_hk: zhHK,
+  zh_tw: zhTW,
   lzh: lzh,
-  ja: ja,
-  ko: ko,
-  vi: vi,
+  ja_jp: ja,
+  ko_kr: ko,
+  vi_vn: vi,
 }
 
 const currentLang = computed(() => currentLocale.value)
@@ -250,9 +251,9 @@ const availableKeys = computed(() => {
 
   switch (queryMode.value) {
     case 'key':
-      return Object.keys(langFiles['en-us']).filter((key) => key.toLowerCase().includes(searchText))
+      return Object.keys(langFiles['en_us']).filter((key) => key.toLowerCase().includes(searchText))
     case 'source':
-      return Object.entries(langFiles['en-us'])
+      return Object.entries(langFiles['en_us'])
         .filter(([, value]) => value.toLowerCase().includes(searchText))
         .map(([key]) => key)
     case 'translation':
@@ -266,23 +267,11 @@ const availableKeys = computed(() => {
   }
 })
 
-const filteredLanguages = computed(() =>
-  languages.filter((lang) => {
-    if (!enableOtherLang.value) {
-      return ['zh-cn', 'zh-hk', 'zh-tw', 'lzh'].includes(lang.code)
-    }
-    return lang.code !== 'en-us'
-  }),
-)
-
 const displayLanguages = computed(() => {
-  return languages.filter((lang) => {
-    if (!enableOtherLang.value) {
-      return ['zh-cn', 'zh-hk', 'zh-tw', 'lzh'].includes(lang.code)
-    }
-    return true
-  })
+  return languages.filter((lang) => selectedLanguages.value.includes(lang.code))
 })
+
+const filteredLanguages = computed(() => languages)
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
@@ -345,7 +334,7 @@ const searchByKey = (key: string) => {
   const searchText = key.trim().toLowerCase()
   if (!searchText) return
 
-  Object.keys(langFiles['en-us'])
+  Object.keys(langFiles['en_us'])
     .filter((key) => key.toLowerCase().includes(searchText))
     .forEach((key) => collectTranslationsForKey(key))
 }
@@ -354,7 +343,7 @@ const searchBySourceText = (text: string) => {
   const searchText = text.trim().toLowerCase()
   if (!searchText) return
 
-  Object.entries(langFiles['en-us'])
+  Object.entries(langFiles['en_us'])
     .filter(([, value]) => value.toLowerCase().includes(searchText))
     .forEach(([key]) => collectTranslationsForKey(key))
 }
@@ -373,31 +362,31 @@ const searchByTranslation = (text: string) => {
 
 const collectTranslationsForKey = (key: string) => {
   translations.value.push({
-    language: 'en-us',
-    name: langFiles['en-us'][key],
+    language: 'en_us',
+    name: langFiles['en_us'][key],
     key: key,
   })
 }
 
 const getLanguageCode = (lang: string): string => {
   const codeMap: { [key: string]: string } = {
-    zh_cn: 'zh-cn',
-    zh_hk: 'zh-hk',
-    zh_tw: 'zh-tw',
+    zh_cn: 'zh_cn',
+    zh_hk: 'zh_hk',
+    zh_tw: 'zh_tw',
     lzh: 'lzh',
-    ja_jp: 'ja',
-    ko_kr: 'ko',
-    vi_vn: 'vi',
+    ja_jp: 'ja_jp',
+    ko_kr: 'ko_kr',
+    vi_vn: 'vi_vn',
   }
   return codeMap[lang] || ''
 }
 
 const updateSelectedTranslation = (key: string) => {
-  const source = langFiles['en-us'][key]
+  const source = langFiles['en_us'][key]
   const category = getCategoryFromKey(key)
 
   const filteredTranslations = languages
-    .filter((lang) => lang.code !== 'en-us')
+    .filter((lang) => lang.code !== 'en_us')
     .map((lang) => ({
       code: lang.code,
       name: lang.displayName,
@@ -460,12 +449,16 @@ const onQueryInput = debounce(() => {
   search()
 }, 300)
 
-watch([queryMode, queryLang, queryContent, localeKey], ([mode, lang, content, key]) => {
-  localStorage.setItem('queryMode', mode)
-  localStorage.setItem('queryLang', lang)
-  localStorage.setItem('queryContent', content)
-  localStorage.setItem('localeKey', key)
-})
+watch(
+  [queryMode, queryLang, queryContent, localeKey, selectedLanguages],
+  ([mode, lang, content, key, langs]) => {
+    localStorage.setItem('queryMode', mode)
+    localStorage.setItem('queryLang', lang)
+    localStorage.setItem('queryContent', content)
+    localStorage.setItem('localeKey', key)
+    localStorage.setItem('selectedLanguages', JSON.stringify(langs))
+  },
+)
 
 onMounted(async () => {
   document.documentElement.style.setProperty(
@@ -547,7 +540,6 @@ onMounted(async () => {
 
 .settings {
   height: auto;
-  overflow-y: auto;
   padding: 1.5rem;
   box-sizing: border-box;
   width: 100%;
@@ -736,12 +728,12 @@ table th {
 
 .minecraft-title[lang='zh-CN'],
 .table-header[lang='zh-CN'] {
-  font-family: var(--zh-cn-sans-font), serif;
+  font-family: var(--zh-cn-serif-font), serif;
 }
 
 .minecraft-title[lang='zh-TW'],
 .table-header[lang='zh-TW'] {
-  font-family: var(--zh-tw-sans-font), serif;
+  font-family: var(--zh-tw-serif-font), serif;
 }
 
 .title,

@@ -22,6 +22,7 @@
       "source": "依原始字串查詢",
       "translation": "依翻譯後字串查詢"
     },
+    "select_languages": "選擇語言",
     "table": {
       "langName": "語言名稱",
       "translation": "譯名"
