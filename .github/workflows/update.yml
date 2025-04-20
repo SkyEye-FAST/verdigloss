@@ -4,7 +4,7 @@ permissions:
 
 on:
   schedule:
-    - cron: '30 16 * * *'
+    - cron: "30 16 * * *"
 
 jobs:
   build:
@@ -36,8 +36,11 @@ jobs:
       - name: Generate ID mapping
         run: pnpm generate-id-mapping
 
+      - name: Prettify code
+        run: pnpm exec prettier --write **/*.{js,ts,css,json}
+
       - name: Commit
         uses: EndBug/add-and-commit@v9
         with:
           default_author: github_actions
-          message: 'Update language files'
+          message: "chore: update language files"
