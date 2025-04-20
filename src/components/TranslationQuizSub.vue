@@ -66,11 +66,15 @@
         <div id="title" :class="queryLang.replace(/_/, '-')">
           {{ $t('quiz.complete') }}
         </div>
-        <div id="level" class="key" v-if="queryLang === 'zh_cn'">
+        <div v-if="isTimerMode" class="summary-info">
+          <i-material-symbols-timer style="font-size: smaller" />
+          <span class="summary-label">{{ formatTime(usedTime) }}</span>
+        </div>
+        <div class="summary-info" v-if="queryLang === 'zh_cn'">
           <i-material-symbols-star style="font-size: smaller" />
-          <span id="levelNum">{{ totalLevel.toFixed(2) }} /</span>
+          <span class="summary-label">{{ totalLevel.toFixed(2) }} /</span>
           <i-material-symbols-stars style="font-size: smaller" />
-          <span id="score">{{ totalScore.toFixed(2) }} pts</span>
+          <span class="summary-label">{{ totalScore.toFixed(2) }} pts</span>
         </div>
         <table id="summaryTable">
           <thead>
@@ -169,6 +173,7 @@ const onCompositionEnd = () => {
 
 const isTimerMode = computed(() => route.query.t === '1')
 const remainingTime = ref(240)
+const usedTime = ref(0)
 let timerInterval: number | null = null
 
 const progressWidth = computed(() => (remainingTime.value / 240) * 100)
@@ -181,10 +186,11 @@ const formatTime = (seconds: number) => {
 
 const startTimer = () => {
   if (isTimerMode.value) {
+    usedTime.value = 0
     timerInterval = setInterval(() => {
       if (remainingTime.value > 0) {
         remainingTime.value--
-        timeScore.value = remainingTime.value * 0.5
+        usedTime.value++
       } else {
         clearInterval(timerInterval!)
         showSummary.value = true
@@ -193,10 +199,8 @@ const startTimer = () => {
   }
 }
 
-const timeScore = ref(90)
-
 const totalScore = ref(0)
-const questionScore = ref(0)
+const questionScore = ref(10)
 
 const queryLang = computed(() => (route.query.l as string) || 'zh_cn')
 const quizCode = computed(() => route.params.code as string)
@@ -315,6 +319,9 @@ const skipQuestion = async () => {
   isLocked.value = true
 
   if (currentIndex.value >= questions.value.length - 1) {
+    if (timerInterval) {
+      clearInterval(timerInterval)
+    }
     showSummary.value = true
   } else {
     currentIndex.value++
@@ -656,7 +663,11 @@ body.dark-mode .button:hover {
   font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
 }
 
-#level {
+.summary-info {
+  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-size: clamp(1.5em, calc(1.5em + 0.6vw), 3em);
+  text-align: center;
+  padding-top: 10px;
   padding: 0;
   font-size: 1.5em;
   margin-top: 10px;
@@ -666,13 +677,12 @@ body.dark-mode .button:hover {
   gap: 5px;
 }
 
-#level i {
+.summary-info i {
   display: flex;
   align-items: center;
 }
 
-#levelNum,
-#score {
+.summary-label {
   margin: 0 10px;
 }
 

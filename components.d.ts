@@ -30,6 +30,7 @@ declare module 'vue' {
     IMaterialSymbolsStars: typeof import('~icons/material-symbols/stars')['default']
     IMaterialSymbolsTable: typeof import('~icons/material-symbols/table')['default']
     IMaterialSymbolsTableViewOutline: typeof import('~icons/material-symbols/table-view-outline')['default']
+    IMaterialSymbolsTimer: typeof import('~icons/material-symbols/timer')['default']
     PageNav: typeof import('./src/components/PageNav.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
