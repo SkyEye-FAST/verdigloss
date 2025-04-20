@@ -66,6 +66,7 @@
       "total_rows": "字串總數："
     },
     "search_placeholder": "搜尋內容...",
-    "title": "Minecraft 標準譯名表"
+    "title": "Minecraft 標準譯名表",
+    "use_pagination": "使用分頁"
   }
 }

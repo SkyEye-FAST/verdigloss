@@ -3,6 +3,7 @@
     <Header
       v-model:search-query="searchQuery"
       v-model:selected-languages="selectedLanguages"
+      v-model:use-pagination="usePagination"
       :minecraft-version="minecraftVersion"
       :languages="languages"
       :is-dark-mode="isDarkMode"
@@ -15,6 +16,7 @@
     </div>
     <template v-else>
       <Pagination
+        v-if="usePagination"
         v-model:current-page="currentPage"
         :total-items="filteredTableData.length"
         :items-per-page="itemsPerPage"
@@ -31,7 +33,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in paginatedData" :key="row.key">
+          <tr v-for="row in displayData" :key="row.key">
             <td class="key-column">{{ row.key }}</td>
             <td v-for="lang in displayLanguages" :key="lang" :class="lang.replace(/_/, '-')">
               {{ row[lang] }}
@@ -41,6 +43,7 @@
       </table>
 
       <Pagination
+        v-if="usePagination"
         v-model:current-page="currentPage"
         :total-items="filteredTableData.length"
         :items-per-page="itemsPerPage"
@@ -85,6 +88,7 @@ interface TableRow extends Record<string, string> {
 
 const loading = ref(true)
 const tableData = ref<TableRow[]>([])
+const usePagination = ref(true)
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
@@ -137,14 +141,19 @@ const filteredTableData = computed(() => {
 const currentPage = ref(1)
 const itemsPerPage = 50
 
-const paginatedData = computed(() => {
+const displayData = computed(() => {
+  if (!usePagination.value) {
+    return filteredTableData.value
+  }
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
   return filteredTableData.value.slice(start, end)
 })
 
 watch(filteredTableData, () => {
-  currentPage.value = 1
+  if (usePagination.value) {
+    currentPage.value = 1
+  }
 })
 </script>
 

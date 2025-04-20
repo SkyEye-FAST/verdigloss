@@ -66,6 +66,7 @@
       "total_rows": "字符串总数："
     },
     "search_placeholder": "搜索内容…",
-    "title": "Minecraft 标准译名表"
+    "title": "Minecraft 标准译名表",
+    "use_pagination": "使用分页"
   }
 }

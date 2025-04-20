@@ -9,15 +9,25 @@
     </div>
 
     <div class="filter-section">
-      <div class="search-wrapper">
-        <i-material-symbols-search class="search-icon" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          :placeholder="$t('table.search_placeholder')"
-          class="search-input"
-          @input="$emit('update:searchQuery', searchQuery)"
-        />
+      <div class="search-controls">
+        <div class="search-wrapper">
+          <i-material-symbols-search class="search-icon" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            :placeholder="$t('table.search_placeholder')"
+            class="search-input"
+            @input="$emit('update:searchQuery', searchQuery)"
+          />
+        </div>
+        <label class="pagination-checkbox">
+          <input
+            type="checkbox"
+            v-model="usePagination"
+            @change="$emit('update:usePagination', usePagination)"
+          />
+          <span class="checkbox-text">{{ $t('table.use_pagination') }}</span>
+        </label>
       </div>
       <div class="language-filter">
         <div class="checkbox-group">
@@ -78,6 +88,7 @@ defineEmits<{
 
 const searchQuery = defineModel('searchQuery')
 const selectedLanguages = defineModel('selectedLanguages')
+const usePagination = defineModel('usePagination', { default: true })
 </script>
 
 <style scoped>
@@ -130,9 +141,18 @@ const selectedLanguages = defineModel('selectedLanguages')
   gap: 1.2rem;
 }
 
+.search-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
 .search-wrapper {
   max-width: 500px;
-  margin: 0 auto;
   width: 100%;
   position: relative;
   display: flex;
@@ -255,7 +275,30 @@ button.button {
   vertical-align: middle;
 }
 
-/* Dark mode */
+.pagination-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pagination-checkbox:hover {
+  background: #f0f7ff;
+  border-color: #5b9bd5;
+}
+
+.pagination-checkbox input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+}
+
+/* Dark mode 样式 */
 body.dark-mode .header {
   background: #333;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -307,7 +350,18 @@ body.dark-mode .button:hover {
   background: #5a5a5a;
 }
 
-/* Responsive styles */
+body.dark-mode .pagination-checkbox {
+  background: #333;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .pagination-checkbox:hover {
+  background: #4a4a4a;
+  border-color: #7aa2ea;
+}
+
+/* 响应式样式 */
 @media (max-width: 768px) {
   .header {
     padding: 1rem;
