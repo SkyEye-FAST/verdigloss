@@ -200,7 +200,7 @@ table thead th {
   top: 0;
   z-index: 1;
   padding: 10px 8px;
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace !important;
+  font-family: var(--monospace-font), monospace !important;
   border: 2px solid #4a8ac4;
   box-shadow:
     inset 1px 0 0 rgba(255, 255, 255, 0.2),
@@ -222,7 +222,7 @@ table thead {
 
 .key-column {
   min-width: 200px;
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-family: var(--monospace-font), monospace;
 }
 
 table thead th.key-column {

@@ -165,7 +165,7 @@ select {
 
 select,
 input[type='text'] {
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-family: var(--monospace-font), monospace;
   flex: 1;
   padding: 0.4em;
   font-size: x-large;
@@ -233,21 +233,17 @@ input[type='text']:hover {
 
 .quiz-title[lang='en'] {
   font-size: 2.25em;
-  font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
+  font-family: var(--serif-font), serif;
 }
 
 .quiz-title[lang='zh-CN'] {
   font-size: 2.75em;
-  font-family:
-    'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
+  font-family: var(--zh-cn-sans-font), serif;
 }
 
 .quiz-title[lang='zh-TW'] {
   font-size: 2.75em;
-  font-family:
-    'Noto Serif TC', 'Noto Serif CJK TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
-    'Times New Roman', SimSun, Times, serif;
+  font-family: var(--zh-tw-sans-font), serif;
 }
 
 body.dark-mode {

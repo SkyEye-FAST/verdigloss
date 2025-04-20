@@ -223,7 +223,7 @@ const usePagination = defineModel('usePagination', { default: true })
 }
 
 .checkbox-text {
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-family: var(--monospace-font), monospace;
   color: #2c3e50;
   font-size: 0.9rem;
 }

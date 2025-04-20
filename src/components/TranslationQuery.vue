@@ -590,7 +590,7 @@ onMounted(async () => {
 }
 
 .result-key {
-  font-family: 'Fira Code', monospace;
+  font-family: var(--monospace-font), monospace;
   color: #666;
   text-align: center;
   margin-bottom: 1.5rem;
@@ -689,7 +689,7 @@ table th {
 }
 
 .subtitle {
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-family: var(--monospace-font), monospace;
   font-size: 1.25em;
   text-align: center;
 }
@@ -711,43 +711,18 @@ table th {
 
 .minecraft-title[lang='zh-CN'],
 .table-header[lang='zh-CN'] {
-  font-family:
-    'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体',
-    'Times New Roman', SimSun, Times, serif;
-}
-
-.minecraft-title[lang='zh-HK'],
-.table-header[lang='zh-HK'] {
-  font-family:
-    'Noto Serif HK', 'Noto Serif CJK HK', 'Source Han Serif HC', 'Source Han Serif HK',
-    '思源宋體 香港', 'Times New Roman', SimSun, Times, serif;
+  font-family: var(--zh-cn-sans-font), serif;
 }
 
 .minecraft-title[lang='zh-TW'],
 .table-header[lang='zh-TW'] {
-  font-family:
-    'Noto Serif TC', 'Noto Serif CJK TC', 'Source Han Serif TC', 'Source Han Serif TW', '思源宋體',
-    'Times New Roman', SimSun, Times, serif;
-}
-
-.minecraft-title[lang='ja'],
-.table-header[lang='ja'] {
-  font-family:
-    'Noto Serif JP', 'Noto Serif CJK JP', 'Source Han Serif', 'Source Han Serif JP',
-    'Times New Roman', SimSun, Times, serif;
-}
-
-.minecraft-title[lang='ko'],
-.table-header[lang='ko'] {
-  font-family:
-    'Noto Serif KR', 'Noto Serif CJK KR', 'Source Han Serif K', 'Source Han Serif KR',
-    'Times New Roman', Times, serif;
+  font-family: var(--zh-tw-sans-font), serif;
 }
 
 .title,
 .table-header,
 .minecraft-title {
-  font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
+  font-family: var(--serif-font), serif;
 }
 
 /* Footer */

@@ -581,14 +581,14 @@ button:hover {
 }
 
 .source {
-  font-family: 'Noto Serif', 'Times New Roman', SimSun, Times, serif;
+  font-family: var(--serif-font), serif;
   font-size: clamp(2.5em, calc(3em + 1vw), 4em);
   font-weight: 600;
   text-align: center;
 }
 
 .key {
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-family: var(--monospace-font), monospace;
   font-size: clamp(1.5em, calc(1.5em + 0.6vw), 3em);
   text-align: center;
   padding-top: 10px;
@@ -660,11 +660,11 @@ body.dark-mode .button:hover {
 .code {
   padding: 0 5px;
   font-size: 16px;
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-family: var(--monospace-font), monospace;
 }
 
 .summary-info {
-  font-family: 'Fira Code', 'Source Code Pro', Consolas, Monaco, monospace;
+  font-family: var(--monospace-font), monospace;
   font-size: clamp(1.5em, calc(1.5em + 0.6vw), 3em);
   text-align: center;
   padding-top: 10px;
@@ -755,17 +755,6 @@ table thead {
   font-size: larger;
 }
 
-table tr td:nth-child(1) {
-  font-family: 'Noto Serif', 'Times New Roman', Simsun, Times, serif;
-}
-
-table thead,
-table tr td:nth-child(2) {
-  font-family:
-    'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', '思源宋体', 'Times New Roman',
-    SimSun, Times, serif;
-}
-
 body.dark-mode .summary {
   background-color: #1a1a1a;
   color: #e0e0e0;
@@ -832,7 +821,7 @@ body.dark-mode .nav-button {
 }
 
 .timer {
-  font-family: 'Fira Code', monospace;
+  font-family: var(--monospace-font), monospace;
   font-size: 2em;
   font-weight: bold;
   color: #5b9bd5;
