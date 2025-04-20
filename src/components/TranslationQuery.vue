@@ -963,17 +963,12 @@ body.dark-mode .toggle-button:hover {
 }
 
 @media (max-height: 480px) and (orientation: landscape) {
-  .sidebar-layout {
-    flex-direction: row;
-    height: 100vh;
-    overflow: hidden;
-  }
-
   .sidebar {
     position: fixed;
     width: 280px !important;
     height: 100vh;
     padding-top: 0.5rem;
+    z-index: 99; /* 调整z-index以确保下拉菜单能显示在侧边栏右侧 */
   }
 
   .settings {

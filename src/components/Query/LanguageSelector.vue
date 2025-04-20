@@ -196,4 +196,31 @@ body.dark-mode.option.is-selected {
     height: 1.25rem;
   }
 }
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .options-container {
+    position: fixed;
+    left: 280px;
+    top: 0;
+    max-height: 100vh;
+    width: 280px;
+    margin-top: 0;
+    border-radius: 0;
+    border-left: 1px solid #ddd;
+    border-top: none;
+    border-bottom: none;
+  }
+
+  body.dark-mode .options-container {
+    border-left-color: #444;
+  }
+
+  .sidebar-collapsed .options-container {
+    left: 40px;
+  }
+
+  .option {
+    padding: 0.75rem;
+  }
+}
 </style>
