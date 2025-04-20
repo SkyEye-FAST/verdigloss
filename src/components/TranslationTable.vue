@@ -23,24 +23,26 @@
         :show-info="true"
       />
 
-      <table>
-        <thead>
-          <tr>
-            <th class="key-column">keys</th>
-            <th v-for="lang in displayLanguages" :key="lang">
-              {{ lang }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in displayData" :key="row.key">
-            <td class="key-column">{{ row.key }}</td>
-            <td v-for="lang in displayLanguages" :key="lang" :class="lang.replace(/_/, '-')">
-              {{ row[lang] }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr v-memo="[displayLanguages]">
+              <th class="key-column">keys</th>
+              <th v-for="lang in displayLanguages" :key="lang">
+                {{ lang }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in displayData" :key="row.key" v-memo="[row, displayLanguages]">
+              <td class="key-column">{{ row.key }}</td>
+              <td v-for="lang in displayLanguages" :key="lang" :class="lang.replace(/_/, '-')">
+                {{ row[lang] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <Pagination
         v-if="usePagination"
@@ -94,18 +96,38 @@ const { isDarkMode, toggleDarkMode } = useDarkMode()
 
 onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
-  setTimeout(async () => {
+
+  requestAnimationFrame(async () => {
     const keys = Object.keys(translations.value.en_us)
-    tableData.value = keys.map((key) => {
-      const row: TableRow = { key }
-      languages.forEach((lang) => {
-        const langData = translations.value[lang as keyof typeof translations.value]
-        row[lang] = (langData as Record<string, string>)[key] || '?'
+    const batchSize = 100
+    const totalBatches = Math.ceil(keys.length / batchSize)
+
+    const processBatch = (batchIndex: number) => {
+      const start = batchIndex * batchSize
+      const end = Math.min(start + batchSize, keys.length)
+      const batchKeys = keys.slice(start, end)
+
+      const batchData = batchKeys.map((key) => {
+        const row: TableRow = { key }
+        languages.forEach((lang) => {
+          const langData = translations.value[lang as keyof typeof translations.value]
+          row[lang] = (langData as Record<string, string>)[key] || '?'
+        })
+        return row
       })
-      return row
-    })
-    loading.value = false
-  }, 0)
+
+      tableData.value = [...tableData.value, ...batchData]
+
+      if (batchIndex + 1 < totalBatches) {
+        requestAnimationFrame(() => processBatch(batchIndex + 1))
+      } else {
+        loading.value = false
+      }
+    }
+
+    tableData.value = []
+    processBatch(0)
+  })
 
   const savedDarkMode = localStorage.getItem('darkMode')
   if (savedDarkMode === 'true') {
@@ -122,10 +144,10 @@ const displayLanguages = computed(() => {
 })
 
 const filteredTableData = computed(() => {
-  return tableData.value.filter((row) => {
-    const searchLower = searchQuery.value.toLowerCase()
-    if (!searchLower) return true
+  const searchLower = searchQuery.value.toLowerCase()
+  if (!searchLower) return tableData.value
 
+  return tableData.value.filter((row) => {
     return Object.entries(row).some(([key, value]) => {
       if (key === 'key') {
         return value.toLowerCase().includes(searchLower)

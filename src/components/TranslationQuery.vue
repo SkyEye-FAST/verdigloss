@@ -392,6 +392,61 @@ const getLanguageCode = (lang: string): string => {
   return codeMap[lang] || ''
 }
 
+const updateSelectedTranslation = (key: string) => {
+  const source = langFiles['en-us'][key]
+  const category = getCategoryFromKey(key)
+
+  const filteredTranslations = languages
+    .filter((lang) => lang.code !== 'en-us')
+    .map((lang) => ({
+      code: lang.code,
+      name: lang.displayName,
+      text: langFiles[lang.code][key],
+    }))
+
+  selectedTranslation.value = {
+    source,
+    key,
+    category,
+    translations: filteredTranslations,
+  }
+}
+
+type DebouncedFunction<T extends (...args: unknown[]) => unknown> = {
+  (...args: Parameters<T>): void
+  cancel: () => void
+}
+
+function debounce<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  delay: number,
+): DebouncedFunction<T> {
+  const timers = new Map<string, number>()
+  const key = 'timer'
+
+  const debounced = function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    if (timers.has(key)) {
+      window.clearTimeout(timers.get(key))
+    }
+
+    const timer = window.setTimeout(() => {
+      fn.apply(this, args)
+      timers.delete(key)
+    }, delay)
+
+    timers.set(key, timer)
+  } as DebouncedFunction<T>
+
+  debounced.cancel = () => {
+    if (timers.has(key)) {
+      window.clearTimeout(timers.get(key))
+      timers.delete(key)
+    }
+  }
+
+  return debounced
+}
+
 const onQueryInput = debounce(() => {
   selectedTranslation.value = null
   error.value = ''
@@ -405,43 +460,13 @@ const onQueryInput = debounce(() => {
   search()
 }, 300)
 
-const updateSelectedTranslation = (key: string) => {
-  selectedTranslation.value = {
-    source: langFiles['en-us'][key],
-    key: key,
-    category: getCategoryFromKey(key),
-    translations: languages
-      .filter((lang) => lang.code !== 'en-us')
-      .map((lang) => ({
-        code: lang.code,
-        name: lang.displayName,
-        text: langFiles[lang.code][key],
-      })),
-  }
-}
-function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number) {
-  let timer: number | null = null
-  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
-    if (timer) clearTimeout(timer)
-    timer = setTimeout(() => fn.apply(this, args), delay)
-  }
-}
-
-watch(queryMode, (newValue) => {
-  localStorage.setItem('queryMode', newValue)
+watch([queryMode, queryLang, queryContent, localeKey], ([mode, lang, content, key]) => {
+  localStorage.setItem('queryMode', mode)
+  localStorage.setItem('queryLang', lang)
+  localStorage.setItem('queryContent', content)
+  localStorage.setItem('localeKey', key)
 })
 
-watch(queryLang, (newValue) => {
-  localStorage.setItem('queryLang', newValue)
-})
-
-watch(queryContent, (newValue) => {
-  localStorage.setItem('queryContent', newValue)
-})
-
-watch(localeKey, (newValue) => {
-  localStorage.setItem('localeKey', newValue)
-})
 onMounted(async () => {
   document.documentElement.style.setProperty(
     '--table-font-size',
