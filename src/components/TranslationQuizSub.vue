@@ -1,5 +1,8 @@
 <template>
   <div class="translation-quiz-sub">
+    <div class="progress-bar" v-if="isTimerMode">
+      <div class="progress-fill" :style="{ width: progressWidth + '%' }"></div>
+    </div>
     <div class="nav-buttons">
       <button class="nav-button" @click="toggleDarkMode">
         <i-material-symbols-light-mode v-if="isDarkMode" style="font-size: 1.5em" />
@@ -165,8 +168,10 @@ const onCompositionEnd = () => {
 }
 
 const isTimerMode = computed(() => route.query.t === '1')
-const remainingTime = ref(180)
+const remainingTime = ref(240)
 let timerInterval: number | null = null
+
+const progressWidth = computed(() => (remainingTime.value / 240) * 100)
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -410,6 +415,30 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #e0e0e0;
+  z-index: 1000;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #5b9bd5;
+  transition: width 1s linear;
+}
+
+body.dark-mode .progress-bar {
+  background-color: #333;
+}
+
+body.dark-mode .progress-fill {
+  background-color: #64b5f6;
+}
+
 .container {
   display: flex;
   justify-content: center;
