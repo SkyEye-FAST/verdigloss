@@ -95,8 +95,10 @@
           <table :class="'table-' + (selectedTranslation?.category || 'block')">
             <thead>
               <tr>
-                <th :lang="currentLang" class="table-header">{{ $t('query.table.langName') }}</th>
-                <th :lang="currentLang" class="table-header">
+                <th :class="currentLang.toLowerCase()" class="table-header">
+                  {{ $t('query.table.langName') }}
+                </th>
+                <th :class="currentLang.toLowerCase()" class="table-header">
                   {{ $t('query.table.translation') }}
                 </th>
               </tr>
@@ -115,7 +117,7 @@
               </tr>
             </tbody>
           </table>
-          <footer class="minecraft-title" :lang="currentLang">
+          <footer class="minecraft-title" :class="currentLang.toLowerCase()">
             {{ $t('query.title') }}<br />
             {{ $t('query.java_edition') }}{{ minecraftVersion }}
           </footer>
@@ -726,19 +728,7 @@ table th {
   white-space: nowrap;
 }
 
-.minecraft-title[lang='zh-CN'],
-.table-header[lang='zh-CN'] {
-  font-family: var(--zh-cn-serif-font), serif;
-}
-
-.minecraft-title[lang='zh-TW'],
-.table-header[lang='zh-TW'] {
-  font-family: var(--zh-tw-serif-font), serif;
-}
-
-.title,
-.table-header,
-.minecraft-title {
+.title {
   font-family: var(--serif-font), serif;
 }
 
@@ -968,7 +958,7 @@ body.dark-mode .toggle-button:hover {
     width: 280px !important;
     height: 100vh;
     padding-top: 0.5rem;
-    z-index: 99; /* 调整z-index以确保下拉菜单能显示在侧边栏右侧 */
+    z-index: 99;
   }
 
   .settings {

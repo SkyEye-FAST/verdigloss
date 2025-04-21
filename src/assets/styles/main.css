@@ -16,19 +16,34 @@
 /* Shanggu Serif VF */
 @import url('https://fontsapi.zeoseven.com/165/main/result.css');
 
-@font-face {
-  font-family: 'Noto Sans';
-  src:
-    url('https://fontsapi.zeoseven.com/go/main.woff2') format('woff2'),
-    url('https://fontsapi-storage.zeoseven.com/go/main.woff2') format('woff2');
-  font-display: swap;
-}
+/* Noto Sans CJK SC */
+@import url('https://fontsapi.zeoseven.com/69/main/result.css');
+
+/* Noto Sans CJK TC */
+@import url('https://fontsapi.zeoseven.com/188/main/result.css');
+
+/* Noto Sans CJK HK */
+@import url('https://fontsapi.zeoseven.com/558/main/result.css');
+
+/* Noto Sans CJK JP */
+@import url('https://fontsapi.zeoseven.com/49/main/result.css');
+
+/* Noto Sans CJK KR */
+@import url('https://fontsapi.zeoseven.com/189/main/result.css');
 
 @font-face {
   font-family: 'Noto Serif';
   src:
     url('https://fontsapi.zeoseven.com/gp/main.woff2') format('woff2'),
     url('https://fontsapi-storage.zeoseven.com/gp/main.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans';
+  src:
+    url('https://fontsapi.zeoseven.com/go/main.woff2') format('woff2'),
+    url('https://fontsapi-storage.zeoseven.com/go/main.woff2') format('woff2');
   font-display: swap;
 }
 

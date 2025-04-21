@@ -47,7 +47,7 @@
         autocomplete="off"
         id="inputBox"
         type="text"
-        :class="queryLang.replace(/_/, '-')"
+        :class="currentLang.toLowerCase()"
         :placeholder="$t('quiz.answer_placeholder')"
         @input="onInput"
         @compositionstart="onCompositionStart"
@@ -63,7 +63,7 @@
       </div>
 
       <div class="summary" v-if="showSummary">
-        <div id="title" :class="queryLang.replace(/_/, '-')">
+        <div id="title" :class="currentLang.toLowerCase()">
           {{ $t('quiz.complete') }}
         </div>
         <div v-if="isTimerMode" class="summary-info">
@@ -77,16 +77,16 @@
           <span class="summary-label">{{ totalScore.toFixed(2) }} pts</span>
         </div>
         <table id="summaryTable">
-          <thead>
+          <thead :class="currentLang.toLowerCase()">
             <tr>
               <th>{{ $t('quiz.source') }}</th>
               <th>{{ $t('quiz.translation') }}</th>
             </tr>
           </thead>
-          <tbody id="summaryBody">
+          <tbody>
             <tr v-for="question in questions" :key="question.key">
-              <td>{{ question.source }}</td>
-              <td>
+              <td class="en-us">{{ question.source }}</td>
+              <td :class="currentLang.toLowerCase()">
                 <span
                   v-for="(char, i) in question.translationChars"
                   :key="i"
@@ -123,6 +123,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { currentLocale } from '@/main'
 import { getSegmentedText } from '@/utils/text'
 import ratingData from '@/assets/data/rating.json'
 import idList from '@/assets/data/id.json'
@@ -134,6 +135,7 @@ import lzh from '@/assets/mc_lang/valid/lzh.json'
 import { useDarkMode } from '@/composables/useDarkMode'
 
 const { t } = useI18n()
+const currentLang = computed(() => currentLocale.value)
 
 interface Question {
   source: string
@@ -737,8 +739,8 @@ table {
   font-size: larger;
 }
 
-table td,
-table th {
+table tr td,
+table thead th {
   border: 2px solid #5b9bd5;
   padding: 5px;
 }
