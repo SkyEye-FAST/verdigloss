@@ -1,51 +1,7 @@
-/* Noto Serif CJK SC */
-@import url('https://fontsapi.zeoseven.com/285/main/result.css');
-
-/* Noto Serif CJK TC */
-@import url('https://fontsapi.zeoseven.com/565/main/result.css');
-
-/* Noto Serif CJK HK */
-@import url('https://fontsapi.zeoseven.com/562/main/result.css');
-
-/* Noto Serif CJK JP */
-@import url('https://fontsapi.zeoseven.com/563/main/result.css');
-
-/* Noto Serif CJK KR */
-@import url('https://fontsapi.zeoseven.com/564/main/result.css');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Noto+Sans+HK:wght@100..900&family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Serif+HK:wght@200..900&family=Noto+Serif+JP:wght@200..900&family=Noto+Serif+KR:wght@200..900&family=Noto+Serif+SC:wght@200..900&family=Noto+Serif+TC:wght@200..900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* Shanggu Serif VF */
 @import url('https://fontsapi.zeoseven.com/165/main/result.css');
-
-/* Noto Sans CJK SC */
-@import url('https://fontsapi.zeoseven.com/69/main/result.css');
-
-/* Noto Sans CJK TC */
-@import url('https://fontsapi.zeoseven.com/188/main/result.css');
-
-/* Noto Sans CJK HK */
-@import url('https://fontsapi.zeoseven.com/558/main/result.css');
-
-/* Noto Sans CJK JP */
-@import url('https://fontsapi.zeoseven.com/49/main/result.css');
-
-/* Noto Sans CJK KR */
-@import url('https://fontsapi.zeoseven.com/189/main/result.css');
-
-@font-face {
-  font-family: 'Noto Serif';
-  src:
-    url('https://fontsapi.zeoseven.com/gp/main.woff2') format('woff2'),
-    url('https://fontsapi-storage.zeoseven.com/gp/main.woff2') format('woff2');
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Noto Sans';
-  src:
-    url('https://fontsapi.zeoseven.com/go/main.woff2') format('woff2'),
-    url('https://fontsapi-storage.zeoseven.com/go/main.woff2') format('woff2');
-  font-display: swap;
-}
 
 :root {
   --serif-font: 'Noto Serif', 'Times New Roman', SimSun, Georgia, Garamond, Times;
