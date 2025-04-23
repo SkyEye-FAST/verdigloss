@@ -102,20 +102,7 @@ const usePagination = defineModel('usePagination', { default: true })
 }
 
 .title {
-  font-family:
-    'Noto Sans',
-    'Source Han Sans',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: var(--sans-font), sans-serif;
   text-align: center;
 }
 

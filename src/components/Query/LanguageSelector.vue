@@ -21,7 +21,9 @@
         v-for="option in options"
         :key="option.value"
         class="option"
-        :class="{ 'is-selected': modelValue.includes(option.value) }"
+        :class="{
+          'is-selected': modelValue.includes(option.value),
+        }"
       >
         <input
           type="checkbox"
@@ -29,7 +31,9 @@
           :checked="modelValue.includes(option.value)"
           @change="toggleOption(option.value)"
         />
-        <span :lang="option.htmlLang">{{ option.label }}</span>
+        <span :lang="option.htmlLang" :class="option.value.replace(/_/, '-')" class="sans">
+          {{ option.label }}
+        </span>
         <span class="lang-code">({{ option.value }})</span>
       </label>
     </div>

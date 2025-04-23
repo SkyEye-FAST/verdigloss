@@ -2,7 +2,7 @@
   <div class="translation-quiz">
     <Nav :is-dark-mode="isDarkMode" @toggle-dark-mode="toggleDarkMode" />
     <div class="quiz-container">
-      <div class="quiz-title" :lang="currentLang">{{ $t('quiz.title') }}</div>
+      <div class="quiz-title" :class="currentLang.toLowerCase()">{{ $t('quiz.title') }}</div>
       <button class="quiz-btn-primary" @click="startRandomQuiz">
         {{ $t('quiz.random_quiz') }}
       </button>
@@ -229,21 +229,12 @@ input[type='text']:hover {
 .quiz-title {
   font-weight: 900;
   text-align: center;
-}
-
-.quiz-title[lang='en'] {
   font-size: 2.25em;
-  font-family: var(--serif-font), serif;
 }
 
-.quiz-title[lang='zh-CN'] {
+.quiz-title.zh-cn,
+.quiz-title.zh-tw {
   font-size: 2.75em;
-  font-family: var(--zh-cn-serif-font), serif;
-}
-
-.quiz-title[lang='zh-TW'] {
-  font-size: 2.75em;
-  font-family: var(--zh-tw-serif-font), serif;
 }
 
 body.dark-mode {

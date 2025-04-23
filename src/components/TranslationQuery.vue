@@ -141,6 +141,15 @@ import lzh from '@#/lzh.json'
 import ja from '@#/ja_jp.json'
 import ko from '@#/ko_kr.json'
 import vi from '@#/vi_vn.json'
+import de from '@#/de_de.json'
+import es from '@#/es_es.json'
+import fr from '@#/fr_fr.json'
+import it from '@#/it_it.json'
+import nl from '@#/nl_nl.json'
+import ptBR from '@#/pt_br.json'
+import ru from '@#/ru_ru.json'
+import th from '@#/th_th.json'
+import uk from '@#/uk_ua.json'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 
@@ -214,6 +223,51 @@ const languages: LanguageInfo[] = [
     displayName: 'Tiếng Việt (Việt Nam)',
     htmlLang: 'vi',
   },
+  {
+    code: 'de_de',
+    displayName: 'Deutsch (Deutschland)',
+    htmlLang: 'de',
+  },
+  {
+    code: 'es_es',
+    displayName: 'Español (España)',
+    htmlLang: 'es',
+  },
+  {
+    code: 'fr_fr',
+    displayName: 'Français (France)',
+    htmlLang: 'fr',
+  },
+  {
+    code: 'it_it',
+    displayName: 'Italiano (Italia)',
+    htmlLang: 'it',
+  },
+  {
+    code: 'nl_nl',
+    displayName: 'Nederlands (Nederland)',
+    htmlLang: 'nl',
+  },
+  {
+    code: 'pt_br',
+    displayName: 'Português (Brasil)',
+    htmlLang: 'pt-BR',
+  },
+  {
+    code: 'ru_ru',
+    displayName: 'Русский (Россия)',
+    htmlLang: 'ru',
+  },
+  {
+    code: 'th_th',
+    displayName: 'ไทย (ประเทศไทย)',
+    htmlLang: 'th',
+  },
+  {
+    code: 'uk_ua',
+    displayName: 'Українська (Україна)',
+    htmlLang: 'uk',
+  },
 ]
 
 const isSidebarOpen = ref(true)
@@ -242,6 +296,15 @@ const langFiles: LangFiles = {
   ja_jp: ja,
   ko_kr: ko,
   vi_vn: vi,
+  de_de: de,
+  es_es: es,
+  fr_fr: fr,
+  it_it: it,
+  nl_nl: nl,
+  pt_br: ptBR,
+  ru_ru: ru,
+  th_th: th,
+  uk_ua: uk,
 }
 
 const currentLang = computed(() => currentLocale.value)
