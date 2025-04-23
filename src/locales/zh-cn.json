@@ -4,7 +4,7 @@
       "missing_query_content": "请输入查询内容",
       "no-matching-translations": "找不到匹配的译名"
     },
-    "java_edition": "Java版",
+    "java_edition": "Java版 ",
     "locale_key": "选择本地化键名",
     "nav": {
       "dark_mode": "切换深色模式",
@@ -58,7 +58,7 @@
       "quiz": "译名认知测验"
     },
     "author": "由 SkyEye_FAST 整理",
-    "java_edition": "Java版",
+    "java_edition": "Java版 ",
     "loading": "加载中…",
     "pagination": {
       "next": "下一页",
