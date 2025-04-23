@@ -11,10 +11,12 @@
     :aria-expanded="isOpen"
   >
     <div class="selected-display" @click="toggleDropdown">
-      <span v-if="modelValue.length">
-        {{ selectedLanguages }}
-      </span>
-      <span v-else class="placeholder">{{ placeholder }}</span>
+      <div class="text-container">
+        <span v-if="modelValue.length">
+          {{ selectedLanguages }}
+        </span>
+        <span v-else class="placeholder">{{ placeholder }}</span>
+      </div>
     </div>
     <div v-show="isOpen" class="options-container">
       <label
@@ -110,17 +112,26 @@ onUnmounted(() => {
 
 .selected-display {
   font-family: var(--monospace-font), monospace;
-  padding: 0.75rem;
+  padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
   background: #fff;
-  min-height: 2.5rem;
+  min-height: 2rem;
   display: flex;
   align-items: center;
-  line-height: 1.4;
-  flex-wrap: wrap;
-  gap: 0.25rem;
+}
+
+.text-container {
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.2em;
+  max-height: 2.4em;
 }
 
 .placeholder {
