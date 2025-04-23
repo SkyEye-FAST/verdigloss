@@ -1,5 +1,5 @@
 <template>
-  <header class="header">
+  <header class="header sans" :class="currentLang.toLowerCase()">
     <div class="title">
       <h1>{{ $t('table.title') }}</h1>
       <div class="update-info">
@@ -76,6 +76,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { currentLocale } from '@/main'
+
+const currentLang = computed(() => currentLocale.value)
+
 defineProps<{
   minecraftVersion: string
   languages: string[]

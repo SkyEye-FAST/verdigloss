@@ -10,7 +10,7 @@
           />
           <i-material-symbols-chevron-right v-else style="font-size: 1.5em; color: #fff" />
         </button>
-        <div class="settings" v-show="isSidebarOpen">
+        <div class="settings sans" :class="currentLang.toLowerCase()" v-show="isSidebarOpen">
           <div class="form-container">
             <div class="input-group">
               <label for="queryMode">
@@ -60,7 +60,12 @@
                 <i-material-symbols-key class="label-icon" />
                 {{ $t('query.locale_key') }}
               </label>
-              <select id="localeKey" v-model="localeKey" @change="search">
+              <select
+                id="localeKey"
+                style="font-family: var(--monospace-font), monospace"
+                v-model="localeKey"
+                @change="search"
+              >
                 <option v-for="key in availableKeys" :key="key" :value="key">
                   {{ key }}
                 </option>

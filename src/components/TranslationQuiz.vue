@@ -1,5 +1,5 @@
 <template>
-  <div class="translation-quiz">
+  <div class="sans" :class="currentLang.toLowerCase()">
     <Nav :is-dark-mode="isDarkMode" @toggle-dark-mode="toggleDarkMode" />
     <div class="quiz-container">
       <div class="quiz-title" :class="currentLang.toLowerCase()">{{ $t('quiz.title') }}</div>
@@ -9,10 +9,12 @@
       <div class="quiz-select-group">
         <label for="query-lang">{{ $t('quiz.language') }}</label>
         <select v-model="queryLang" id="query-lang">
-          <option value="zh_cn" lang="zh-Hans-CN">简体中文 (中国大陆)</option>
-          <option value="zh_hk" lang="zh-Hant-HK">繁體中文 (香港特別行政區)</option>
-          <option value="zh_tw" lang="zh-Hant-TW">繁體中文 (台灣)</option>
-          <option value="lzh" lang="lzh">文言 (華夏)</option>
+          <option value="zh_cn" class="zh-cn sans" lang="zh-Hans-CN">简体中文 (中国大陆)</option>
+          <option value="zh_hk" class="zh-hk sans" lang="zh-Hant-HK">
+            繁體中文 (香港特別行政區)
+          </option>
+          <option value="zh_tw" class="zh-tw sans" lang="zh-Hant-TW">繁體中文 (台灣)</option>
+          <option value="lzh" class="lzh sans" lang="lzh">文言 (華夏)</option>
         </select>
         <input type="checkbox" id="timer-mode" v-model="timerMode" class="timer-checkbox" />
         <label for="timer-mode" class="timer-label">{{ $t('quiz.timer_mode') }}</label>
