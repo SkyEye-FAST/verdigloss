@@ -66,6 +66,7 @@
       "total_rows": "Total number of strings: "
     },
     "search_placeholder": "Search content...",
+    "selected_languages": "Selected Languages",
     "title": "Minecraft Standard Translation Table",
     "use_pagination": "Use Pagination"
   }

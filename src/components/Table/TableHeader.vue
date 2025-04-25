@@ -30,7 +30,14 @@
         </label>
       </div>
       <div class="language-filter">
-        <div class="checkbox-group">
+        <button class="collapse-button" @click="isLangFilterVisible = !isLangFilterVisible">
+          {{ $t('table.selected_languages') }} ({{ selectedLanguages.length }})
+          <i-material-symbols-expand-more
+            :class="{ 'rotate-180': isLangFilterVisible }"
+            class="collapse-icon"
+          />
+        </button>
+        <div class="checkbox-group" :class="{ collapsed: !isLangFilterVisible }">
           <label v-for="lang in languages" :key="lang" class="lang-checkbox">
             <input
               type="checkbox"
@@ -76,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { currentLocale } from '@/main'
 
 const currentLang = computed(() => currentLocale.value)
@@ -92,8 +99,12 @@ defineEmits<{
 }>()
 
 const searchQuery = defineModel('searchQuery')
-const selectedLanguages = defineModel('selectedLanguages')
+const selectedLanguages = defineModel<string[]>('selectedLanguages', {
+  default: () => ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh'],
+})
 const usePagination = defineModel('usePagination', { default: true })
+
+const isLangFilterVisible = ref(true)
 </script>
 
 <style scoped>
@@ -185,33 +196,42 @@ const usePagination = defineModel('usePagination', { default: true })
   gap: 0.8rem;
 }
 
-.checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  justify-content: center;
-}
-
-.lang-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.8rem;
-  background: white;
+.collapse-button {
+  display: none;
+  width: 100%;
+  padding: 0.6rem 1rem;
   border: 1px solid #e0e0e0;
   border-radius: 6px;
+  background: white;
+  color: #2c3e50;
+  font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   transition: all 0.2s ease;
 }
 
-.lang-checkbox:hover {
+.collapse-button:hover {
   background: #f0f7ff;
   border-color: #5b9bd5;
 }
 
-.lang-checkbox input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+  max-height: 160px;
+  padding: 0.3rem;
+}
+
+.checkbox-group.collapsed {
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
 }
 
 .checkbox-text {
@@ -290,7 +310,15 @@ button.button {
   height: 16px;
 }
 
-/* Dark mode 样式 */
+.collapse-icon {
+  transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Dark mode */
 body.dark-mode .header {
   background: #333;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -353,7 +381,22 @@ body.dark-mode .pagination-checkbox:hover {
   border-color: #7aa2ea;
 }
 
-/* 响应式样式 */
+body.dark-mode .collapse-button {
+  background: #333;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .collapse-button:hover {
+  background: #4a4a4a;
+  border-color: #7aa2ea;
+}
+
+body.dark-mode .checkbox-group {
+  background: #2a2a2a;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
   .header {
     padding: 1rem;
@@ -391,7 +434,7 @@ body.dark-mode .pagination-checkbox:hover {
   }
 
   .checkbox-group {
-    gap: 0.5rem;
+    gap: 0.2rem;
   }
 
   .filter-label {
@@ -400,6 +443,40 @@ body.dark-mode .pagination-checkbox:hover {
 
   .button .icon {
     font-size: 1.1rem;
+  }
+
+  .collapse-button {
+    display: flex;
+  }
+
+  .checkbox-group {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 0.3rem;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .checkbox-group::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .checkbox-group::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  .checkbox-group::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+
+  body.dark-mode .checkbox-group::-webkit-scrollbar-track {
+    background: #2a2a2a;
+  }
+
+  body.dark-mode .checkbox-group::-webkit-scrollbar-thumb {
+    background: #555;
   }
 }
 </style>

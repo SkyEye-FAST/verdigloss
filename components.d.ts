@@ -17,6 +17,7 @@ declare module 'vue' {
     IMaterialSymbolsContentCopy: typeof import('~icons/material-symbols/content-copy')['default']
     IMaterialSymbolsDarkMode: typeof import('~icons/material-symbols/dark-mode')['default']
     IMaterialSymbolsDownload: typeof import('~icons/material-symbols/download')['default']
+    IMaterialSymbolsExpandMore: typeof import('~icons/material-symbols/expand-more')['default']
     IMaterialSymbolsKey: typeof import('~icons/material-symbols/key')['default']
     IMaterialSymbolsLanguage: typeof import('~icons/material-symbols/language')['default']
     IMaterialSymbolsLightMode: typeof import('~icons/material-symbols/light-mode')['default']
