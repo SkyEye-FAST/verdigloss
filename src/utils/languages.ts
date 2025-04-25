@@ -16,9 +16,10 @@ import ru from '@#/ru_ru.json'
 import th from '@#/th_th.json'
 import uk from '@#/uk_ua.json'
 
+export type LanguageFile = Record<string, string>
 export type LanguageCode = keyof typeof languageFiles
 
-export const languageFiles = {
+export const languageFiles: Record<string, LanguageFile> = {
   en_us: enUS,
   zh_cn: zhCN,
   zh_hk: zhHK,
