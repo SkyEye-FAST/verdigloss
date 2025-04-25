@@ -30,23 +30,25 @@
         </label>
       </div>
       <div class="language-filter">
-        <button class="collapse-button" @click="isLangFilterVisible = !isLangFilterVisible">
-          {{ $t('table.selected_languages') }} ({{ selectedLanguages.length }})
-          <i-material-symbols-expand-more
-            :class="{ 'rotate-180': isLangFilterVisible }"
-            class="collapse-icon"
-          />
-        </button>
-        <div class="checkbox-group" :class="{ collapsed: !isLangFilterVisible }">
-          <label v-for="lang in languages" :key="lang" class="lang-checkbox">
-            <input
-              type="checkbox"
-              v-model="selectedLanguages"
-              :value="lang"
-              @change="$emit('update:selectedLanguages', selectedLanguages)"
+        <div class="language-selector">
+          <button class="collapse-button" @click="isLangFilterVisible = !isLangFilterVisible">
+            {{ $t('table.selected_languages') }} ({{ selectedLanguages.length }})
+            <i-material-symbols-expand-more
+              :class="{ 'rotate-180': isLangFilterVisible }"
+              class="collapse-icon"
             />
-            <span class="checkbox-text">{{ lang }}</span>
-          </label>
+          </button>
+          <div class="checkbox-group" :class="{ collapsed: !isLangFilterVisible }">
+            <label v-for="lang in languages" :key="lang" class="lang-checkbox">
+              <input
+                type="checkbox"
+                v-model="selectedLanguages"
+                :value="lang"
+                @change="$emit('update:selectedLanguages', selectedLanguages)"
+              />
+              <span class="checkbox-text">{{ lang }}</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -196,12 +198,20 @@ const isLangFilterVisible = ref(true)
   gap: 0.8rem;
 }
 
-.collapse-button {
-  display: none;
-  width: 100%;
-  padding: 0.6rem 1rem;
+.language-selector {
   border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: 8px;
+  background: white;
+  overflow: hidden;
+  min-width: 400px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.collapse-button {
+  width: 100%;
+  padding: 0.8rem 1rem;
   background: white;
   color: #2c3e50;
   font-weight: 600;
@@ -210,11 +220,12 @@ const isLangFilterVisible = ref(true)
   align-items: center;
   justify-content: space-between;
   transition: all 0.2s ease;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .collapse-button:hover {
   background: #f0f7ff;
-  border-color: #5b9bd5;
 }
 
 .checkbox-group {
@@ -222,16 +233,20 @@ const isLangFilterVisible = ref(true)
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: center;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease;
+  padding: 1rem;
+  background: white;
+  max-height: 300px;
+  opacity: 1;
   overflow: hidden;
-  max-height: 160px;
-  padding: 0.3rem;
 }
 
 .checkbox-group.collapsed {
   max-height: 0;
-  padding: 0;
+  padding-top: 0;
+  padding-bottom: 0;
   opacity: 0;
+  pointer-events: none;
 }
 
 .checkbox-text {
@@ -393,19 +408,24 @@ body.dark-mode .pagination-checkbox:hover {
   border-color: #7aa2ea;
 }
 
+body.dark-mode .language-selector {
+  background: #333;
+  border-color: #555;
+}
+
 body.dark-mode .collapse-button {
   background: #333;
   border-color: #555;
   color: #e0e0e0;
+  border-bottom-color: #555;
 }
 
 body.dark-mode .collapse-button:hover {
   background: #4a4a4a;
-  border-color: #7aa2ea;
 }
 
 body.dark-mode .checkbox-group {
-  background: #2a2a2a;
+  background: #333;
 }
 
 /* Responsive styles */
@@ -467,6 +487,12 @@ body.dark-mode .checkbox-group {
     padding: 0.3rem;
     max-height: 200px;
     overflow-y: auto;
+  }
+
+  .checkbox-group.collapsed {
+    max-height: 0;
+    padding: 0;
+    opacity: 0;
   }
 
   .checkbox-group::-webkit-scrollbar {
