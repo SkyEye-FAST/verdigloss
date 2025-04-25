@@ -403,15 +403,20 @@ const loadQuestions = () => {
   const selectedLang = queryLang.value as LanguageCode
   const langFile = langFiles[selectedLang]
 
+  type LangFileKey = keyof typeof languageFiles.en_us
+
   questions.value = selectedKeys
-    .map((key) => ({
-      source: languageFiles.en_us[key as keyof typeof languageFiles.en_us],
-      key: key,
-      translation: langFile[key as keyof typeof langFile],
-      rating:
-        selectedLang === 'zh_cn' ? ratingData[key as keyof typeof ratingData] || 0 : undefined,
-      translationChars: getSegmentedText(langFile[key as keyof typeof langFile]),
-    }))
+    .map((key) => {
+      const langKey = key as LangFileKey
+      return {
+        source: languageFiles.en_us[langKey],
+        key: key,
+        translation: langFile[langKey],
+        rating:
+          selectedLang === 'zh_cn' ? ratingData[langKey as keyof typeof ratingData] || 0 : undefined,
+        translationChars: getSegmentedText(langFile[langKey]),
+      }
+    })
     .filter((question) => question.source !== question.translation)
 }
 
