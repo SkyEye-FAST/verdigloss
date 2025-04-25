@@ -460,6 +460,10 @@ body.dark-mode .checkbox-group {
     font-size: 0.9rem;
   }
 
+  .language-selector {
+    min-width: 300px;
+  }
+
   .lang-checkbox {
     padding: 0.2rem 0.3rem;
     font-size: 0.8rem;
