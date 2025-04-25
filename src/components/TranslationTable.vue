@@ -59,30 +59,19 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useDarkMode } from '@/composables/useDarkMode'
 import Header from './Table/TableHeader.vue'
 import Pagination from './Table/TablePagination.vue'
-import enUS from '@#/en_us.json'
-import zhCN from '@#/zh_cn.json'
-import zhHK from '@#/zh_hk.json'
-import zhTW from '@#/zh_tw.json'
-import lzh from '@#/lzh.json'
-import ja from '@#/ja_jp.json'
-import ko from '@#/ko_kr.json'
-import vi from '@#/vi_vn.json'
+import { languageFiles, languageList, type LanguageCode } from '@/utils/languages'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 
 const minecraftVersion = ref(mcVersion)
+const languages = languageList
+const translations = ref(languageFiles)
 
-const languages = ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh', 'ja_jp', 'ko_kr', 'vi_vn']
-
-const translations = ref({
-  en_us: enUS,
-  zh_cn: zhCN,
-  zh_hk: zhHK,
-  zh_tw: zhTW,
-  lzh: lzh,
-  ja_jp: ja,
-  ko_kr: ko,
-  vi_vn: vi,
-})
+const selectedLanguages = ref<LanguageCode[]>(
+  JSON.parse(
+    localStorage.getItem('table:selectedLanguages') ||
+      '["en_us", "zh_cn", "zh_hk", "zh_tw", "lzh"]',
+  ),
+)
 
 interface TableRow extends Record<string, string> {
   key: string
@@ -137,7 +126,6 @@ onMounted(() => {
 })
 
 const searchQuery = ref('')
-const selectedLanguages = ref(languages)
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang))
@@ -152,7 +140,7 @@ const filteredTableData = computed(() => {
       if (key === 'key') {
         return value.toLowerCase().includes(searchLower)
       }
-      if (selectedLanguages.value.includes(key)) {
+      if (selectedLanguages.value.includes(key as LanguageCode)) {
         return value.toLowerCase().includes(searchLower)
       }
       return false
@@ -177,6 +165,14 @@ watch(filteredTableData, () => {
     currentPage.value = 1
   }
 })
+
+watch(
+  selectedLanguages,
+  (newValue) => {
+    localStorage.setItem('table:selectedLanguages', JSON.stringify(newValue))
+  },
+  { deep: true },
+)
 </script>
 
 <style scoped>

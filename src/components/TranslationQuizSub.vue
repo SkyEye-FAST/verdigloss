@@ -127,11 +127,7 @@ import { currentLocale } from '@/main'
 import { getSegmentedText } from '@/utils/text'
 import ratingData from '@/assets/data/rating.json'
 import idList from '@/assets/data/id.json'
-import enUS from '@#/en_us.json'
-import zhCN from '@#/zh_cn.json'
-import zhHK from '@#/zh_hk.json'
-import zhTW from '@#/zh_tw.json'
-import lzh from '@/assets/mc_lang/valid/lzh.json'
+import { languageFiles, type LanguageCode } from '@/utils/languages'
 import { useDarkMode } from '@/composables/useDarkMode'
 
 const { t } = useI18n()
@@ -356,7 +352,7 @@ const restartQuiz = () => {
   const selectedLang = queryLang.value
   const langFile = langFiles[selectedLang]
   const allKeys = Object.keys(idList).filter(
-    (key) => enUS[key as keyof typeof enUS] !== langFile[key as keyof typeof langFile],
+    (key) => languageFiles.en_us[key] !== langFile[key as keyof typeof langFile],
   )
   const shuffled = allKeys.sort(() => Math.random() - 0.5)
   const selectedKeys = shuffled.slice(0, 10)
@@ -371,12 +367,13 @@ const returnToPortal = () => {
   router.push('/quiz')
 }
 
-const langFiles: Record<string, Record<string, string>> = {
-  zh_cn: zhCN,
-  zh_hk: zhHK,
-  zh_tw: zhTW,
-  lzh: lzh,
-}
+const langFiles: Record<LanguageCode, Record<string, string>> = {
+  en_us: languageFiles.en_us,
+  zh_cn: languageFiles.zh_cn,
+  zh_hk: languageFiles.zh_hk,
+  zh_tw: languageFiles.zh_tw,
+  lzh: languageFiles.lzh,
+} as const
 
 const loadQuestions = () => {
   if (!quizCode.value || quizCode.value.length !== 30) {
@@ -396,7 +393,7 @@ const loadQuestions = () => {
 
   questions.value = selectedKeys
     .map((key) => ({
-      source: enUS[key as keyof typeof enUS],
+      source: languageFiles.en_us[key],
       key: key,
       translation: langFile[key as keyof typeof langFile],
       rating:

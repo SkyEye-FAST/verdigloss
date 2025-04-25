@@ -138,23 +138,7 @@ import LanguageSelector from './Query/LanguageSelector.vue'
 import { useI18n } from 'vue-i18n'
 import { currentLocale } from '@/main'
 import Nav from './PageNav.vue'
-import enUS from '@#/en_us.json'
-import zhCN from '@#/zh_cn.json'
-import zhHK from '@#/zh_hk.json'
-import zhTW from '@#/zh_tw.json'
-import lzh from '@#/lzh.json'
-import ja from '@#/ja_jp.json'
-import ko from '@#/ko_kr.json'
-import vi from '@#/vi_vn.json'
-import de from '@#/de_de.json'
-import es from '@#/es_es.json'
-import fr from '@#/fr_fr.json'
-import it from '@#/it_it.json'
-import nl from '@#/nl_nl.json'
-import ptBR from '@#/pt_br.json'
-import ru from '@#/ru_ru.json'
-import th from '@#/th_th.json'
-import uk from '@#/uk_ua.json'
+import { languageFiles, type LanguageCode } from '@/utils/languages'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 
@@ -165,14 +149,6 @@ interface Translation {
   language: string
   name: string
   key?: string
-}
-
-interface LangMap {
-  [key: string]: string
-}
-
-interface LangFiles {
-  [key: string]: LangMap
 }
 
 interface SelectedTranslation {
@@ -281,7 +257,9 @@ const queryLang = ref(localStorage.getItem('queryLang') || 'zh_cn')
 const queryContent = ref(localStorage.getItem('queryContent') || 'The End')
 const localeKey = ref(localStorage.getItem('localeKey') || 'advancements.end.respawn_dragon.title')
 const selectedLanguages = ref<string[]>(
-  JSON.parse(localStorage.getItem('selectedLanguages') || '["zh_cn", "zh_hk", "zh_tw", "lzh"]'),
+  JSON.parse(
+    localStorage.getItem('query:selectedLanguages') || '["zh_cn", "zh_hk", "zh_tw", "lzh"]',
+  ),
 )
 const translations = ref<Translation[]>([])
 const error = ref('')
@@ -292,25 +270,7 @@ onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
 })
 
-const langFiles: LangFiles = {
-  en_us: enUS,
-  zh_cn: zhCN,
-  zh_hk: zhHK,
-  zh_tw: zhTW,
-  lzh: lzh,
-  ja_jp: ja,
-  ko_kr: ko,
-  vi_vn: vi,
-  de_de: de,
-  es_es: es,
-  fr_fr: fr,
-  it_it: it,
-  nl_nl: nl,
-  pt_br: ptBR,
-  ru_ru: ru,
-  th_th: th,
-  uk_ua: uk,
-}
+const langFiles = languageFiles
 
 const currentLang = computed(() => currentLocale.value)
 
@@ -326,12 +286,15 @@ const availableKeys = computed(() => {
       return Object.entries(langFiles['en_us'])
         .filter(([, value]) => value.toLowerCase().includes(searchText))
         .map(([key]) => key)
-    case 'translation':
+    case 'translation': {
       const langCode = getLanguageCode(queryLang.value)
-      if (!langCode || !langFiles[langCode]) return []
-      return Object.entries(langFiles[langCode])
+      if (!langCode) return []
+      const langData = langFiles[langCode]
+      if (!langData) return []
+      return Object.entries(langData)
         .filter(([, value]) => value.toLowerCase().includes(searchText))
         .map(([key]) => key)
+    }
     default:
       return []
   }
@@ -433,26 +396,17 @@ const searchByTranslation = (text: string) => {
 const collectTranslationsForKey = (key: string) => {
   translations.value.push({
     language: 'en_us',
-    name: langFiles['en_us'][key],
+    name: (langFiles['en_us'] as Record<string, string>)[key],
     key: key,
   })
 }
 
-const getLanguageCode = (lang: string): string => {
-  const codeMap: { [key: string]: string } = {
-    zh_cn: 'zh_cn',
-    zh_hk: 'zh_hk',
-    zh_tw: 'zh_tw',
-    lzh: 'lzh',
-    ja_jp: 'ja_jp',
-    ko_kr: 'ko_kr',
-    vi_vn: 'vi_vn',
-  }
-  return codeMap[lang] || ''
+const getLanguageCode = (lang: string): LanguageCode | undefined => {
+  return Object.keys(langFiles).includes(lang) ? (lang as LanguageCode) : undefined
 }
 
 const updateSelectedTranslation = (key: string) => {
-  const source = langFiles['en_us'][key]
+  const source = (langFiles['en_us'] as Record<string, string>)[key]
   const category = getCategoryFromKey(key)
 
   const filteredTranslations = languages
@@ -460,7 +414,7 @@ const updateSelectedTranslation = (key: string) => {
     .map((lang) => ({
       code: lang.code,
       name: lang.displayName,
-      text: langFiles[lang.code][key],
+      text: ((langFiles as Record<string, Record<string, string>>)[lang.code] || {})[key],
     }))
 
   selectedTranslation.value = {
@@ -526,7 +480,7 @@ watch(
     localStorage.setItem('queryLang', lang)
     localStorage.setItem('queryContent', content)
     localStorage.setItem('localeKey', key)
-    localStorage.setItem('selectedLanguages', JSON.stringify(langs))
+    localStorage.setItem('query:selectedLanguages', JSON.stringify(langs))
   },
 )
 
