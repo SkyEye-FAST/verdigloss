@@ -352,8 +352,8 @@ const restartQuiz = () => {
   const selectedLang = queryLang.value as LanguageCode
   const langFile = langFiles[selectedLang]
   const allKeys = Object.keys(idList).filter(
-    (key) => languageFiles.en_us[key] !== langFile[key as keyof typeof langFile],
-  )
+    (key) => languageFiles.en_us[key as keyof typeof languageFiles.en_us] !== langFile[key as keyof typeof langFile],
+  ) as (keyof typeof languageFiles.en_us)[]
   const shuffled = allKeys.sort(() => Math.random() - 0.5)
   const selectedKeys = shuffled.slice(0, 10)
   const sortedKeys = selectedKeys.sort((a, b) =>
