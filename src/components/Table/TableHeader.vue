@@ -240,6 +240,18 @@ const isLangFilterVisible = ref(true)
   font-size: 0.9rem;
 }
 
+.lang-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
 .actions {
   margin-top: 1rem;
   display: flex;
@@ -429,7 +441,7 @@ body.dark-mode .checkbox-group {
   }
 
   .lang-checkbox {
-    padding: 0.3rem 0.6rem;
+    padding: 0.2rem 0.3rem;
     font-size: 0.8rem;
   }
 
