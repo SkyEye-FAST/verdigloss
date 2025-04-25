@@ -349,7 +349,7 @@ const shareResult = () => {
 }
 
 const restartQuiz = () => {
-  const selectedLang = queryLang.value
+  const selectedLang = queryLang.value as LanguageCode
   const langFile = langFiles[selectedLang]
   const allKeys = Object.keys(idList).filter(
     (key) => languageFiles.en_us[key] !== langFile[key as keyof typeof langFile],
@@ -367,13 +367,25 @@ const returnToPortal = () => {
   router.push('/quiz')
 }
 
-const langFiles: Record<LanguageCode, Record<string, string>> = {
+const langFiles: Record<LanguageCode, typeof languageFiles.en_us> = {
   en_us: languageFiles.en_us,
   zh_cn: languageFiles.zh_cn,
   zh_hk: languageFiles.zh_hk,
   zh_tw: languageFiles.zh_tw,
   lzh: languageFiles.lzh,
-} as const
+  ja_jp: languageFiles.ja_jp,
+  ko_kr: languageFiles.ko_kr,
+  vi_vn: languageFiles.vi_vn,
+  de_de: languageFiles.de_de,
+  es_es: languageFiles.es_es,
+  fr_fr: languageFiles.fr_fr,
+  it_it: languageFiles.it_it,
+  nl_nl: languageFiles.nl_nl,
+  pt_br: languageFiles.pt_br,
+  ru_ru: languageFiles.ru_ru,
+  th_th: languageFiles.th_th,
+  uk_ua: languageFiles.uk_ua
+}
 
 const loadQuestions = () => {
   if (!quizCode.value || quizCode.value.length !== 30) {
@@ -388,12 +400,12 @@ const loadQuestions = () => {
   }
 
   const selectedKeys = codeSegments.map((seg) => idList[seg as keyof typeof idList]).sort()
-  const selectedLang = queryLang.value
+  const selectedLang = queryLang.value as LanguageCode
   const langFile = langFiles[selectedLang]
 
   questions.value = selectedKeys
     .map((key) => ({
-      source: languageFiles.en_us[key],
+      source: languageFiles.en_us[key as keyof typeof languageFiles.en_us],
       key: key,
       translation: langFile[key as keyof typeof langFile],
       rating:
