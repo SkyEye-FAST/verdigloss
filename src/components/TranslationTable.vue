@@ -92,7 +92,7 @@ interface TableRow extends Record<string, string> {
 const loading = ref(true)
 const tableData = ref<TableRow[]>([])
 const usePagination = ref(true)
-const downloadAllData = ref(false)
+const downloadAllData = ref(localStorage.getItem('table:downloadAllData') !== 'false')
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
