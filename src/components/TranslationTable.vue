@@ -15,6 +15,8 @@
       @download-all-tsv="downloadAllTsv"
       @download-all-csv="downloadAllCsv"
       @download-all-json="downloadAllJson"
+      @download-xml="downloadXml"
+      @download-all-xml="downloadAllXml"
     />
 
     <div v-if="loading" class="loading-container">
@@ -214,8 +216,26 @@ const generateJsonContent = (data: TableRow[]): string => {
   return JSON.stringify(result, null, 2)
 }
 
-const downloadFile = (content: string, filename: string) => {
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+const generateXmlContent = (data: TableRow[]): string => {
+  const escape = (str: string) =>
+    str.replace(
+      /[<>&"']/g,
+      (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c] || c,
+    )
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<translations>'
+  data.forEach((row) => {
+    xml += `\n  <entry key="${escape(row.key)}">`
+    displayLanguages.value.forEach((lang) => {
+      xml += `\n    <${lang}>${escape(row[lang] || '？')}</${lang}>`
+    })
+    xml += '\n  </entry>'
+  })
+  xml += '\n</translations>'
+  return xml
+}
+
+const downloadFile = (content: string, filename: string, mimeType: string) => {
+  const blob = new Blob([content], { type: mimeType })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -228,32 +248,42 @@ const downloadFile = (content: string, filename: string) => {
 
 const downloadTsv = () => {
   const content = generateTsvContent(displayData.value)
-  downloadFile(content, 'table.tsv')
+  downloadFile(content, 'table.tsv', 'text/tab-separated-values;charset=utf-8')
 }
 
 const downloadCsv = () => {
   const content = generateCsvContent(displayData.value)
-  downloadFile(content, 'table.csv')
+  downloadFile(content, 'table.csv', 'text/csv;charset=utf-8')
 }
 
 const downloadJson = () => {
   const content = generateJsonContent(displayData.value)
-  downloadFile(content, 'table.json')
+  downloadFile(content, 'table.json', 'application/json;charset=utf-8')
+}
+
+const downloadXml = () => {
+  const content = generateXmlContent(displayData.value)
+  downloadFile(content, 'table.xml', 'application/xml;charset=utf-8')
 }
 
 const downloadAllTsv = () => {
   const content = generateTsvContent(filteredTableData.value)
-  downloadFile(content, 'table_all.tsv')
+  downloadFile(content, 'table_all.tsv', 'text/tab-separated-values;charset=utf-8')
 }
 
 const downloadAllCsv = () => {
   const content = generateCsvContent(filteredTableData.value)
-  downloadFile(content, 'table_all.csv')
+  downloadFile(content, 'table_all.csv', 'text/csv;charset=utf-8')
 }
 
 const downloadAllJson = () => {
   const content = generateJsonContent(filteredTableData.value)
-  downloadFile(content, 'table_all.json')
+  downloadFile(content, 'table_all.json', 'application/json;charset=utf-8')
+}
+
+const downloadAllXml = () => {
+  const content = generateXmlContent(filteredTableData.value)
+  downloadFile(content, 'table_all.xml', 'application/xml;charset=utf-8')
 }
 
 watch(
