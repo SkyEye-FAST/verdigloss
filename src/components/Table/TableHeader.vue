@@ -67,10 +67,10 @@
           <i-fa6-brands-github class="icon" />
           GitHub
         </a>
-        <a href="/table.tsv" class="button">
+        <button class="button" @click="$emit('download-tsv')">
           <i-material-symbols-download class="icon" />
           {{ $t('table.action.download_tsv') }}
-        </a>
+        </button>
         <button
           class="button"
           @click="$emit('toggle-dark-mode')"
@@ -98,6 +98,7 @@ defineProps<{
 
 defineEmits<{
   'toggle-dark-mode': []
+  'download-tsv': []
 }>()
 
 const searchQuery = defineModel('searchQuery')

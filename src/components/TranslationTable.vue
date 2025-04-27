@@ -8,6 +8,7 @@
       :languages="languages"
       :is-dark-mode="isDarkMode"
       @toggle-dark-mode="toggleDarkMode"
+      @download-tsv="downloadTsv"
     />
 
     <div v-if="loading" class="loading-container">
@@ -165,6 +166,31 @@ watch(filteredTableData, () => {
     currentPage.value = 1
   }
 })
+
+const generateTsvContent = (data: TableRow[]): string => {
+  const headers = ['key', ...displayLanguages.value]
+  const rows = [headers.join('\t')]
+
+  data.forEach((row) => {
+    const rowData = [row.key, ...displayLanguages.value.map((lang) => row[lang] || '？')]
+    rows.push(rowData.join('\t'))
+  })
+
+  return rows.join('\n')
+}
+
+const downloadTsv = () => {
+  const content = generateTsvContent(displayData.value)
+  const blob = new Blob([content], { type: 'text/tab-separated-values' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'table.tsv'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
 watch(
   selectedLanguages,
