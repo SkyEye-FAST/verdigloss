@@ -33,9 +33,6 @@ jobs:
           git submodule sync
           git submodule update --remote --recursive --force
 
-      - name: Generate translation table
-        run: pnpm generate-tsv
-
       - name: Generate ID mapping
         run: pnpm generate-id-mapping
 
