@@ -67,10 +67,6 @@
           <i-fa6-brands-github class="icon" />
           GitHub
         </a>
-        <button class="button" @click="$emit('download-tsv')">
-          <i-material-symbols-download class="icon" />
-          {{ $t('table.action.download_tsv') }}
-        </button>
         <button
           class="button"
           @click="$emit('toggle-dark-mode')"
@@ -79,6 +75,18 @@
           <i-material-symbols-dark-mode v-if="isDarkMode" class="icon" />
           <i-material-symbols-light-mode v-else class="icon" />
         </button>
+      </div>
+      <div class="download-options">
+        <div class="download-group">
+          <i-material-symbols-download class="download-label icon" style="font-size: 1.2em" />
+          <button class="download-btn" @click="emitDownload('tsv')">TSV</button>
+          <button class="download-btn" @click="emitDownload('csv')">CSV</button>
+          <button class="download-btn" @click="emitDownload('json')">JSON</button>
+          <label v-if="usePagination" class="download-checkbox">
+            <input type="checkbox" v-model="downloadAllData" />
+            <span class="checkbox-text">{{ $t('table.action.download_all_data') }}</span>
+          </label>
+        </div>
       </div>
     </div>
   </header>
@@ -96,16 +104,34 @@ defineProps<{
   isDarkMode: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'toggle-dark-mode': []
   'download-tsv': []
+  'download-csv': []
+  'download-json': []
+  'download-all-tsv': []
+  'download-all-csv': []
+  'download-all-json': []
 }>()
+
+function emitDownload(type: 'tsv' | 'csv' | 'json') {
+  if (downloadAllData.value) {
+    if (type === 'tsv') emit('download-all-tsv')
+    else if (type === 'csv') emit('download-all-csv')
+    else if (type === 'json') emit('download-all-json')
+  } else {
+    if (type === 'tsv') emit('download-tsv')
+    else if (type === 'csv') emit('download-csv')
+    else if (type === 'json') emit('download-json')
+  }
+}
 
 const searchQuery = defineModel('searchQuery')
 const selectedLanguages = defineModel<string[]>('selectedLanguages', {
   default: () => ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh'],
 })
 const usePagination = defineModel('usePagination', { default: true })
+const downloadAllData = defineModel('downloadAllData', { default: false })
 
 const isLangFilterVisible = ref(true)
 </script>
@@ -429,6 +455,93 @@ body.dark-mode .checkbox-group {
   background: #333;
 }
 
+.download-options {
+  margin-top: 0.5rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.download-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.download-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.download-checkbox:hover {
+  background: #f0f7ff;
+  border-color: #5b9bd5;
+}
+
+.download-checkbox input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+}
+
+.download-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.download-btn {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #5b9bd5;
+  background: transparent;
+  color: #5b9bd5;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.download-btn:hover {
+  background: #5b9bd5;
+  color: white;
+}
+
+body.dark-mode .download-options {
+  border-top-color: #555;
+}
+
+body.dark-mode .download-label {
+  color: #aaa;
+}
+
+body.dark-mode .download-btn {
+  border-color: #7aa2ea;
+  color: #7aa2ea;
+}
+
+body.dark-mode .download-btn:hover {
+  background: #7aa2ea;
+  color: #333;
+}
+
+body.dark-mode .download-checkbox {
+  background: #333;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .download-checkbox:hover {
+  background: #4a4a4a;
+  border-color: #7aa2ea;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .header {
@@ -480,6 +593,25 @@ body.dark-mode .checkbox-group {
 
   .button .icon {
     font-size: 1.1rem;
+  }
+
+  .download-options {
+    padding-top: 0.6rem;
+    margin-top: 0.4rem;
+    gap: 0.6rem;
+  }
+
+  .download-group {
+    gap: 0.4rem;
+  }
+
+  .download-label {
+    font-size: 0.85rem;
+  }
+
+  .download-btn {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.85rem;
   }
 
   .collapse-button {

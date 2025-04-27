@@ -7,8 +7,14 @@
       :minecraft-version="minecraftVersion"
       :languages="languages"
       :is-dark-mode="isDarkMode"
+      v-model:download-all-data="downloadAllData"
       @toggle-dark-mode="toggleDarkMode"
       @download-tsv="downloadTsv"
+      @download-csv="downloadCsv"
+      @download-json="downloadJson"
+      @download-all-tsv="downloadAllTsv"
+      @download-all-csv="downloadAllCsv"
+      @download-all-json="downloadAllJson"
     />
 
     <div v-if="loading" class="loading-container">
@@ -81,6 +87,7 @@ interface TableRow extends Record<string, string> {
 const loading = ref(true)
 const tableData = ref<TableRow[]>([])
 const usePagination = ref(true)
+const downloadAllData = ref(false)
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
@@ -179,17 +186,74 @@ const generateTsvContent = (data: TableRow[]): string => {
   return rows.join('\n')
 }
 
-const downloadTsv = () => {
-  const content = generateTsvContent(displayData.value)
-  const blob = new Blob([content], { type: 'text/tab-separated-values' })
+const generateCsvContent = (data: TableRow[]): string => {
+  const headers = ['key', ...displayLanguages.value]
+  const rows = [headers.join(',')]
+
+  data.forEach((row) => {
+    const rowData = [
+      `"${row.key.replace(/"/g, '""')}"`,
+      ...displayLanguages.value.map((lang) => `"${(row[lang] || '？').replace(/"/g, '""')}"`),
+    ]
+    rows.push(rowData.join(','))
+  })
+
+  return rows.join('\n')
+}
+
+const generateJsonContent = (data: TableRow[]): string => {
+  const result: Record<string, Record<string, string>> = {}
+
+  data.forEach((row) => {
+    result[row.key] = {}
+    displayLanguages.value.forEach((lang) => {
+      result[row.key][lang] = row[lang] || '？'
+    })
+  })
+
+  return JSON.stringify(result, null, 2)
+}
+
+const downloadFile = (content: string, filename: string) => {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'table.tsv'
+  a.download = filename
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+const downloadTsv = () => {
+  const content = generateTsvContent(displayData.value)
+  downloadFile(content, 'table.tsv')
+}
+
+const downloadCsv = () => {
+  const content = generateCsvContent(displayData.value)
+  downloadFile(content, 'table.csv')
+}
+
+const downloadJson = () => {
+  const content = generateJsonContent(displayData.value)
+  downloadFile(content, 'table.json')
+}
+
+const downloadAllTsv = () => {
+  const content = generateTsvContent(filteredTableData.value)
+  downloadFile(content, 'table_all.tsv')
+}
+
+const downloadAllCsv = () => {
+  const content = generateCsvContent(filteredTableData.value)
+  downloadFile(content, 'table_all.csv')
+}
+
+const downloadAllJson = () => {
+  const content = generateJsonContent(filteredTableData.value)
+  downloadFile(content, 'table_all.json')
 }
 
 watch(

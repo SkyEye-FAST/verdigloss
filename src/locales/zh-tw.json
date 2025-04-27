@@ -54,7 +54,8 @@
   "table": {
     "action": {
       "dark_mode": "切換深色模式",
-      "download_tsv": "下載 TSV",
+      "download": "下載",
+      "download_all_data": "下載所有數據",
       "query_tool": "譯名查詢工具",
       "quiz": "譯名認知測驗"
     },

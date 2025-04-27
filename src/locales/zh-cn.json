@@ -53,7 +53,8 @@
   "table": {
     "action": {
       "dark_mode": "切换深色模式",
-      "download_tsv": "下载 TSV",
+      "download": "下载",
+      "download_all_data": "下载所有数据",
       "query_tool": "译名查询工具",
       "quiz": "译名认知测验"
     },
