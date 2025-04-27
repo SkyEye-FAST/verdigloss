@@ -12,11 +12,13 @@
       @download-tsv="downloadTsv"
       @download-csv="downloadCsv"
       @download-json="downloadJson"
+      @download-xml="downloadXml"
+      @download-xlsx="downloadXlsx"
       @download-all-tsv="downloadAllTsv"
       @download-all-csv="downloadAllCsv"
       @download-all-json="downloadAllJson"
-      @download-xml="downloadXml"
       @download-all-xml="downloadAllXml"
+      @download-all-xlsx="downloadAllXlsx"
     />
 
     <div v-if="loading" class="loading-container">
@@ -70,6 +72,7 @@ import Header from './Table/TableHeader.vue'
 import Pagination from './Table/TablePagination.vue'
 import { languageFiles, languageList, type LanguageCode } from '@/utils/languages'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
+import { utils as XLSXUtils, write as writeXLSX } from 'xlsx'
 
 const minecraftVersion = ref(mcVersion)
 const languages = languageList
@@ -266,6 +269,30 @@ const downloadXml = () => {
   downloadFile(content, 'table.xml', 'application/xml;charset=utf-8')
 }
 
+const downloadXlsx = () => {
+  const headers = ['key', ...displayLanguages.value]
+  const data = [headers]
+
+  displayData.value.forEach((row) => {
+    const rowData = [row.key, ...displayLanguages.value.map((lang) => row[lang] || '？')]
+    data.push(rowData)
+  })
+
+  const ws = XLSXUtils.aoa_to_sheet(data)
+  const wb = XLSXUtils.book_new()
+  XLSXUtils.book_append_sheet(wb, ws, 'translations')
+  const xlsxData = writeXLSX(wb, { type: 'array' })
+  const blob = new Blob([xlsxData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'table.xlsx'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 const downloadAllTsv = () => {
   const content = generateTsvContent(filteredTableData.value)
   downloadFile(content, 'table_all.tsv', 'text/tab-separated-values;charset=utf-8')
@@ -284,6 +311,30 @@ const downloadAllJson = () => {
 const downloadAllXml = () => {
   const content = generateXmlContent(filteredTableData.value)
   downloadFile(content, 'table_all.xml', 'application/xml;charset=utf-8')
+}
+
+const downloadAllXlsx = () => {
+  const headers = ['key', ...displayLanguages.value]
+  const data = [headers]
+
+  filteredTableData.value.forEach((row) => {
+    const rowData = [row.key, ...displayLanguages.value.map((lang) => row[lang] || '？')]
+    data.push(rowData)
+  })
+
+  const ws = XLSXUtils.aoa_to_sheet(data)
+  const wb = XLSXUtils.book_new()
+  XLSXUtils.book_append_sheet(wb, ws, 'translations')
+  const xlsxData = writeXLSX(wb, { type: 'array' })
+  const blob = new Blob([xlsxData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'table_all.xlsx'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 watch(

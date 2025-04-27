@@ -83,6 +83,7 @@
           <button class="download-btn" @click="emitDownload('csv')">CSV</button>
           <button class="download-btn" @click="emitDownload('json')">JSON</button>
           <button class="download-btn" @click="emitDownload('xml')">XML</button>
+          <button class="download-btn" @click="emitDownload('xlsx')">XLSX</button>
           <label v-if="usePagination" class="download-checkbox">
             <input type="checkbox" v-model="downloadAllData" />
             <span class="checkbox-text">{{ $t('table.action.download_all_data') }}</span>
@@ -111,23 +112,27 @@ const emit = defineEmits<{
   'download-csv': []
   'download-json': []
   'download-xml': []
+  'download-xlsx': []
   'download-all-tsv': []
   'download-all-csv': []
   'download-all-json': []
   'download-all-xml': []
+  'download-all-xlsx': []
 }>()
 
-function emitDownload(type: 'tsv' | 'csv' | 'json' | 'xml') {
+function emitDownload(type: 'tsv' | 'csv' | 'json' | 'xml' | 'xlsx') {
   if (downloadAllData.value) {
     if (type === 'tsv') emit('download-all-tsv')
     else if (type === 'csv') emit('download-all-csv')
     else if (type === 'json') emit('download-all-json')
     else if (type === 'xml') emit('download-all-xml')
+    else if (type === 'xlsx') emit('download-all-xlsx')
   } else {
     if (type === 'tsv') emit('download-tsv')
     else if (type === 'csv') emit('download-csv')
     else if (type === 'json') emit('download-json')
     else if (type === 'xml') emit('download-xml')
+    else if (type === 'xlsx') emit('download-xlsx')
   }
 }
 
