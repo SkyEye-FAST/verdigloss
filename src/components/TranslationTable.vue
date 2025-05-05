@@ -66,13 +66,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+
+import { utils as XLSXUtils, write as writeXLSX } from 'xlsx'
+
+import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { type LanguageCode, languageFiles, languageList } from '@/utils/languages'
+
 import Header from './Table/TableHeader.vue'
 import Pagination from './Table/TablePagination.vue'
-import { languageFiles, languageList, type LanguageCode } from '@/utils/languages'
-import mcVersion from '@/assets/mc_lang/version.txt?raw'
-import { utils as XLSXUtils, write as writeXLSX } from 'xlsx'
 
 const minecraftVersion = ref(mcVersion)
 const languages = languageList
@@ -282,7 +285,9 @@ const downloadXlsx = () => {
   const wb = XLSXUtils.book_new()
   XLSXUtils.book_append_sheet(wb, ws, 'translations')
   const xlsxData = writeXLSX(wb, { type: 'array' })
-  const blob = new Blob([xlsxData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const blob = new Blob([xlsxData], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -326,7 +331,9 @@ const downloadAllXlsx = () => {
   const wb = XLSXUtils.book_new()
   XLSXUtils.book_append_sheet(wb, ws, 'translations')
   const xlsxData = writeXLSX(wb, { type: 'array' })
-  const blob = new Blob([xlsxData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const blob = new Blob([xlsxData], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

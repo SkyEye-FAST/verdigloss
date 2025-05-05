@@ -55,13 +55,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+
 import { useRouter } from 'vue-router'
-import { usePreferredDark } from '@vueuse/core'
-import { currentLocale } from '@/main'
-import Nav from './PageNav.vue'
+
 import idList from '@/assets/data/id.json'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { currentLocale } from '@/main'
+import { usePreferredDark } from '@vueuse/core'
+
+import Nav from './PageNav.vue'
 
 const router = useRouter()
 const preferredDark = usePreferredDark()

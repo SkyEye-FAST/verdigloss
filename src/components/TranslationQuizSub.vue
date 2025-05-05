@@ -120,15 +120,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+
 import { useI18n } from 'vue-i18n'
-import { currentLocale } from '@/main'
-import { getSegmentedText } from '@/utils/text'
-import ratingData from '@/assets/data/rating.json'
+import { useRoute, useRouter } from 'vue-router'
+
 import idList from '@/assets/data/id.json'
-import { languageFiles, type LanguageCode } from '@/utils/languages'
+import ratingData from '@/assets/data/rating.json'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { currentLocale } from '@/main'
+import { type LanguageCode, languageFiles } from '@/utils/languages'
+import { getSegmentedText } from '@/utils/text'
 
 const { t } = useI18n()
 const currentLang = computed(() => currentLocale.value)
@@ -352,7 +354,9 @@ const restartQuiz = () => {
   const selectedLang = queryLang.value as LanguageCode
   const langFile = langFiles[selectedLang]
   const allKeys = Object.keys(idList).filter(
-    (key) => languageFiles.en_us[key as keyof typeof languageFiles.en_us] !== langFile[key as keyof typeof langFile],
+    (key) =>
+      languageFiles.en_us[key as keyof typeof languageFiles.en_us] !==
+      langFile[key as keyof typeof langFile],
   ) as (keyof typeof languageFiles.en_us)[]
   const shuffled = allKeys.sort(() => Math.random() - 0.5)
   const selectedKeys = shuffled.slice(0, 10)
@@ -384,7 +388,7 @@ const langFiles: Record<LanguageCode, typeof languageFiles.en_us> = {
   pt_br: languageFiles.pt_br,
   ru_ru: languageFiles.ru_ru,
   th_th: languageFiles.th_th,
-  uk_ua: languageFiles.uk_ua
+  uk_ua: languageFiles.uk_ua,
 }
 
 const loadQuestions = () => {
@@ -413,7 +417,9 @@ const loadQuestions = () => {
         key: key,
         translation: langFile[langKey],
         rating:
-          selectedLang === 'zh_cn' ? ratingData[langKey as keyof typeof ratingData] || 0 : undefined,
+          selectedLang === 'zh_cn'
+            ? ratingData[langKey as keyof typeof ratingData] || 0
+            : undefined,
         translationChars: getSegmentedText(langFile[langKey]),
       }
     })

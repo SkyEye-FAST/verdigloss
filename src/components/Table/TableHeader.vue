@@ -96,6 +96,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+
 import { currentLocale } from '@/main'
 
 const currentLang = computed(() => currentLocale.value)
@@ -141,7 +142,9 @@ const selectedLanguages = defineModel<string[]>('selectedLanguages', {
   default: () => ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh'],
 })
 const usePagination = defineModel('usePagination', { default: true })
-const downloadAllData = defineModel('downloadAllData', { default: localStorage.getItem('table:downloadAllData') !== 'false' })
+const downloadAllData = defineModel('downloadAllData', {
+  default: localStorage.getItem('table:downloadAllData') !== 'false',
+})
 
 const isLangFilterVisible = ref(true)
 

@@ -133,14 +133,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import LanguageSelector from './Query/LanguageSelector.vue'
+import { computed, onMounted, ref, watch } from 'vue'
+
 import { useI18n } from 'vue-i18n'
-import { currentLocale } from '@/main'
-import Nav from './PageNav.vue'
-import { languageFiles, type LanguageCode } from '@/utils/languages'
+
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { currentLocale } from '@/main'
+import { type LanguageCode, languageFiles } from '@/utils/languages'
+
+import Nav from './PageNav.vue'
+import LanguageSelector from './Query/LanguageSelector.vue'
 
 const { t } = useI18n()
 const minecraftVersion = ref(mcVersion)
