@@ -81,6 +81,8 @@ const minecraftVersion = ref(mcVersion)
 const languages = languageList
 const translations = ref(languageFiles)
 
+const searchQuery = ref('')
+
 const selectedLanguages = ref<LanguageCode[]>(
   JSON.parse(
     localStorage.getItem('table:selectedLanguages') ||
@@ -140,8 +142,6 @@ onMounted(() => {
     isDarkMode.value = true
   }
 })
-
-const searchQuery = ref('')
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang))

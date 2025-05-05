@@ -13,11 +13,11 @@
         <div class="search-wrapper">
           <i-material-symbols-search class="search-icon" />
           <input
-            v-model="searchQuery"
+            :value="searchQuery"
             type="text"
             :placeholder="$t('table.search_placeholder')"
             class="search-input"
-            @input="$emit('update:searchQuery', searchQuery)"
+            @input="$emit('update:searchQuery', ($event.target as HTMLInputElement).value)"
           />
         </div>
         <label class="pagination-checkbox">
@@ -102,12 +102,14 @@ import { currentLocale } from '@/main'
 const currentLang = computed(() => currentLocale.value)
 
 defineProps<{
+  searchQuery: string
   minecraftVersion: string
   languages: string[]
   isDarkMode: boolean
 }>()
 
 const emit = defineEmits<{
+  'update:searchQuery': [string]
   'toggle-dark-mode': []
   'download-tsv': []
   'download-csv': []
@@ -137,7 +139,6 @@ function emitDownload(type: 'tsv' | 'csv' | 'json' | 'xml' | 'xlsx') {
   }
 }
 
-const searchQuery = defineModel('searchQuery')
 const selectedLanguages = defineModel<string[]>('selectedLanguages', {
   default: () => ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh'],
 })
