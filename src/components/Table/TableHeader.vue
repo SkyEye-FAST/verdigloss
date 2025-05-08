@@ -259,6 +259,7 @@ watch(downloadAllData, (newValue) => {
   padding: 0.8rem 1rem;
   background: white;
   color: #2c3e50;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
