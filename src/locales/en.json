@@ -52,15 +52,16 @@
   },
   "table": {
     "action": {
+      "colors": "Color Table",
       "dark_mode": "Toggle Dark Mode",
       "download": "Download",
       "download_all_data": "Download All Data",
-      "query_tool": "Query Tool",
+      "query": "Query Tool",
       "quiz": "Quiz"
     },
     "author": "Compiled by SkyEye_FAST",
     "colors": {
-      "title": "Minecraft Standard Translation Table - Colors"
+      "title": "Minecraft Color Translation Table"
     },
     "java_edition": "Java Edition ",
     "loading": "Loading...",

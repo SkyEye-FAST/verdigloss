@@ -53,15 +53,16 @@
   },
   "table": {
     "action": {
+      "colors": "顏色表",
       "dark_mode": "切換深色模式",
       "download": "下載",
       "download_all_data": "下載所有數據",
-      "query_tool": "查詢工具",
+      "query": "查詢工具",
       "quiz": "認知測驗"
     },
     "author": "由 SkyEye_FAST 整理",
     "colors": {
-      "title": "Minecraft 標準譯名表 — 顏色"
+      "title": "Minecraft 顏色譯名表"
     },
     "java_edition": "Java版 ",
     "loading": "載入中...",

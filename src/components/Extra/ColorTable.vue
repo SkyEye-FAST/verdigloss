@@ -3,12 +3,13 @@
   <div class="page-content">
     <h1 class="page-title" :class="currentLang.toLowerCase()">
       {{ $t('table.colors.title') }}
+      <span style="font-size: 75%; color: gray"> (2025/5/10)</span>
     </h1>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th class="key-column">Color</th>
+            <th class="key-column">Color / ID</th>
             <th v-for="lang in languages" :key="lang">{{ lang }}</th>
           </tr>
         </thead>

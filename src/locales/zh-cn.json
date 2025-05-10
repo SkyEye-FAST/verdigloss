@@ -52,15 +52,16 @@
   },
   "table": {
     "action": {
+      "colors": "颜色表",
       "dark_mode": "切换深色模式",
       "download": "下载",
       "download_all_data": "下载所有数据",
-      "query_tool": "查询工具",
+      "query": "查询工具",
       "quiz": "认知测验"
     },
     "author": "由 SkyEye_FAST 整理",
     "colors": {
-      "title": "Minecraft 标准译名表 — 颜色"
+      "title": "Minecraft 颜色译名表"
     },
     "java_edition": "Java版 ",
     "loading": "加载中…",

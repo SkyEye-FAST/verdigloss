@@ -57,11 +57,15 @@
       <div class="buttons">
         <router-link to="/" class="button">
           <i-material-symbols-manage-search class="icon" />
-          {{ $t('table.action.query_tool') }}
+          {{ $t('table.action.query') }}
         </router-link>
         <router-link to="/quiz" class="button">
           <i-material-symbols-quiz class="icon" />
           {{ $t('table.action.quiz') }}
+        </router-link>
+        <router-link to="/table/color" class="button">
+          <i-material-symbols-colors class="icon" />
+          {{ $t('table.action.colors') }}
         </router-link>
         <a href="https://github.com/SkyEye-FAST/verdigloss" class="button" target="_blank">
           <i-fa6-brands-github class="icon" />

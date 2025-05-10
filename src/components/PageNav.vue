@@ -8,7 +8,12 @@
     >
       <i-material-symbols-manage-search style="font-size: 1.5em" />
     </router-link>
-    <router-link v-else to="/quiz" class="nav-button" :title="$t('query.nav.quiz')">
+    <router-link
+      v-if="$route.path !== '/quiz'"
+      to="/quiz"
+      class="nav-button"
+      :title="$t('query.nav.quiz')"
+    >
       <i-material-symbols-quiz style="font-size: 1.5em" />
     </router-link>
     <router-link to="/table" class="nav-button" :title="$t('query.nav.table')">

@@ -15,6 +15,7 @@ declare module 'vue' {
     IMaterialSymbolsCheck: typeof import('~icons/material-symbols/check')['default']
     IMaterialSymbolsChevronLeft: typeof import('~icons/material-symbols/chevron-left')['default']
     IMaterialSymbolsChevronRight: typeof import('~icons/material-symbols/chevron-right')['default']
+    IMaterialSymbolsColors: typeof import('~icons/material-symbols/colors')['default']
     IMaterialSymbolsContentCopy: typeof import('~icons/material-symbols/content-copy')['default']
     IMaterialSymbolsDarkMode: typeof import('~icons/material-symbols/dark-mode')['default']
     IMaterialSymbolsDownload: typeof import('~icons/material-symbols/download')['default']
