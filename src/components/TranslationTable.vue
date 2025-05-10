@@ -47,7 +47,12 @@
           <tbody>
             <tr v-for="row in displayData" :key="row.key" v-memo="[row, displayLanguages]">
               <td class="key-column">{{ row.key }}</td>
-              <td v-for="lang in displayLanguages" :key="lang" :class="lang.replace(/_/, '-')">
+              <td
+                class="sans"
+                v-for="lang in displayLanguages"
+                :key="lang"
+                :class="lang.replace(/_/, '-')"
+              >
                 {{ row[lang] }}
               </td>
             </tr>
