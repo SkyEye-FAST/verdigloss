@@ -435,8 +435,16 @@ table tr:hover {
   background-color: #5b9bd530;
 }
 
+table tr:nth-child(even) td.key-column {
+  background-color: #f3f6f8;
+}
+
+table tr:hover td.key-column {
+  background-color: #e9ecef;
+}
+
 /* Dark mode */
-body.dark-mode .color-table table {
+body.dark-mode table {
   background: #333;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   border-color: #555;
@@ -445,20 +453,35 @@ body.dark-mode .color-table table {
 body.dark-mode table td,
 body.dark-mode table th {
   border-color: #555;
-  color: #e0e0e0;
 }
 
 body.dark-mode table thead th {
   background-color: #4a4a4a;
   border-color: #555;
+  box-shadow:
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 0 #555;
+}
+
+body.dark-mode table tr td.key-column {
+  background-color: #2a2a2a;
 }
 
 body.dark-mode table tr:nth-child(even) {
   background-color: #3a3a3a;
 }
 
+body.dark-mode table tr:nth-child(even) td.key-column {
+  background-color: #333;
+}
+
 body.dark-mode table tr:hover {
   background-color: #4a4a4a;
+}
+
+body.dark-mode table tr:hover td.key-column {
+  background-color: #444;
 }
 
 body.dark-mode .page-title {
