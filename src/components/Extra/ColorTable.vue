@@ -16,10 +16,12 @@
         <tbody>
           <tr v-for="color in colorData" :key="color.key">
             <td class="key-column">
-              <img :src="color.icon" width="16" height="16" style="image-rendering: pixelated" />
-              <div class="color-preview" :style="{ backgroundColor: color.hex }"></div>
-              <div class="color-preview" :style="{ backgroundColor: color.textHex }"></div>
-              {{ color.key }}
+              <div class="key-cell-content">
+                <img :src="color.icon" width="16" height="16" style="image-rendering: pixelated" />
+                <div class="color-preview" :style="{ backgroundColor: color.hex }"></div>
+                <div class="color-preview" :style="{ backgroundColor: color.textHex }"></div>
+                {{ color.key }}
+              </div>
             </td>
             <td class="sans" v-for="lang in languages" :key="lang" :class="lang.replace(/_/, '-')">
               {{ color.translations[lang] }}
@@ -415,6 +417,10 @@ table thead th {
   min-width: 100px;
   max-width: 300px;
   font-family: var(--monospace-font), monospace;
+  background: inherit;
+}
+
+.key-cell-content {
   display: flex;
   align-items: center;
   gap: 8px;
