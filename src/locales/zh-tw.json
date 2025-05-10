@@ -60,6 +60,9 @@
       "quiz": "認知測驗"
     },
     "author": "由 SkyEye_FAST 整理",
+    "colors": {
+      "title": "Minecraft 標準譯名表 — 顏色"
+    },
     "java_edition": "Java版 ",
     "loading": "載入中...",
     "pagination": {

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import TranslationQuery from '../components/TranslationQuery.vue'
 import TranslationTable from '../components/TranslationTable.vue'
+import ColorTable from '../components/Extra/ColorTable.vue'
 import TranslationQuiz from '../components/TranslationQuiz.vue'
 import TranslationQuizSub from '../components/TranslationQuizSub.vue'
 
@@ -19,6 +20,14 @@ const routes = [
     component: TranslationTable,
     meta: {
       titleKey: 'table.title',
+    },
+  },
+  {
+    path: '/table/color',
+    name: 'ColorTable',
+    component: ColorTable,
+    meta: {
+      titleKey: 'table.colors.title',
     },
   },
   {

@@ -59,6 +59,9 @@
       "quiz": "Quiz"
     },
     "author": "Compiled by SkyEye_FAST",
+    "colors": {
+      "title": "Minecraft Standard Translation Table - Colors"
+    },
     "java_edition": "Java Edition ",
     "loading": "Loading...",
     "pagination": {

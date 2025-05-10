@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    ColorTable: typeof import('./src/components/Extra/ColorTable.vue')['default']
     IFa6BrandsGithub: typeof import('~icons/fa6-brands/github')['default']
     IMaterialSymbolsArrowBack: typeof import('~icons/material-symbols/arrow-back')['default']
     IMaterialSymbolsArrowForward: typeof import('~icons/material-symbols/arrow-forward')['default']
