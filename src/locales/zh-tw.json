@@ -62,6 +62,8 @@
     },
     "author": "由 SkyEye_FAST 整理",
     "colors": {
+      "show_chu_nom": "顯示喃字",
+      "show_korean_mixed": "顯示漢諺混寫",
       "title": "Minecraft 顏色譯名表"
     },
     "java_edition": "Java版 ",

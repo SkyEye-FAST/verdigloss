@@ -61,6 +61,8 @@
     },
     "author": "Compiled by SkyEye_FAST",
     "colors": {
+      "show_chu_nom": "Show Chữ Nôm",
+      "show_korean_mixed": "Show Korean Mixed Script",
       "title": "Minecraft Color Translation Table"
     },
     "java_edition": "Java Edition ",

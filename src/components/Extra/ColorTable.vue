@@ -5,6 +5,16 @@
       {{ $t('table.colors.title') }}
       <span style="font-size: 75%; color: gray"> (2025/5/10)</span>
     </h1>
+    <div style="text-align: center; margin-bottom: 1rem">
+      <label style="margin-right: 1.5em">
+        <input type="checkbox" v-model="showKoreanMixed" />
+        {{ $t('table.colors.show_korean_mixed') }}
+      </label>
+      <label>
+        <input type="checkbox" v-model="showChuNom" />
+        {{ $t('table.colors.show_chu_nom') }}
+      </label>
+    </div>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -24,7 +34,31 @@
               </div>
             </td>
             <td class="sans" v-for="lang in languages" :key="lang" :class="lang.replace(/_/, '-')">
-              {{ color.translations[lang] }}
+              <template v-if="lang === 'ko_kr'">
+                <span>{{ color.translations.ko_kr.split(' ')[0] }}</span>
+                <span v-if="showKoreanMixed">
+                  {{
+                    (() => {
+                      const match = color.translations.ko_kr.match(/\(([^)]+)\)/)
+                      return match ? ' ' + match[0] : ''
+                    })()
+                  }}
+                </span>
+              </template>
+              <template v-else-if="lang === 'vi_vn'">
+                <span>{{ color.translations.vi_vn.split('(')[0].trim() }}</span>
+                <span v-if="showChuNom">
+                  {{
+                    (() => {
+                      const match = color.translations.vi_vn.match(/\(([^)]+)\)/)
+                      return match ? ' (' + match[1] + ')' : ''
+                    })()
+                  }}
+                </span>
+              </template>
+              <template v-else>
+                {{ color.translations[lang] }}
+              </template>
             </td>
           </tr>
         </tbody>
@@ -34,14 +68,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { useDarkMode } from '@/composables/useDarkMode'
 import { currentLocale } from '@/main'
 
 import Nav from '../PageNav.vue'
 
+const { isDarkMode, toggleDarkMode } = useDarkMode()
 const currentLang = computed(() => currentLocale.value)
+
+const showKoreanMixed = ref(true)
+const showChuNom = ref(true)
 
 const languages: Array<keyof (typeof colorData)[0]['translations']> = [
   'en_us',
@@ -342,8 +380,6 @@ const colorData = [
     },
   },
 ]
-
-const { isDarkMode, toggleDarkMode } = useDarkMode()
 
 onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
