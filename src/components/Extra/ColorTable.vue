@@ -19,7 +19,7 @@
       <table>
         <thead>
           <tr>
-            <th class="key-column">Color / ID</th>
+            <th>Color / ID</th>
             <th v-for="lang in languages" :key="lang">{{ lang }}</th>
           </tr>
         </thead>
