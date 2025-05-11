@@ -9,16 +9,7 @@
       :is-dark-mode="isDarkMode"
       v-model:download-all-data="downloadAllData"
       @toggle-dark-mode="toggleDarkMode"
-      @download-tsv="downloadTsv"
-      @download-csv="downloadCsv"
-      @download-json="downloadJson"
-      @download-xml="downloadXml"
-      @download-xlsx="downloadXlsx"
-      @download-all-tsv="downloadAllTsv"
-      @download-all-csv="downloadAllCsv"
-      @download-all-json="downloadAllJson"
-      @download-all-xml="downloadAllXml"
-      @download-all-xlsx="downloadAllXlsx"
+      @download="handleDownload"
     />
 
     <div v-if="loading" class="loading-container">
@@ -73,10 +64,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 
-import { utils as XLSXUtils, write as writeXLSX } from 'xlsx'
-
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { useDownload } from '@/composables/useDownload'
 import { type LanguageCode, languageFiles, languageList } from '@/utils/languages'
 
 import Header from './Table/TableHeader.vue'
@@ -187,166 +177,33 @@ watch(filteredTableData, () => {
   }
 })
 
-const generateTsvContent = (data: TableRow[]): string => {
-  const headers = ['key', ...displayLanguages.value]
-  const rows = [headers.join('\t')]
+const {
+  downloadTsv,
+  downloadCsv,
+  downloadJson,
+  downloadXml,
+  downloadXlsx,
+  downloadAllTsv,
+  downloadAllCsv,
+  downloadAllJson,
+  downloadAllXml,
+  downloadAllXlsx,
+} = useDownload(displayLanguages, displayData, filteredTableData)
 
-  data.forEach((row) => {
-    const rowData = [row.key, ...displayLanguages.value.map((lang) => row[lang] || '？')]
-    rows.push(rowData.join('\t'))
-  })
-
-  return rows.join('\n')
-}
-
-const generateCsvContent = (data: TableRow[]): string => {
-  const headers = ['key', ...displayLanguages.value]
-  const rows = [headers.join(',')]
-
-  data.forEach((row) => {
-    const rowData = [
-      `"${row.key.replace(/"/g, '""')}"`,
-      ...displayLanguages.value.map((lang) => `"${(row[lang] || '？').replace(/"/g, '""')}"`),
-    ]
-    rows.push(rowData.join(','))
-  })
-
-  return rows.join('\n')
-}
-
-const generateJsonContent = (data: TableRow[]): string => {
-  const result: Record<string, Record<string, string>> = {}
-
-  data.forEach((row) => {
-    result[row.key] = {}
-    displayLanguages.value.forEach((lang) => {
-      result[row.key][lang] = row[lang] || '？'
-    })
-  })
-
-  return JSON.stringify(result, null, 2)
-}
-
-const generateXmlContent = (data: TableRow[]): string => {
-  const escape = (str: string) =>
-    str.replace(
-      /[<>&"']/g,
-      (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c] || c,
-    )
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<translations>'
-  data.forEach((row) => {
-    xml += `\n  <entry key="${escape(row.key)}">`
-    displayLanguages.value.forEach((lang) => {
-      xml += `\n    <${lang}>${escape(row[lang] || '？')}</${lang}>`
-    })
-    xml += '\n  </entry>'
-  })
-  xml += '\n</translations>'
-  return xml
-}
-
-const downloadFile = (content: string, filename: string, mimeType: string) => {
-  const blob = new Blob([content], { type: mimeType })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-const downloadTsv = () => {
-  const content = generateTsvContent(displayData.value)
-  downloadFile(content, 'table.tsv', 'text/tab-separated-values;charset=utf-8')
-}
-
-const downloadCsv = () => {
-  const content = generateCsvContent(displayData.value)
-  downloadFile(content, 'table.csv', 'text/csv;charset=utf-8')
-}
-
-const downloadJson = () => {
-  const content = generateJsonContent(displayData.value)
-  downloadFile(content, 'table.json', 'application/json;charset=utf-8')
-}
-
-const downloadXml = () => {
-  const content = generateXmlContent(displayData.value)
-  downloadFile(content, 'table.xml', 'application/xml;charset=utf-8')
-}
-
-const downloadXlsx = () => {
-  const headers = ['key', ...displayLanguages.value]
-  const data = [headers]
-
-  displayData.value.forEach((row) => {
-    const rowData = [row.key, ...displayLanguages.value.map((lang) => row[lang] || '？')]
-    data.push(rowData)
-  })
-
-  const ws = XLSXUtils.aoa_to_sheet(data)
-  const wb = XLSXUtils.book_new()
-  XLSXUtils.book_append_sheet(wb, ws, 'translations')
-  const xlsxData = writeXLSX(wb, { type: 'array' })
-  const blob = new Blob([xlsxData], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'table.xlsx'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-const downloadAllTsv = () => {
-  const content = generateTsvContent(filteredTableData.value)
-  downloadFile(content, 'table_all.tsv', 'text/tab-separated-values;charset=utf-8')
-}
-
-const downloadAllCsv = () => {
-  const content = generateCsvContent(filteredTableData.value)
-  downloadFile(content, 'table_all.csv', 'text/csv;charset=utf-8')
-}
-
-const downloadAllJson = () => {
-  const content = generateJsonContent(filteredTableData.value)
-  downloadFile(content, 'table_all.json', 'application/json;charset=utf-8')
-}
-
-const downloadAllXml = () => {
-  const content = generateXmlContent(filteredTableData.value)
-  downloadFile(content, 'table_all.xml', 'application/xml;charset=utf-8')
-}
-
-const downloadAllXlsx = () => {
-  const headers = ['key', ...displayLanguages.value]
-  const data = [headers]
-
-  filteredTableData.value.forEach((row) => {
-    const rowData = [row.key, ...displayLanguages.value.map((lang) => row[lang] || '？')]
-    data.push(rowData)
-  })
-
-  const ws = XLSXUtils.aoa_to_sheet(data)
-  const wb = XLSXUtils.book_new()
-  XLSXUtils.book_append_sheet(wb, ws, 'translations')
-  const xlsxData = writeXLSX(wb, { type: 'array' })
-  const blob = new Blob([xlsxData], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'table_all.xlsx'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+function handleDownload({ type, all }: { type: string; all: boolean }) {
+  if (all) {
+    if (type === 'tsv') downloadAllTsv()
+    else if (type === 'csv') downloadAllCsv()
+    else if (type === 'json') downloadAllJson()
+    else if (type === 'xml') downloadAllXml()
+    else if (type === 'xlsx') downloadAllXlsx()
+  } else {
+    if (type === 'tsv') downloadTsv()
+    else if (type === 'csv') downloadCsv()
+    else if (type === 'json') downloadJson()
+    else if (type === 'xml') downloadXml()
+    else if (type === 'xlsx') downloadXlsx()
+  }
 }
 
 watch(

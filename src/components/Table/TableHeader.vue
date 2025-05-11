@@ -115,32 +115,11 @@ defineProps<{
 const emit = defineEmits<{
   'update:searchQuery': [string]
   'toggle-dark-mode': []
-  'download-tsv': []
-  'download-csv': []
-  'download-json': []
-  'download-xml': []
-  'download-xlsx': []
-  'download-all-tsv': []
-  'download-all-csv': []
-  'download-all-json': []
-  'download-all-xml': []
-  'download-all-xlsx': []
+  download: [{ type: 'tsv' | 'csv' | 'json' | 'xml' | 'xlsx'; all: boolean }]
 }>()
 
 function emitDownload(type: 'tsv' | 'csv' | 'json' | 'xml' | 'xlsx') {
-  if (downloadAllData.value) {
-    if (type === 'tsv') emit('download-all-tsv')
-    else if (type === 'csv') emit('download-all-csv')
-    else if (type === 'json') emit('download-all-json')
-    else if (type === 'xml') emit('download-all-xml')
-    else if (type === 'xlsx') emit('download-all-xlsx')
-  } else {
-    if (type === 'tsv') emit('download-tsv')
-    else if (type === 'csv') emit('download-csv')
-    else if (type === 'json') emit('download-json')
-    else if (type === 'xml') emit('download-xml')
-    else if (type === 'xlsx') emit('download-xlsx')
-  }
+  emit('download', { type, all: downloadAllData.value })
 }
 
 const selectedLanguages = defineModel<string[]>('selectedLanguages', {
