@@ -8,7 +8,7 @@
       </button>
       <div class="quiz-select-group">
         <label for="query-lang">{{ $t('quiz.language') }}</label>
-        <select v-model="queryLang" id="query-lang">
+        <select :class="`${queryLang.replace('_', '-')} sans`" v-model="queryLang" id="query-lang">
           <option value="zh_cn" class="zh-cn sans" lang="zh-Hans-CN">简体中文 (中国大陆)</option>
           <option value="zh_hk" class="zh-hk sans" lang="zh-Hant-HK">
             繁體中文 (香港特別行政區)
@@ -23,6 +23,7 @@
         <input
           v-model="inputCode"
           type="text"
+          id="quiz-code"
           :placeholder="$t('quiz.code_placeholder')"
           @keyup.enter="startQuiz"
         />
@@ -110,6 +111,7 @@ watch(preferredDark, (newValue) => {
 </script>
 
 <style scoped>
+/* Base Layout & Container */
 body {
   display: flex;
   justify-content: center;
@@ -138,15 +140,16 @@ body {
   transition: all 0.3s ease;
 }
 
-a {
+.quiz-container a {
   font-size: x-large;
 }
 
-label {
+.quiz-container label {
   font-size: x-large;
   text-align: right;
 }
 
+/* Form Groups & Inputs */
 .quiz-input-group {
   display: flex;
   flex-direction: row;
@@ -154,6 +157,11 @@ label {
   justify-content: center;
   margin-bottom: 10px;
   width: 100%;
+}
+
+.quiz-input-group input,
+.quiz-input-group button {
+  font-family: inherit;
 }
 
 .quiz-select-group {
@@ -164,13 +172,12 @@ label {
   width: 100%;
 }
 
-select {
+.quiz-container select {
   margin-left: 5px;
 }
 
-select,
-input[type='text'] {
-  font-family: var(--monospace-font), monospace;
+.quiz-container select,
+.quiz-container input[type='text'] {
   flex: 1;
   padding: 0.4em;
   font-size: x-large;
@@ -180,8 +187,14 @@ input[type='text'] {
   transition: all 0.3s ease;
 }
 
-button {
-  background-color: white;
+.quiz-container select:hover,
+.quiz-container input[type='text']:hover {
+  border-color: #4a8ac4;
+  background-color: #5b9bd515;
+}
+
+/* Buttons */
+.quiz-container button {
   cursor: pointer;
   font-size: x-large;
   transition: all 0.3s ease;
@@ -189,13 +202,7 @@ button {
   border-radius: 4px;
 }
 
-button:hover {
-  background-color: #5b9bd515;
-}
-
-select:hover,
-input[type='text']:hover {
-  border-color: #4a8ac4;
+.quiz-container button:hover {
   background-color: #5b9bd515;
 }
 
@@ -209,6 +216,7 @@ input[type='text']:hover {
   font-weight: 600;
   border: none;
   border-radius: 4px;
+  font-family: inherit;
 }
 
 .quiz-enter-button {
@@ -231,6 +239,7 @@ input[type='text']:hover {
   padding: 0.4em 30px;
 }
 
+/* Title & Typography */
 .quiz-title {
   font-weight: 900;
   text-align: center;
@@ -242,42 +251,7 @@ input[type='text']:hover {
   font-size: 2.75em;
 }
 
-body.dark-mode {
-  background-color: #121212;
-}
-
-body.dark-mode .quiz-container {
-  background-color: #333;
-  border-color: #555;
-  color: #e0e0e0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode select,
-body.dark-mode input[type='text'] {
-  background: #2a2a2a;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-body.dark-mode button {
-  background-color: #2a2a2a;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-body.dark-mode .quiz-btn-primary {
-  background-color: #4a4a4a;
-}
-
-body.dark-mode .quiz-btn-primary:hover {
-  background-color: #555;
-}
-
-body.dark-mode button:hover {
-  background-color: #3a3a3a;
-}
-
+/* Quiz Actions (Links/Buttons) */
 .quiz-actions {
   margin-top: 1rem;
   display: flex;
@@ -317,14 +291,7 @@ body.dark-mode button:hover {
   vertical-align: middle;
 }
 
-body.dark-mode .quiz-actions-button {
-  background: #4a4a4a;
-}
-
-body.dark-mode .quiz-actions-button:hover {
-  background: #5a5a5a;
-}
-
+/* Timer Checkbox & Label */
 .timer-label {
   margin-left: 5px;
   white-space: nowrap;
@@ -337,6 +304,52 @@ body.dark-mode .quiz-actions-button:hover {
   cursor: pointer;
 }
 
+/* Dark Mode Styles */
+body.dark-mode {
+  background-color: #121212;
+}
+
+body.dark-mode .quiz-container {
+  background-color: #333;
+  border-color: #555;
+  color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .quiz-container select,
+body.dark-mode .quiz-container input[type='text'] {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+body.dark-mode .quiz-container button {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+body.dark-mode .quiz-container .quiz-btn-primary {
+  background-color: #4a4a4a;
+}
+
+body.dark-mode .quiz-container .quiz-btn-primary:hover {
+  background-color: #555;
+}
+
+body.dark-mode .quiz-container button:hover {
+  background-color: #3a3a3a;
+}
+
+body.dark-mode .quiz-container .quiz-actions-button {
+  background: #4a4a4a;
+}
+
+body.dark-mode .quiz-container .quiz-actions-button:hover {
+  background: #5a5a5a;
+}
+
+/* Responsive Styles */
 @media (orientation: portrait) {
   .quiz-container {
     padding: 2rem 1rem;
@@ -347,16 +360,16 @@ body.dark-mode .quiz-actions-button:hover {
     width: 95%;
   }
 
-  select,
-  input[type='text'],
-  button {
+  .quiz-container select,
+  .quiz-container input[type='text'],
+  .quiz-container button {
     font-size: 1.2em;
     padding: 0.5em;
   }
 }
 
 @media (orientation: portrait) and (max-width: 760px) {
-  a {
+  .quiz-container a {
     font-size: initial;
   }
 
@@ -371,8 +384,8 @@ body.dark-mode .quiz-actions-button:hover {
 
   .quiz-btn-primary,
   .quiz-btn-secondary,
-  label,
-  select,
+  .quiz-container label,
+  .quiz-container select,
   .quiz-container input[type='text'] {
     font-size: 14px;
     padding: 7px;

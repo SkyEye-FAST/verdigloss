@@ -9,8 +9,8 @@
         <i-material-symbols-dark-mode v-else style="font-size: 1.5em" />
       </button>
     </div>
-    <div class="container">
-      <div id="info" v-show="!showSummary">
+    <div class="quiz-container">
+      <div class="quiz-info" v-show="!showSummary">
         <div class="info">
           <div v-if="isTimerMode" class="timer">
             {{ formatTime(remainingTime) }}
@@ -29,7 +29,7 @@
             <span>{{ currentQuestion?.rating.toFixed(2) }}</span>
           </div>
         </div>
-        <div id="boxes" :class="queryLang">
+        <div class="quiz-boxes" :class="queryLang">
           <div
             v-for="(box, index) in boxes"
             :key="index"
@@ -45,25 +45,27 @@
         v-if="!showSummary"
         v-model="inputText"
         autocomplete="off"
-        id="inputBox"
-        type="text"
+        class="quiz-input"
         :class="currentLang.toLowerCase()"
         :placeholder="$t('quiz.answer_placeholder')"
         @input="onInput"
         @compositionstart="onCompositionStart"
         @compositionend="onCompositionEnd"
         ref="inputRef"
+        type="text"
       />
 
-      <div id="buttons" class="quiz-controls" v-if="!showSummary">
-        <button v-if="canHint" @click="showHint">{{ $t('quiz.hint') }}</button>
-        <button v-if="canSkip" @click="skipQuestion" :disabled="isLocked">
+      <div class="quiz-controls" v-if="!showSummary">
+        <button v-if="canHint" class="quiz-hint-btn" @click="showHint">
+          {{ $t('quiz.hint') }}
+        </button>
+        <button v-if="canSkip" class="quiz-skip-btn" @click="skipQuestion" :disabled="isLocked">
           {{ $t('quiz.skip') }}
         </button>
       </div>
 
-      <div class="summary" v-if="showSummary">
-        <div id="title" :class="currentLang.toLowerCase()">
+      <div class="quiz-summary" v-if="showSummary">
+        <div class="quiz-title" :class="currentLang.toLowerCase()">
           {{ $t('quiz.complete') }}
         </div>
         <div v-if="isTimerMode" class="summary-info">
@@ -76,7 +78,7 @@
           <i-material-symbols-stars style="font-size: smaller" />
           <span class="summary-label">{{ totalScore.toFixed(2) }} pts</span>
         </div>
-        <table id="summaryTable">
+        <table class="quiz-summary-table">
           <thead :class="currentLang.toLowerCase()">
             <tr>
               <th>{{ $t('quiz.source') }}</th>
@@ -98,15 +100,15 @@
             </tr>
           </tbody>
         </table>
-        <div class="code-container">
-          <div class="code">{{ quizCode }}</div>
+        <div class="quiz-code-container">
+          <div class="quiz-code">{{ quizCode }}</div>
           <span style="font-size: 1.2em">
             <i-material-symbols-content-copy v-if="!isCopied" class="btn" @click="copyCode" />
             <i-material-symbols-check v-else class="btn" />
             <i-material-symbols-share class="btn" v-if="canShare" @click="shareResult" />
           </span>
         </div>
-        <div class="buttons">
+        <div class="quiz-summary-buttons">
           <button class="button" @click="restartQuiz">
             {{ $t('quiz.restart') }}
           </button>
@@ -351,20 +353,34 @@ const shareResult = () => {
 }
 
 const restartQuiz = () => {
-  const selectedLang = queryLang.value as LanguageCode
-  const langFile = langFiles[selectedLang]
-  const allKeys = Object.keys(idList).filter(
-    (key) =>
-      languageFiles.en_us[key as keyof typeof languageFiles.en_us] !==
-      langFile[key as keyof typeof langFile],
-  ) as (keyof typeof languageFiles.en_us)[]
+  const allKeys = Object.keys(idList)
   const shuffled = allKeys.sort(() => Math.random() - 0.5)
   const selectedKeys = shuffled.slice(0, 10)
   const sortedKeys = selectedKeys.sort((a, b) =>
     idList[a as keyof typeof idList].localeCompare(idList[b as keyof typeof idList]),
   )
   const keys = sortedKeys.join('')
-  router.push(`/quiz/${keys}?l=${queryLang.value}`)
+  router.push(`/quiz/${keys}?l=${queryLang.value}`).then(() => {
+    currentIndex.value = 0
+    inputText.value = ''
+    showSummary.value = false
+    isComposing.value = false
+    isLocked.value = false
+    isCopied.value = false
+    charStates.value = {}
+    totalScore.value = 0
+    questionScore.value = 10
+    remainingTime.value = 240
+    usedTime.value = 0
+
+    if (timerInterval) {
+      clearInterval(timerInterval)
+      timerInterval = null
+    }
+
+    loadQuestions()
+    startTimer()
+  })
 }
 
 const returnToPortal = () => {
@@ -444,6 +460,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* Progress Bar */
 .progress-bar {
   position: fixed;
   top: 0;
@@ -460,15 +477,8 @@ onUnmounted(() => {
   transition: width 1s linear;
 }
 
-body.dark-mode .progress-bar {
-  background-color: #333;
-}
-
-body.dark-mode .progress-fill {
-  background-color: #64b5f6;
-}
-
-.container {
+/* Main Container */
+.quiz-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -479,6 +489,7 @@ body.dark-mode .progress-fill {
   box-sizing: border-box;
 }
 
+/* Character Boxes */
 .translation-character {
   display: inline-block;
   width: 7rem;
@@ -517,33 +528,9 @@ body.dark-mode .progress-fill {
   background-color: #ffd600;
 }
 
-.translation-character.dark {
-  color: #e0e0e0;
-  background-color: #9ca3af25;
-}
-
-.translation-character.correct.dark {
-  color: #e0e0e0;
-  background-color: #43a047;
-}
-
-.translation-character.exist.dark {
-  color: #e0e0e0;
-  background-color: #afb42b;
-}
-
-.translation-character.hinted.dark {
-  color: #e0e0e0;
-  background-color: #d32f2f;
-}
-
-.translation-character.hinted.correct.dark {
-  color: #e0e0e0;
-  background-color: #0288d1;
-}
-
-#buttons button,
-input[type='text'] {
+/* Input & Controls */
+.quiz-controls button,
+.quiz-input {
   font-size: 1.75em;
   text-align: center;
   border: 2px solid;
@@ -553,19 +540,11 @@ input[type='text'] {
   color: #000;
 }
 
-input[type='text'] {
+.quiz-input {
   margin-top: 20px;
   height: 3em;
   width: 50%;
   border-color: #50535a1a;
-}
-
-#inputBox {
-  border-color: #50535a1a;
-}
-
-body.dark-mode #inputBox {
-  border-color: #e0e0e01a;
 }
 
 .quiz-controls {
@@ -598,6 +577,7 @@ button:hover {
   border-color: inherit;
 }
 
+/* Info & Typography */
 .info {
   margin-bottom: 20px;
 }
@@ -622,12 +602,13 @@ button:hover {
   vertical-align: middle;
 }
 
-#title {
+.quiz-title {
   font-size: 2.8em;
   font-weight: 900;
 }
 
-.summary {
+/* Summary Section */
+.quiz-summary {
   text-align: center;
   background-color: white;
   padding: 20px 30px;
@@ -635,7 +616,27 @@ button:hover {
   border-radius: 8px;
 }
 
-.buttons {
+.summary-info {
+  font-family: var(--monospace-font), monospace;
+  font-size: clamp(1.5em, calc(1.5em + 0.6vw), 3em);
+  text-align: center;
+  padding: 0;
+  font-size: 1.5em;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.summary-info {
+  display: flex;
+  align-items: center;
+}
+.summary-label {
+  margin: 0 10px;
+}
+
+.quiz-summary-buttons {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
@@ -662,15 +663,7 @@ button:hover {
   background: #4a8ac4 !important;
 }
 
-body.dark-mode .button {
-  background: #4a4a4a !important;
-}
-
-body.dark-mode .button:hover {
-  background: #5a5a5a !important;
-}
-
-.code-container {
+.quiz-code-container {
   margin: 0 auto;
   padding: 15px 0 0;
   display: flex;
@@ -679,35 +672,79 @@ body.dark-mode .button:hover {
   white-space: nowrap;
 }
 
-.code {
+.quiz-code {
   padding: 0 5px;
   font-size: 16px;
   font-family: var(--monospace-font), monospace;
 }
 
-.summary-info {
-  font-family: var(--monospace-font), monospace;
-  font-size: clamp(1.5em, calc(1.5em + 0.6vw), 3em);
-  text-align: center;
-  padding-top: 10px;
-  padding: 0;
-  font-size: 1.5em;
-  margin-top: 10px;
+/* Summary Table */
+.quiz-summary-table {
+  margin: 10px auto 0 auto;
+  border-collapse: collapse;
+  font-size: larger;
+}
+
+.quiz-summary-table tr td,
+.quiz-summary-table thead th {
+  border: 2px solid #5b9bd5;
+  padding: 5px;
+}
+
+.quiz-summary-table tr:nth-child(odd) {
+  background-color: #2e4e6c0f;
+}
+
+.quiz-summary-table tr:nth-child(even) {
+  background-color: #5b9bd533;
+}
+
+.quiz-summary-table thead {
+  font-size: larger;
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.nav-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff !important;
+  color: #666;
+  border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-.summary-info i {
-  display: flex;
-  align-items: center;
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  color: #7aa2ea;
 }
 
-.summary-label {
-  margin: 0 10px;
+/* Timer */
+.timer {
+  font-family: var(--monospace-font), monospace;
+  font-size: 2em;
+  font-weight: bold;
+  color: #5b9bd5;
+  margin-bottom: 10px;
 }
 
+/* Answer Highlighting */
 .transl {
   color: #000;
 }
@@ -753,88 +790,71 @@ body.dark-mode .button:hover {
   background-color: transparent;
 }
 
-table {
-  margin: 10px auto 0 auto;
-  border-collapse: collapse;
-  font-size: larger;
+.translation-character.dark {
+  color: #e0e0e0;
+  background-color: #9ca3af25;
 }
 
-table tr td,
-table thead th {
-  border: 2px solid #5b9bd5;
-  padding: 5px;
+.translation-character.correct.dark {
+  color: #e0e0e0;
+  background-color: #43a047;
 }
 
-table tr:nth-child(odd) {
-  background-color: #2e4e6c0f;
+.translation-character.exist.dark {
+  color: #e0e0e0;
+  background-color: #afb42b;
 }
 
-table tr:nth-child(even) {
-  background-color: #5b9bd533;
+.translation-character.hinted.dark {
+  color: #e0e0e0;
+  background-color: #d32f2f;
 }
 
-table thead {
-  font-size: larger;
+.translation-character.hinted.correct.dark {
+  color: #e0e0e0;
+  background-color: #0288d1;
 }
 
-body.dark-mode .summary {
+/*  Dark Mode */
+body.dark-mode .progress-bar {
+  background-color: #333;
+}
+
+body.dark-mode .progress-fill {
+  background-color: #64b5f6;
+}
+
+body.dark-mode .quiz-input {
+  border-color: #e0e0e01a;
+}
+
+body.dark-mode .quiz-controls button,
+body.dark-mode .quiz-input {
+  color: #e0e0e0;
+  border-color: #505050;
+}
+
+body.dark-mode .quiz-summary {
   background-color: #1a1a1a;
   color: #e0e0e0;
 }
 
-body.dark-mode #buttons button,
-body.dark-mode input[type='text'] {
-  color: #e0e0e0;
+body.dark-mode .quiz-summary-table td,
+body.dark-mode .quiz-summary-table th {
   border-color: #505050;
 }
 
-body.dark-mode table td,
-body.dark-mode table th {
-  border-color: #505050;
-}
-
-body.dark-mode table tr:nth-child(odd) {
+body.dark-mode .quiz-summary-table tr:nth-child(odd) {
   background-color: #2a2a2a;
 }
 
-body.dark-mode table tr:nth-child(even) {
+body.dark-mode .quiz-summary-table tr:nth-child(even) {
   background-color: #333333;
 }
 
-body.dark-mode .code {
+body.dark-mode .quiz-code {
   background-color: #2a2a2a;
   color: #e0e0e0;
-}
-
-.nav-buttons {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.nav-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #fff !important;
-  color: #666;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.nav-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  color: #7aa2ea;
 }
 
 body.dark-mode .nav-button {
@@ -842,20 +862,21 @@ body.dark-mode .nav-button {
   color: #e0e0e0;
 }
 
-.timer {
-  font-family: var(--monospace-font), monospace;
-  font-size: 2em;
-  font-weight: bold;
-  color: #5b9bd5;
-  margin-bottom: 10px;
+body.dark-mode .button {
+  background: #4a4a4a !important;
+}
+
+body.dark-mode .button:hover {
+  background: #5a5a5a !important;
 }
 
 body.dark-mode .timer {
   color: #64b5f6;
 }
 
+/* Responsive Styles */
 @media (orientation: landscape) and (max-height: 520px) {
-  .container {
+  .quiz-container {
     padding: 1rem;
   }
 
@@ -875,7 +896,7 @@ body.dark-mode .timer {
     margin: 3px;
   }
 
-  input[type='text'] {
+  .quiz-input {
     width: 65%;
     height: 2.5em;
     font-size: 1.25em;
@@ -890,7 +911,7 @@ body.dark-mode .timer {
     width: 65%;
   }
 
-  #summaryTable {
+  .quiz-summary-table {
     display: none;
   }
 }
@@ -913,7 +934,7 @@ body.dark-mode .timer {
 }
 
 @media (orientation: portrait) and (max-width: 768px) {
-  .container {
+  .quiz-container {
     padding: 1rem;
   }
 
@@ -934,7 +955,7 @@ body.dark-mode .timer {
   }
 
   .quiz-controls button,
-  input[type='text'] {
+  .quiz-input {
     font-size: 1.25em;
   }
 
@@ -942,11 +963,11 @@ body.dark-mode .timer {
     margin-top: 1.5em !important;
   }
 
-  .summary {
+  .quiz-summary {
     font-size: smaller;
   }
 
-  .summary button {
+  .quiz-summary button {
     font-size: 16px;
   }
 
@@ -958,7 +979,7 @@ body.dark-mode .timer {
 }
 
 @media (orientation: portrait) and (min-width: 768px) and (max-width: 1024px) {
-  .container {
+  .quiz-container {
     padding: 1rem;
   }
 
@@ -979,13 +1000,13 @@ body.dark-mode .timer {
   }
 
   .quiz-controls button,
-  input[type='text'] {
+  .quiz-input {
     font-size: 1.75em;
   }
 }
 
 @media (orientation: portrait) and (min-width: 1024px) {
-  .container {
+  .quiz-container {
     padding: 1rem;
   }
 
@@ -1006,13 +1027,13 @@ body.dark-mode .timer {
   }
 
   .quiz-controls button,
-  input[type='text'] {
+  .quiz-input {
     font-size: 2em;
   }
 }
 
 @media (orientation: portrait) {
-  .container {
+  .quiz-container {
     padding: 1rem;
   }
 
@@ -1022,7 +1043,7 @@ body.dark-mode .timer {
     height: 2.5em;
   }
 
-  input[type='text'] {
+  .quiz-input {
     width: 80%;
   }
 
@@ -1034,7 +1055,7 @@ body.dark-mode .timer {
     font-size: 2em;
   }
 
-  .summary {
+  .quiz-summary {
     width: auto;
     padding: 20px 20px;
   }
@@ -1047,7 +1068,7 @@ body.dark-mode .timer {
     margin: 3px;
   }
 
-  input[type='text'] {
+  .quiz-input {
     width: 90%;
     font-size: 1.5em;
   }

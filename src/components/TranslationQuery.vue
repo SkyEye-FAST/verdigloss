@@ -603,6 +603,7 @@ onMounted(async () => {
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  font-family: inherit;
 }
 
 .input-group input:focus,
