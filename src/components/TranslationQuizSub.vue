@@ -440,6 +440,7 @@ const loadQuestions = () => {
       }
     })
     .filter((question) => question.source !== question.translation)
+    .sort(() => Math.random() - 0.5)
 }
 
 onMounted(async () => {
