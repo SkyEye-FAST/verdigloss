@@ -228,6 +228,18 @@ const getBoxes = (): Box[] => {
   const input = getSegmentedText(inputText.value)
   const translation = getSegmentedText(currentQuestion.value.translation)
 
+  const correctMatchCounts = new Map<string, number>()
+  translation.forEach((char, i) => {
+    if (input[i] === char) {
+      correctMatchCounts.set(char, (correctMatchCounts.get(char) || 0) + 1)
+    }
+  })
+
+  const charTotalCounts = new Map<string, number>()
+  translation.forEach((char) => {
+    charTotalCounts.set(char, (charTotalCounts.get(char) || 0) + 1)
+  })
+
   return translation.map((char, i) => {
     const userChar = input[i] || ''
     const isHinted = charStates.value[currentQuestion.value.key]?.[i]?.includes('hinted')
@@ -242,7 +254,10 @@ const getBoxes = (): Box[] => {
       boxClass = ''
     } else if (userChar === char) {
       boxClass = 'correct'
-    } else if (translation.includes(userChar)) {
+    } else if (
+      translation.includes(userChar) &&
+      (correctMatchCounts.get(userChar) || 0) < (charTotalCounts.get(userChar) || 0)
+    ) {
       boxClass = 'exist'
     }
 
