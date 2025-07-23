@@ -1,5 +1,10 @@
 <template>
-  <Nav :is-dark-mode="isDarkMode" @toggle-dark-mode="toggleDarkMode" />
+  <Nav
+    :is-dark-mode="isDarkMode"
+    :use-sans-font="useSansFont"
+    @toggle-dark-mode="toggleDarkMode"
+    @toggle-sans-font="toggleSansFont"
+  />
   <div class="page-content">
     <h1 class="page-title" :class="currentLang.toLowerCase()">
       {{ $t('table.colors.title') }}
@@ -33,7 +38,11 @@
                 {{ color.key }}
               </div>
             </td>
-            <td class="sans" v-for="lang in languages" :key="lang" :class="lang.replace(/_/, '-')">
+            <td
+              v-for="lang in languages"
+              :key="lang"
+              :class="[lang.replace(/_/, '-'), { sans: useSansFont }]"
+            >
               <template v-if="lang === 'ko_kr'">
                 <span>{{ color.translations.ko_kr.split(' ')[0] }}</span>
                 <span v-if="showKoreanMixed">
@@ -84,6 +93,12 @@ const currentLang = computed(() => currentLocale.value)
 
 const showKoreanMixed = ref(true)
 const showChuNom = ref(true)
+const useSansFont = ref(localStorage.getItem('table:useSansFont') !== 'false')
+
+const toggleSansFont = () => {
+  useSansFont.value = !useSansFont.value
+  localStorage.setItem('table:useSansFont', useSansFont.value.toString())
+}
 
 const languages: Array<keyof (typeof colorData)[0]['translations']> = [
   'en_us',

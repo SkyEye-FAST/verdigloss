@@ -11,7 +11,8 @@
       "github": "GitHub 仓库",
       "query": "译名查询工具",
       "quiz": "译名认知测验",
-      "table": "译名表"
+      "table": "译名表",
+      "toggle_font": "切换字体"
     },
     "query_content": "查询内容",
     "query_lang": "查询语言",
@@ -57,7 +58,8 @@
       "download": "下载",
       "download_all_data": "下载所有数据",
       "query": "查询工具",
-      "quiz": "认知测验"
+      "quiz": "认知测验",
+      "toggle_font": "切换字体"
     },
     "author": "由 SkyEye_FAST 整理",
     "colors": {

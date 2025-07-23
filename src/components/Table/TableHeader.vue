@@ -79,6 +79,13 @@
           <i-material-symbols-dark-mode v-if="isDarkMode" class="icon" />
           <i-material-symbols-light-mode v-else class="icon" />
         </button>
+        <button
+          class="button"
+          @click="$emit('toggle-sans-font')"
+          :title="$t('table.action.toggle_font')"
+        >
+          <i-material-symbols-font-download-outline class="icon" />
+        </button>
       </div>
       <div class="download-options">
         <div class="download-group">
@@ -110,11 +117,13 @@ defineProps<{
   minecraftVersion: string
   languages: string[]
   isDarkMode: boolean
+  useSansFont?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:searchQuery': [string]
   'toggle-dark-mode': []
+  'toggle-sans-font': []
   download: [{ type: 'tsv' | 'csv' | 'json' | 'xml' | 'xlsx'; all: boolean }]
 }>()
 

@@ -31,20 +31,42 @@
       <i-material-symbols-dark-mode v-if="isDarkMode" style="font-size: 1.5em" />
       <i-material-symbols-light-mode v-else style="font-size: 1.5em" />
     </button>
+    <button
+      v-if="showFontToggle"
+      class="nav-button"
+      @click="toggleSansFont"
+      :title="$t('query.nav.toggle_font')"
+    >
+      <i-material-symbols-font-download-outline style="font-size: 1.5em" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
 interface Props {
   isDarkMode: boolean
+  useSansFont?: boolean
 }
 
 defineProps<Props>()
-const emit = defineEmits(['toggleDarkMode'])
+const emit = defineEmits(['toggleDarkMode', 'toggleSansFont'])
 
 const toggleDarkMode = () => {
   emit('toggleDarkMode')
 }
+
+const toggleSansFont = () => {
+  emit('toggleSansFont')
+}
+
+const route = useRoute()
+const showFontToggle = computed(() => {
+  const path = route.path
+  return path === '/' || path.startsWith('/table/')
+})
 </script>
 
 <style scoped>

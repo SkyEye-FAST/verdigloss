@@ -11,7 +11,8 @@
       "github": "GitHub Repository",
       "query": "Translation Query Tool",
       "quiz": "Standard Translation Quiz",
-      "table": "Translation Table"
+      "table": "Translation Table",
+      "toggle_font": "Toggle Font"
     },
     "query_content": "Query Content",
     "query_lang": "Query Language",
@@ -57,7 +58,8 @@
       "download": "Download",
       "download_all_data": "Download All Data",
       "query": "Query Tool",
-      "quiz": "Quiz"
+      "quiz": "Quiz",
+      "toggle_font": "Toggle Font"
     },
     "author": "Compiled by SkyEye_FAST",
     "colors": {

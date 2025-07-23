@@ -1,6 +1,11 @@
 <template>
   <div class="translation-query">
-    <Nav :is-dark-mode="isDarkMode" @toggle-dark-mode="toggleDarkMode" />
+    <Nav
+      :is-dark-mode="isDarkMode"
+      :use-sans-font="useSansFont"
+      @toggle-dark-mode="toggleDarkMode"
+      @toggle-sans-font="toggleSansFont"
+    />
     <div class="sidebar-layout" :class="{ 'sidebar-collapsed': !isSidebarOpen }">
       <div class="sidebar">
         <button class="toggle-button" @click="toggleSidebar">
@@ -95,15 +100,21 @@
       <div class="main-content">
         <div v-if="error" class="error">{{ error }}</div>
         <div v-if="selectedTranslation" class="result-section">
-          <div class="title">{{ selectedTranslation.source }}</div>
+          <div class="title" :class="{ sans: useSansFont }">{{ selectedTranslation.source }}</div>
           <p class="subtitle">{{ selectedTranslation.key }}</p>
           <table :class="'table-' + (selectedTranslation?.category || 'block')">
             <thead>
               <tr>
-                <th :class="currentLang.toLowerCase()" class="table-header">
+                <th
+                  :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
+                  class="table-header"
+                >
                   {{ $t('query.table.langName') }}
                 </th>
-                <th :class="currentLang.toLowerCase()" class="table-header">
+                <th
+                  :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
+                  class="table-header"
+                >
                   {{ $t('query.table.translation') }}
                 </th>
               </tr>
@@ -113,7 +124,7 @@
                 v-for="lang in displayLanguages"
                 :key="lang.code"
                 :lang="lang.htmlLang"
-                :class="lang.code.replace(/_/, '-')"
+                :class="[lang.code.replace(/_/, '-'), { sans: useSansFont }]"
               >
                 <td class="lang-name">{{ lang.displayName }}</td>
                 <td class="string">
@@ -122,7 +133,10 @@
               </tr>
             </tbody>
           </table>
-          <footer class="minecraft-title" :class="currentLang.toLowerCase()">
+          <footer
+            class="minecraft-title"
+            :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
+          >
             {{ $t('query.title') }}<br />
             {{ $t('query.java_edition') }}{{ minecraftVersion }}
           </footer>
@@ -499,6 +513,13 @@ onMounted(async () => {
     onQueryInput()
   }
 })
+
+const useSansFont = ref(localStorage.getItem('table:useSansFont') == 'false')
+
+const toggleSansFont = () => {
+  useSansFont.value = !useSansFont.value
+  localStorage.setItem('table:useSansFont', useSansFont.value.toString())
+}
 </script>
 
 <style scoped>
@@ -756,6 +777,10 @@ table th {
 
 .title {
   font-family: var(--serif-font), serif;
+}
+
+.title.sans {
+  font-family: var(--sans-font), sans-serif;
 }
 
 /* Footer */

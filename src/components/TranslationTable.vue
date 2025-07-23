@@ -7,8 +7,10 @@
       :minecraft-version="minecraftVersion"
       :languages="languages"
       :is-dark-mode="isDarkMode"
+      :use-sans-font="useSansFont"
       v-model:download-all-data="downloadAllData"
       @toggle-dark-mode="toggleDarkMode"
+      @toggle-sans-font="toggleSansFont"
       @download="handleDownload"
     />
 
@@ -28,7 +30,7 @@
       <div class="table-wrapper">
         <table>
           <thead>
-            <tr v-memo="[displayLanguages]">
+            <tr v-memo="[displayLanguages, useSansFont]">
               <th class="key-column">keys</th>
               <th v-for="lang in displayLanguages" :key="lang">
                 {{ lang }}
@@ -36,13 +38,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in displayData" :key="row.key" v-memo="[row, displayLanguages]">
+            <tr
+              v-for="row in displayData"
+              :key="row.key"
+              v-memo="[row, displayLanguages, useSansFont]"
+            >
               <td class="key-column">{{ row.key }}</td>
               <td
-                class="sans"
+                :class="[lang.replace(/_/, '-'), { sans: useSansFont }]"
                 v-for="lang in displayLanguages"
                 :key="lang"
-                :class="lang.replace(/_/, '-')"
               >
                 {{ row[lang] }}
               </td>
@@ -93,6 +98,7 @@ const loading = ref(true)
 const tableData = ref<TableRow[]>([])
 const usePagination = ref(true)
 const downloadAllData = ref(localStorage.getItem('table:downloadAllData') !== 'false')
+const useSansFont = ref(localStorage.getItem('table:useSansFont') !== 'false')
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
@@ -213,6 +219,11 @@ watch(
   },
   { deep: true },
 )
+
+const toggleSansFont = () => {
+  useSansFont.value = !useSansFont.value
+  localStorage.setItem('table:useSansFont', useSansFont.value.toString())
+}
 </script>
 
 <style scoped>
