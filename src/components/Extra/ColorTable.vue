@@ -8,7 +8,7 @@
   <div class="page-content">
     <h1 class="page-title" :class="currentLang.toLowerCase()">
       {{ $t('table.colors.title') }}
-      <span style="font-size: 75%; color: gray"> (2025/5/10)</span>
+      <span style="font-size: 75%; color: gray"> (2025/7/23)</span>
     </h1>
     <div style="text-align: center; margin-bottom: 1rem">
       <label style="margin-right: 1.5em">
@@ -33,6 +33,7 @@
             <td class="key-column">
               <div class="key-cell-content">
                 <ColorIcon :src="color.icon" />
+                <ColorIcon :src="color.iconNew" />
                 <ColorPreview :color="color.hex" />
                 <ColorPreview :color="color.textHex" />
                 {{ color.key }}
@@ -87,6 +88,7 @@ import ColorIcon from './ColorTable/ColorIcon.vue'
 import ColorPreview from './ColorTable/ColorPreview.vue'
 import colorTranslations from './ColorTable/colorTranslations'
 import dyeIcons from './ColorTable/dyeIcons'
+import dyeIconsNew from './ColorTable/dyeIconsNew'
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 const currentLang = computed(() => currentLocale.value)
@@ -137,6 +139,7 @@ const colorData = colorList.map((key) => ({
   hex: getHex(key),
   textHex: getTextHex(key),
   icon: dyeIcons[key],
+  iconNew: dyeIconsNew[key],
   translations: colorTranslations[key],
 }))
 
