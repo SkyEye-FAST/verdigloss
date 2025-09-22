@@ -73,9 +73,9 @@ const handlePageInputChange = (event: Event) => {
 
 const displayedPages = computed(() => {
   const delta = 2
-  const range = []
-  const rangeWithDots = []
-  let l
+  const range: number[] = []
+  const rangeWithDots: Array<number | string | { type: string; position: number }> = []
+  let l: number | undefined
 
   range.push(1)
 
@@ -90,17 +90,21 @@ const displayedPages = computed(() => {
   }
 
   for (let i = 0; i < range.length; i++) {
-    if (l) {
-      if (i === range.length - 1 && range[i] - l > 2) {
+    const current = range[i]
+    if (l !== undefined && current !== undefined) {
+      const diff = current - l
+      if (i === range.length - 1 && diff > 2) {
         rangeWithDots.push({ type: 'input', position: l + 1 })
-      } else if (range[i] - l === 2) {
+      } else if (diff === 2) {
         rangeWithDots.push(l + 1)
-      } else if (range[i] - l !== 1) {
+      } else if (diff !== 1) {
         rangeWithDots.push('...')
       }
     }
-    rangeWithDots.push(range[i])
-    l = range[i]
+    if (current !== undefined) {
+      rangeWithDots.push(current)
+      l = current
+    }
   }
 
   return rangeWithDots

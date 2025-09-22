@@ -223,10 +223,11 @@ const hasHalfStar = computed(() => (currentQuestion.value?.rating || 0) % 1 > 0)
 const totalLevel = computed(() => questions.value.reduce((sum, q) => sum + (q.rating || 0), 0))
 
 const getBoxes = (): Box[] => {
-  if (!currentQuestion.value) return []
+  const cq = currentQuestion.value
+  if (!cq) return []
 
   const input = getSegmentedText(inputText.value)
-  const translation = getSegmentedText(currentQuestion.value.translation)
+  const translation = getSegmentedText(cq.translation || '')
 
   const correctMatchCounts = new Map<string, number>()
   translation.forEach((char, i) => {
@@ -242,7 +243,7 @@ const getBoxes = (): Box[] => {
 
   return translation.map((char, i) => {
     const userChar = input[i] || ''
-    const isHinted = charStates.value[currentQuestion.value.key]?.[i]?.includes('hinted')
+    const isHinted = charStates.value[cq.key]?.[i]?.includes('hinted')
     let boxClass = ''
 
     if (isHinted) {
@@ -271,24 +272,29 @@ const getBoxes = (): Box[] => {
 const onInput = () => {
   if (isComposing.value || isLocked.value) return
 
-  const translation = currentQuestion.value.translation
+  const cq = currentQuestion.value
+  const translation = cq ? cq.translation || '' : ''
   inputText.value = getSegmentedText(inputText.value)
     .slice(0, getSegmentedText(translation).length)
     .join('')
 
-  if (inputText.value === translation) {
+  if (cq && inputText.value === (cq.translation || '')) {
     handleCorrectAnswer()
   }
 }
 
 const handleCorrectAnswer = async () => {
   isLocked.value = true
-  if (!charStates.value[currentQuestion.value.key]) {
-    charStates.value[currentQuestion.value.key] = []
+  const cq = currentQuestion.value
+  if (!cq) return
+  if (!charStates.value[cq.key]) {
+    charStates.value[cq.key] = []
   }
+  const stateArr = charStates.value[cq.key] as string[]
   boxes.value.forEach((box, index) => {
-    charStates.value[currentQuestion.value.key][index] = box.class
+    stateArr[index] = box.class
   })
+  charStates.value[cq.key] = stateArr
 
   totalScore.value += questionScore.value
 
@@ -310,8 +316,10 @@ const handleCorrectAnswer = async () => {
 
 const showHint = () => {
   if (isLocked.value) return
+  const cq = currentQuestion.value
+  if (!cq) return
 
-  const translation = getSegmentedText(currentQuestion.value.translation)
+  const translation = getSegmentedText(cq.translation || '')
   const currentBoxes = boxes.value
 
   const hintIndex = currentBoxes.findIndex(
@@ -319,15 +327,15 @@ const showHint = () => {
   )
 
   if (hintIndex !== -1) {
-    if (!charStates.value[currentQuestion.value.key]) {
-      charStates.value[currentQuestion.value.key] = []
+    if (!charStates.value[cq.key]) {
+      charStates.value[cq.key] = []
     }
-    charStates.value[currentQuestion.value.key][hintIndex] = 'hinted'
+    const sArr = charStates.value[cq.key] as string[]
+    sArr[hintIndex] = 'hinted'
+    charStates.value[cq.key] = sArr
 
-    const hintCount = charStates.value[currentQuestion.value.key].filter((state) =>
-      state?.includes('hinted'),
-    ).length
-    questionScore.value = Math.max(0, 10 * (1 - hintCount / translation.length))
+    const hintCount = (sArr || []).filter((state) => state?.includes('hinted')).length
+    questionScore.value = Math.max(0, 10 * (1 - hintCount / (translation.length || 1)))
   }
 }
 
@@ -436,22 +444,24 @@ const loadQuestions = () => {
 
   const selectedKeys = codeSegments.map((seg) => idList[seg as keyof typeof idList]).sort()
   const selectedLang = queryLang.value as LanguageCode
-  const langFile = langFiles[selectedLang]
+  const langFile = langFiles[selectedLang] || {}
 
   type LangFileKey = keyof typeof languageFiles.en_us
 
   questions.value = selectedKeys
     .map((key) => {
       const langKey = key as LangFileKey
+      const src = (languageFiles.en_us && languageFiles.en_us[langKey]) || ''
+      const trans = (langFile && (langFile as Record<string, string>)[langKey]) || ''
       return {
-        source: languageFiles.en_us[langKey],
+        source: src,
         key: key,
-        translation: langFile[langKey],
+        translation: trans,
         rating:
           selectedLang === 'zh_cn'
             ? ratingData[langKey as keyof typeof ratingData] || 0
             : undefined,
-        translationChars: getSegmentedText(langFile[langKey]),
+        translationChars: getSegmentedText(trans || ''),
       }
     })
     .filter((question) => question.source !== question.translation)

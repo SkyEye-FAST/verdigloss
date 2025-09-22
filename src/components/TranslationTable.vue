@@ -106,7 +106,7 @@ onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
 
   requestAnimationFrame(async () => {
-    const keys = Object.keys(translations.value.en_us)
+    const keys = Object.keys((translations.value.en_us as Record<string, string>) || {})
     const batchSize = 100
     const totalBatches = Math.ceil(keys.length / batchSize)
 

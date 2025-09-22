@@ -38,4 +38,27 @@ export default defineConfig({
       '@#': fileURLToPath(new URL('./src/assets/mc_lang/valid', import.meta.url)),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id) return
+
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
+
+          const mcLangPosix = '/src/assets/mc_lang/valid/'
+          const mcLangWin = '\\src\\assets\\mc_lang\\valid\\'
+          if (id.includes(mcLangPosix) || id.includes(mcLangWin)) {
+            const parts = id.split(/[/\\\\]/)
+            const file = parts[parts.length - 1]
+            const name = file.replace(/\.json$/, '')
+            return `mc_lang_${name}`
+          }
+        },
+      },
+    },
+  },
 })

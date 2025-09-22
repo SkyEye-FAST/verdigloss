@@ -36,10 +36,11 @@ export function useDownload(
   const generateJsonContent = (data: TableRow[]): string => {
     const result: Record<string, Record<string, string>> = {}
     data.forEach((row) => {
-      result[row.key] = {}
+      const entry: Record<string, string> = {}
       displayLanguages.value.forEach((lang) => {
-        result[row.key][lang] = row[lang] || '？'
+        entry[lang] = row[lang] || '\uff1f'
       })
+      result[row.key] = entry
     })
     return JSON.stringify(result, null, 2)
   }

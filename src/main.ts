@@ -40,7 +40,7 @@ const updateHtmlLang = (locale: LocaleType['locale']): void => {
 
 const setLocaleFromPreference = (preferredLanguages: readonly string[]) => {
   if (preferredLanguages.length > 0) {
-    const lang = preferredLanguages[0].toLowerCase()
+    const lang = (preferredLanguages[0] || '').toLowerCase()
     let locale: LocaleType['locale'] = 'en'
 
     if (lang.startsWith('zh')) {

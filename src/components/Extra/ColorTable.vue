@@ -45,29 +45,29 @@
               :class="[lang.replace(/_/, '-'), { sans: useSansFont }]"
             >
               <template v-if="lang === 'ko_kr'">
-                <span>{{ color.translations.ko_kr.split(' ')[0] }}</span>
+                <span>{{ (color.translations.ko_kr || '').split(' ')[0] }}</span>
                 <span v-if="showKoreanMixed">
                   {{
                     (() => {
-                      const match = color.translations.ko_kr.match(/\(([^)]+)\)/)
+                      const match = (color.translations.ko_kr || '').match(/\(([^)]+)\)/)
                       return match ? ' ' + match[0] : ''
                     })()
                   }}
                 </span>
               </template>
               <template v-else-if="lang === 'vi_vn'">
-                <span>{{ color.translations.vi_vn.split('(')[0].trim() }}</span>
+                <span>{{ ((color.translations.vi_vn || '').split('(')[0] || '').trim() }}</span>
                 <span v-if="showChuNom">
                   {{
                     (() => {
-                      const match = color.translations.vi_vn.match(/\(([^)]+)\)/)
+                      const match = (color.translations.vi_vn || '').match(/\(([^)]+)\)/)
                       return match ? ' (' + match[1] + ')' : ''
                     })()
                   }}
                 </span>
               </template>
               <template v-else>
-                {{ color.translations[lang] }}
+                {{ color.translations[lang] || '' }}
               </template>
             </td>
           </tr>

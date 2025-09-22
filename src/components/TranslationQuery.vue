@@ -298,9 +298,11 @@ const availableKeys = computed(() => {
 
   switch (queryMode.value) {
     case 'key':
-      return Object.keys(langFiles['en_us']).filter((key) => key.toLowerCase().includes(searchText))
+      return Object.keys(langFiles['en_us'] || {}).filter((key) =>
+        key.toLowerCase().includes(searchText),
+      )
     case 'source':
-      return Object.entries(langFiles['en_us'])
+      return Object.entries(langFiles['en_us'] || {})
         .filter(([, value]) => value.toLowerCase().includes(searchText))
         .map(([key]) => key)
     case 'translation': {
@@ -370,21 +372,24 @@ const search = () => {
   }
 
   if (translations.value.length === 1 || localeKey.value) {
-    const keyToUse = localeKey.value || translations.value[0].key
+    const keyToUse = localeKey.value || translations.value[0]?.key
     if (keyToUse) {
       updateSelectedTranslation(keyToUse)
     }
-  } else if (translations.value[0].key) {
-    localeKey.value = translations.value[0].key
-    updateSelectedTranslation(translations.value[0].key)
+  } else {
+    const tx = translations.value
+    const firstKey = tx[0]?.key
+    if (firstKey) {
+      localeKey.value = firstKey
+      updateSelectedTranslation(firstKey)
+    }
   }
 }
 
 const searchByKey = (key: string) => {
   const searchText = key.trim().toLowerCase()
   if (!searchText) return
-
-  Object.keys(langFiles['en_us'])
+  Object.keys(langFiles['en_us'] || {})
     .filter((key) => key.toLowerCase().includes(searchText))
     .forEach((key) => collectTranslationsForKey(key))
 }
@@ -392,8 +397,7 @@ const searchByKey = (key: string) => {
 const searchBySourceText = (text: string) => {
   const searchText = text.trim().toLowerCase()
   if (!searchText) return
-
-  Object.entries(langFiles['en_us'])
+  Object.entries(langFiles['en_us'] || {})
     .filter(([, value]) => value.toLowerCase().includes(searchText))
     .forEach(([key]) => collectTranslationsForKey(key))
 }
@@ -411,9 +415,10 @@ const searchByTranslation = (text: string) => {
 }
 
 const collectTranslationsForKey = (key: string) => {
+  const en = langFiles['en_us'] || {}
   translations.value.push({
     language: 'en_us',
-    name: (langFiles['en_us'] as Record<string, string>)[key],
+    name: en[key] || key,
     key: key,
   })
 }
@@ -423,7 +428,7 @@ const getLanguageCode = (lang: string): LanguageCode | undefined => {
 }
 
 const updateSelectedTranslation = (key: string) => {
-  const source = (langFiles['en_us'] as Record<string, string>)[key]
+  const source = ((langFiles['en_us'] || {}) as Record<string, string>)[key] || ''
   const category = getCategoryFromKey(key)
 
   const filteredTranslations = languages
@@ -431,7 +436,7 @@ const updateSelectedTranslation = (key: string) => {
     .map((lang) => ({
       code: lang.code,
       name: lang.displayName,
-      text: ((langFiles as Record<string, Record<string, string>>)[lang.code] || {})[key],
+      text: ((langFiles as Record<string, Record<string, string>>)[lang.code] || {})[key] || '',
     }))
 
   selectedTranslation.value = {
