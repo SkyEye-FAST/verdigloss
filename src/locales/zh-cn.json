@@ -25,7 +25,7 @@
     "description": "Verdigloss 无法加载此视图。请重试，或返回译名查询页面。",
     "retry": "重试",
     "return_to_query": "返回查询",
-    "title": "出现错误"
+    "title": "出了点问题"
   },
   "language_selector": {
     "choose": "选择语言",
@@ -107,16 +107,16 @@
     },
     "description": "测试你对标准译名的掌握程度。",
     "eligibility": {
-      "available": "该语言有 {count} 道可用题目。",
-      "failure": "无法加载可用题目。请重新选择该语言。",
+      "available": "此语言有 {count} 道可用题目。",
+      "failure": "无法加载可用题目。请重新选择此语言。",
       "loading": "正在检查可用题目…",
       "loading_button": "正在检查题目…",
-      "unavailable": "该语言有 {count} 道可用题目，至少需要 {minimum} 道。"
+      "unavailable": "此语言有 {count} 道可用题目，至少需要 {minimum} 道。"
     },
     "errors": {
       "copy_failure": "无法复制题组编号。",
       "generate_failure": "无法加载生成测验所需的题目。",
-      "insufficient_route_questions": "该编号在所选语言中提供的可用题目少于 {minimum} 道。",
+      "insufficient_route_questions": "此编号在所选语言中提供的可用题目少于 {minimum} 道。",
       "invalid_mapping": "题目映射无效，无法生成题组编号。",
       "invalid_route_code": "题组编号缺失、格式错误、不受支持，或包含未知题目。",
       "invalid_route_options": "测验语言或计时模式无效。",
@@ -146,7 +146,7 @@
     "summary": {
       "caption": "答题结果",
       "level": "难度 {level}",
-      "results_region": "测验结果表；可横向滚动查看所有列",
+      "results_region": "测验结果表（可左右滚动）",
       "score": "{score} 分",
       "status": "状态",
       "used_time": "用时：{time}"
@@ -172,14 +172,13 @@
       "color_id": "颜色 / 标识符",
       "color_value": "颜色值 {color}",
       "dye_icon": "Minecraft 染料图标",
-      "region": "颜色译名表；可横向滚动查看所有语言",
+      "region": "颜色译名表（可左右滚动）",
       "show_chu_nom": "显示喃字",
       "show_korean_mixed": "显示汉谚混写",
       "title": "Minecraft 颜色译名表",
       "updated": "更新于 {date}",
       "variants": "译名变体"
     },
-    "comparison_region": "译名对照表；可横向滚动查看所有语言",
     "controls_label": "表格控件",
     "displayed_languages": "显示的语言",
     "empty": "没有本地化键名符合当前筛选条件。",
@@ -204,7 +203,6 @@
       "total_rows": "字符串总数："
     },
     "search_placeholder": "搜索内容…",
-    "selected_languages": "已选择的语言",
     "sections": {
       "colors": "颜色",
       "label": "表格分区",

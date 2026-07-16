@@ -146,7 +146,7 @@
     "summary": {
       "caption": "Question results",
       "level": "Difficulty {level}",
-      "results_region": "Quiz results table; scroll horizontally to see all columns",
+      "results_region": "Quiz results table (horizontally scrollable)",
       "score": "{score} points",
       "status": "Status",
       "used_time": "Time used: {time}"
@@ -172,14 +172,13 @@
       "color_id": "Colour / ID",
       "color_value": "Colour value {color}",
       "dye_icon": "Minecraft dye icon",
-      "region": "Colour translation table; scroll horizontally to see all languages",
+      "region": "Colour translation table (horizontally scrollable)",
       "show_chu_nom": "Show Chữ Nôm",
       "show_korean_mixed": "Show Korean mixed script",
       "title": "Minecraft Colour Translation Table",
       "updated": "Updated {date}",
       "variants": "Translation variants"
     },
-    "comparison_region": "Translation comparison table; scroll horizontally to see all languages",
     "controls_label": "Table controls",
     "displayed_languages": "Displayed languages",
     "empty": "No translation keys match the current filters.",
@@ -204,7 +203,6 @@
       "total_rows": "Total number of strings: "
     },
     "search_placeholder": "Search content…",
-    "selected_languages": "Selected languages",
     "sections": {
       "colors": "Colours",
       "label": "Table sections",

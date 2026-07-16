@@ -25,7 +25,7 @@
     "description": "Verdigloss 無法載入此檢視。請重試，或返回譯名查詢頁面。",
     "retry": "重試",
     "return_to_query": "返回查詢",
-    "title": "發生錯誤"
+    "title": "出了點問題"
   },
   "language_selector": {
     "choose": "選擇語言",
@@ -146,7 +146,7 @@
     "summary": {
       "caption": "作答結果",
       "level": "難度 {level}",
-      "results_region": "測驗結果表；可橫向捲動查看所有欄位",
+      "results_region": "測驗結果表（可左右捲動）",
       "score": "{score} 分",
       "status": "狀態",
       "used_time": "用時：{time}"
@@ -172,14 +172,13 @@
       "color_id": "顏色 / 識別碼",
       "color_value": "顏色值 {color}",
       "dye_icon": "Minecraft 染料圖示",
-      "region": "顏色譯名表；可橫向捲動查看所有語言",
+      "region": "顏色譯名表（可左右捲動）",
       "show_chu_nom": "顯示喃字",
       "show_korean_mixed": "顯示漢諺混寫",
       "title": "Minecraft 顏色譯名表",
       "updated": "更新於 {date}",
       "variants": "譯名變體"
     },
-    "comparison_region": "譯名對照表；可橫向捲動查看所有語言",
     "controls_label": "表格控制項",
     "displayed_languages": "顯示的語言",
     "empty": "沒有本地化鍵名符合目前的篩選條件。",
@@ -204,7 +203,6 @@
       "total_rows": "字串總數："
     },
     "search_placeholder": "搜尋內容…",
-    "selected_languages": "已選擇的語言",
     "sections": {
       "colors": "顏色",
       "label": "表格分區",
