@@ -8,7 +8,7 @@
   <div class="page-content">
     <h1 class="page-title" :class="currentLang.toLowerCase()">
       {{ $t('table.colors.title') }}
-      <span style="font-size: 75%; color: gray"> (2025/7/23)</span>
+      <span style="font-size: 75%; color: gray"> ({{ colorDataset.updatedAt }})</span>
     </h1>
     <div style="text-align: center; margin-bottom: 1rem">
       <label style="margin-right: 1.5em">
@@ -29,7 +29,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="color in colorData" :key="color.key">
+          <tr v-for="color in colorDataset.colors" :key="color.key">
             <td class="key-column">
               <div class="key-cell-content">
                 <ColorIcon :src="color.icon" />
@@ -45,26 +45,12 @@
               :class="[lang.replace(/_/, '-'), { sans: useSansFont }]"
             >
               <template v-if="lang === 'ko_kr'">
-                <span>{{ (color.translations.ko_kr || '').split(' ')[0] }}</span>
-                <span v-if="showKoreanMixed">
-                  {{
-                    (() => {
-                      const match = (color.translations.ko_kr || '').match(/\(([^)]+)\)/)
-                      return match ? ' ' + match[0] : ''
-                    })()
-                  }}
-                </span>
+                <span>{{ color.korean.label }}</span>
+                <span v-if="showKoreanMixed"> {{ color.korean.annotation }}</span>
               </template>
               <template v-else-if="lang === 'vi_vn'">
-                <span>{{ ((color.translations.vi_vn || '').split('(')[0] || '').trim() }}</span>
-                <span v-if="showChuNom">
-                  {{
-                    (() => {
-                      const match = (color.translations.vi_vn || '').match(/\(([^)]+)\)/)
-                      return match ? ' (' + match[1] + ')' : ''
-                    })()
-                  }}
-                </span>
+                <span>{{ color.chuNom.label }}</span>
+                <span v-if="showChuNom"> {{ color.chuNom.annotation }}</span>
               </template>
               <template v-else>
                 {{ color.translations[lang] || '' }}
@@ -78,21 +64,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import { useDarkMode } from '@/composables/useDarkMode'
-import { currentLocale } from '@/main'
+import { useLocale } from '@/composables/useLocale'
+import { colorDataset } from '@/features/colors/color-data'
 
 import Nav from '../PageNav.vue'
 import ColorIcon from './ColorTable/ColorIcon.vue'
 import ColorPreview from './ColorTable/ColorPreview.vue'
-import colorTranslations from './ColorTable/colorTranslations'
-import dyeIcons from './ColorTable/dyeIcons'
-import dyeIconsNew from './ColorTable/dyeIconsNew'
 import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
-const currentLang = computed(() => currentLocale.value)
+const { locale: currentLang } = useLocale()
 
 const showKoreanMixed = ref(true)
 const showChuNom = ref(true)
@@ -103,7 +87,7 @@ const toggleSansFont = () => {
   writeStoredValue('table:useSansFont', useSansFont.value)
 }
 
-const languages: Array<keyof (typeof colorData)[0]['translations']> = [
+const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = [
   'en_us',
   'zh_cn',
   'zh_hk',
@@ -114,117 +98,7 @@ const languages: Array<keyof (typeof colorData)[0]['translations']> = [
   'vi_vn',
 ]
 
-const colorList = [
-  'black',
-  'blue',
-  'brown',
-  'cyan',
-  'gray',
-  'green',
-  'light_blue',
-  'light_gray',
-  'lime',
-  'magenta',
-  'orange',
-  'pink',
-  'purple',
-  'red',
-  'white',
-  'yellow',
-] as const
 
-type ColorKey = (typeof colorList)[number]
-
-const colorData = colorList.map((key) => ({
-  key,
-  hex: getHex(key),
-  textHex: getTextHex(key),
-  icon: dyeIcons[key],
-  iconNew: dyeIconsNew[key],
-  translations: colorTranslations[key],
-}))
-
-function getHex(key: ColorKey): string {
-  switch (key) {
-    case 'black':
-      return '#1D1D21'
-    case 'blue':
-      return '#3C44AA'
-    case 'brown':
-      return '#835432'
-    case 'cyan':
-      return '#169C9C'
-    case 'gray':
-      return '#474F52'
-    case 'green':
-      return '#5E7C16'
-    case 'light_blue':
-      return '#3AB3DA'
-    case 'light_gray':
-      return '#9D9D97'
-    case 'lime':
-      return '#80C71F'
-    case 'magenta':
-      return '#C74EBD'
-    case 'orange':
-      return '#F9801D'
-    case 'pink':
-      return '#F38BAA'
-    case 'purple':
-      return '#8932B8'
-    case 'red':
-      return '#B02E26'
-    case 'white':
-      return '#F9FFFE'
-    case 'yellow':
-      return '#FED83D'
-    default:
-      return '#000000'
-  }
-}
-
-function getTextHex(key: ColorKey): string {
-  switch (key) {
-    case 'black':
-      return '#000000'
-    case 'blue':
-      return '#0000FF'
-    case 'brown':
-      return '#8B4513'
-    case 'cyan':
-      return '#00FFFF'
-    case 'gray':
-      return '#808080'
-    case 'green':
-      return '#00FF00'
-    case 'light_blue':
-      return '#9AC0CD'
-    case 'light_gray':
-      return '#D3D3D3'
-    case 'lime':
-      return '#BFFF00'
-    case 'magenta':
-      return '#FF00FF'
-    case 'orange':
-      return '#FF681F'
-    case 'pink':
-      return '#FF69B4'
-    case 'purple':
-      return '#A020F0'
-    case 'red':
-      return '#FF0000'
-    case 'white':
-      return '#FFFFFF'
-    case 'yellow':
-      return '#FFFF00'
-    default:
-      return '#000000'
-  }
-}
-
-onMounted(() => {
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-})
 </script>
 
 <style scoped>

@@ -1,4 +1,5 @@
-import type { LanguageCode, LanguageFile } from '@/utils/languages'
+import type { LanguageCode } from '@/data/languages'
+import type { LanguageFile } from '@/services/translation-data'
 import { getSegmentedText } from '@/utils/text'
 
 import { err, ok, type Result } from './result'

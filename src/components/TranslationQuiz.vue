@@ -61,26 +61,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 
 import { useRouter } from 'vue-router'
 
 import quizIdData from '@/assets/data/quiz-id-map.json'
 import legacyQuizIdMap from '@/assets/data/id.json'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { useLocale } from '@/composables/useLocale'
+import { languageRegistry, type LanguageCode } from '@/data/languages'
 import { QUIZ_QUESTION_COUNT, buildEligibleQuestionPool, getQuizLanguageAvailability } from '@/domain/quiz'
 import { decodeQuizCode, encodeQuizCode } from '@/domain/quiz-code'
 import { shuffle } from '@/domain/shuffle'
-import { currentLocale } from '@/main'
-import { languageFiles, languageRegistry, type LanguageCode } from '@/utils/languages'
-import { hasStoredValue } from '@/utils/storage'
-import { usePreferredDark } from '@vueuse/core'
+import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 
 import Nav from './PageNav.vue'
 
 const router = useRouter()
-const preferredDark = usePreferredDark()
-const currentLang = computed(() => currentLocale.value)
+const { locale: currentLang } = useLocale()
 
 const queryLang = ref<LanguageCode>('zh_cn')
 const inputCode = ref('')
@@ -88,18 +86,22 @@ const timerMode = ref(false)
 const quizError = ref('')
 const quizQuestionCount = QUIZ_QUESTION_COUNT
 const quizIdMap = quizIdData.ids
+const loadedQuizData = ref<Partial<Record<LanguageCode, LanguageFile>>>({})
 
 const quizLanguages = computed(() =>
   languageRegistry
     .filter((language) => language.quiz.enabled)
     .map((language) => ({
       ...language,
-      ...getQuizLanguageAvailability(language.code, languageFiles, quizIdMap),
+      ...(loadedQuizData.value[language.code] && loadedQuizData.value.en_us
+        ? getQuizLanguageAvailability(language.code, loadedQuizData.value as Record<LanguageCode, LanguageFile>, quizIdMap)
+        : { language: language.code, eligibleCount: QUIZ_QUESTION_COUNT, available: true }),
     })),
 )
 
-const generateQuizCode = () => {
-  const eligible = buildEligibleQuestionPool(queryLang.value, languageFiles, quizIdMap)
+const generateQuizCode = async () => {
+  loadedQuizData.value = { ...loadedQuizData.value, ...(await loadLanguages(['en_us', queryLang.value])) }
+  const eligible = buildEligibleQuestionPool(queryLang.value, loadedQuizData.value as Record<LanguageCode, LanguageFile>, quizIdMap)
   if (eligible.length < QUIZ_QUESTION_COUNT) {
     quizError.value = `This language needs at least ${QUIZ_QUESTION_COUNT} eligible questions; it has ${eligible.length}.`
     return undefined
@@ -110,15 +112,15 @@ const generateQuizCode = () => {
   )
 }
 
-const startRandomQuiz = () => {
+const startRandomQuiz = async () => {
   quizError.value = ''
-  const result = generateQuizCode()
+  const result = await generateQuizCode()
   if (!result) return
   if (!result.ok) {
     quizError.value = 'Unable to generate a quiz code because its question mapping is invalid.'
     return
   }
-  router.push({ name: 'TranslationQuizSub', params: { code: result.value }, query: { l: queryLang.value, t: timerMode.value ? '1' : '0' } })
+  router.push({ name: 'quiz-code', params: { code: result.value }, query: { l: queryLang.value, t: timerMode.value ? '1' : '0' } })
 }
 
 const startQuiz = () => {
@@ -129,21 +131,11 @@ const startQuiz = () => {
     quizError.value = 'Enter a complete, supported quiz code.'
     return
   }
-  router.push({ name: 'TranslationQuizSub', params: { code }, query: { l: queryLang.value, t: timerMode.value ? '1' : '0' } })
+  router.push({ name: 'quiz-code', params: { code }, query: { l: queryLang.value, t: timerMode.value ? '1' : '0' } })
 }
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
-onMounted(() => {
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
-})
-
-watch(preferredDark, (newValue) => {
-  if (!hasStoredValue('darkMode')) {
-    isDarkMode.value = newValue
-    document.body.classList.toggle('dark-mode', newValue)
-  }
-})
 </script>
 
 <style scoped>

@@ -124,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, shallowRef, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -133,6 +133,8 @@ import legacyQuizIdMap from '@/assets/data/id.json'
 import quizIdData from '@/assets/data/quiz-id-map.json'
 import ratingData from '@/assets/data/rating.json'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { useLocale } from '@/composables/useLocale'
+import { languageRegistry, type LanguageCode } from '@/data/languages'
 import { matchCharacters, type CharacterState } from '@/domain/matching'
 import { QUIZ_QUESTION_COUNT, buildEligibleQuestionPool, buildQuizQuestions, questionSegmentCount } from '@/domain/quiz'
 import { decodeQuizCode, encodeQuizCode } from '@/domain/quiz-code'
@@ -140,13 +142,13 @@ import { parseTargetLanguage, parseTimerMode, type TimerMode } from '@/domain/ro
 import { aggregateScores, calculateQuestionScore, type QuestionCompletion } from '@/domain/scoring'
 import { shuffle } from '@/domain/shuffle'
 import { createQuizTimer, elapsedMilliseconds, isTimerExpired, remainingSeconds, timerProgressPercent, type QuizTimer } from '@/domain/timer'
-import { currentLocale } from '@/main'
-import { languageFiles, languageRegistry, type LanguageCode } from '@/utils/languages'
+import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import { copyText, shareContent } from '@/utils/sharing'
 import { getSegmentedText } from '@/utils/text'
 
 const { t } = useI18n()
-const currentLang = computed(() => currentLocale.value)
+const { locale: currentLang } = useLocale()
+const languageFiles = shallowRef<Partial<Record<LanguageCode, LanguageFile>>>({})
 
 interface Question {
   source: string
@@ -376,7 +378,7 @@ const shareResult = async () => {
 }
 
 const restartQuiz = () => {
-  const eligible = buildEligibleQuestionPool(queryLang.value, languageFiles, quizIdData.ids)
+  const eligible = buildEligibleQuestionPool(queryLang.value, languageFiles.value as Record<LanguageCode, LanguageFile>, quizIdData.ids)
   const code = encodeQuizCode(
     shuffle(eligible.map((question) => question.key)).slice(0, QUIZ_QUESTION_COUNT),
     quizIdData.ids,
@@ -386,7 +388,7 @@ const restartQuiz = () => {
     return
   }
   router.push({
-    name: 'TranslationQuizSub',
+    name: 'quiz-code',
     params: { code: code.value },
     query: { l: queryLang.value, t: isTimerMode.value ? '1' : '0' },
   })
@@ -410,7 +412,7 @@ const resetQuizState = () => {
   timer.value = null
 }
 
-const loadQuestions = () => {
+const loadQuestions = async () => {
   resetQuizState()
   routeError.value = null
   const decoded = decodeQuizCode(quizCode.value, quizIdData.ids, legacyQuizIdMap)
@@ -429,7 +431,8 @@ const loadQuestions = () => {
   }
   queryLang.value = language.value
   timerMode.value = timerResult.value
-  const selected = buildQuizQuestions(decoded.value.keys, queryLang.value, languageFiles, quizIdData.ids)
+  languageFiles.value = { ...languageFiles.value, ...(await loadLanguages(['en_us', queryLang.value])) }
+  const selected = buildQuizQuestions(decoded.value.keys, queryLang.value, languageFiles.value as Record<LanguageCode, LanguageFile>, quizIdData.ids)
   if (!selected.ok) {
     routeError.value = `This valid code provides fewer than ${QUIZ_QUESTION_COUNT} usable questions for the selected language.`
     questions.value = []
@@ -445,7 +448,7 @@ const loadQuestions = () => {
 
 watch(
   () => [route.params.code, route.query.l, route.query.t],
-  () => loadQuestions(),
+  () => void loadQuestions(),
   { immediate: true },
 )
 
