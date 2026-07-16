@@ -10,7 +10,8 @@
       </button>
     </div>
     <div class="quiz-container">
-      <div class="quiz-info" v-show="!showSummary">
+      <p v-if="routeError" role="alert" class="quiz-route-error">{{ routeError }}</p>
+      <div class="quiz-info" v-show="!showSummary && !routeError">
         <div class="info">
           <div v-if="isTimerMode" class="timer">
             {{ formatTime(remainingTime) }}
@@ -34,7 +35,7 @@
             v-for="(box, index) in boxes"
             :key="index"
             class="translation-character"
-            :class="[queryLang.replace(/_/, '-'), box.class, { dark: isDarkMode }]"
+            :class="[queryLang.replace(/_/, '-'), box.state, { dark: isDarkMode }]"
           >
             {{ box.char }}
           </div>
@@ -42,7 +43,7 @@
       </div>
 
       <input
-        v-if="!showSummary"
+        v-if="!showSummary && !routeError"
         v-model="inputText"
         autocomplete="off"
         class="quiz-input"
@@ -55,7 +56,7 @@
         type="text"
       />
 
-      <div class="quiz-controls" v-if="!showSummary">
+      <div class="quiz-controls" v-if="!showSummary && !routeError">
         <button v-if="canHint" class="quiz-hint-btn" @click="showHint">
           {{ $t('quiz.hint') }}
         </button>
@@ -64,7 +65,7 @@
         </button>
       </div>
 
-      <div class="quiz-summary" v-if="showSummary">
+      <div class="quiz-summary" v-if="showSummary && !routeError">
         <div class="quiz-title" :class="currentLang.toLowerCase()">
           {{ $t('quiz.complete') }}
         </div>
@@ -93,7 +94,7 @@
                   v-for="(char, i) in question.translationChars"
                   :key="i"
                   class="transl"
-                  :class="[charStates[question.key]?.[i]?.replace('box', ''), { dark: isDarkMode }]"
+                  :class="[questionResults[question.key]?.states[i] || 'empty', { dark: isDarkMode }]"
                   >{{ char }}</span
                 >
               </td>
@@ -108,6 +109,7 @@
             <i-material-symbols-share class="btn" v-if="canShare" @click="shareResult" />
           </span>
         </div>
+        <p v-if="actionError" role="alert" class="quiz-route-error">{{ actionError }}</p>
         <div class="quiz-summary-buttons">
           <button class="button" @click="restartQuiz">
             {{ $t('quiz.restart') }}
@@ -122,16 +124,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import idList from '@/assets/data/id.json'
+import legacyQuizIdMap from '@/assets/data/id.json'
+import quizIdData from '@/assets/data/quiz-id-map.json'
 import ratingData from '@/assets/data/rating.json'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { matchCharacters, type CharacterState } from '@/domain/matching'
+import { QUIZ_QUESTION_COUNT, buildEligibleQuestionPool, buildQuizQuestions, questionSegmentCount } from '@/domain/quiz'
+import { decodeQuizCode, encodeQuizCode } from '@/domain/quiz-code'
+import { parseTargetLanguage, parseTimerMode, type TimerMode } from '@/domain/route'
+import { aggregateScores, calculateQuestionScore, type QuestionCompletion } from '@/domain/scoring'
+import { shuffle } from '@/domain/shuffle'
+import { createQuizTimer, elapsedMilliseconds, isTimerExpired, remainingSeconds, timerProgressPercent, type QuizTimer } from '@/domain/timer'
 import { currentLocale } from '@/main'
-import { type LanguageCode, languageFiles } from '@/utils/languages'
+import { languageFiles, languageRegistry, type LanguageCode } from '@/utils/languages'
+import { copyText, shareContent } from '@/utils/sharing'
 import { getSegmentedText } from '@/utils/text'
 
 const { t } = useI18n()
@@ -147,8 +158,13 @@ interface Question {
 
 interface Box {
   char: string
-  class: string
-  isHint?: boolean
+  state: CharacterState
+}
+
+interface StoredQuestionResult {
+  completion: QuestionCompletion
+  score: number
+  states: CharacterState[]
 }
 
 const route = useRoute()
@@ -162,7 +178,10 @@ const showSummary = ref(false)
 const isComposing = ref(false)
 const isLocked = ref(false)
 const isCopied = ref(false)
-const charStates = ref<Record<string, string[]>>({})
+const routeError = ref<string | null>(null)
+const actionError = ref<string | null>(null)
+const questionResults = ref<Record<string, StoredQuestionResult>>({})
+const hintsByQuestion = ref<Record<string, number[]>>({})
 
 const onCompositionStart = () => {
   isComposing.value = true
@@ -173,12 +192,18 @@ const onCompositionEnd = () => {
   onInput()
 }
 
-const isTimerMode = computed(() => route.query.t === '1')
-const remainingTime = ref(240)
-const usedTime = ref(0)
+const QUIZ_DURATION_SECONDS = 240
+const timerMode = ref<TimerMode>('untimed')
+const isTimerMode = computed(() => timerMode.value === 'timed')
+const timer = ref<QuizTimer | null>(null)
+const now = ref(Date.now())
 let timerInterval: number | null = null
 
-const progressWidth = computed(() => (remainingTime.value / 240) * 100)
+const remainingTime = computed(() => (timer.value ? remainingSeconds(timer.value, now.value) : 0))
+const usedTime = computed(() =>
+  timer.value ? Math.min(QUIZ_DURATION_SECONDS, Math.floor(elapsedMilliseconds(timer.value, now.value) / 1000)) : 0,
+)
+const progressWidth = computed(() => (timer.value ? timerProgressPercent(timer.value, now.value) : 0))
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -186,25 +211,23 @@ const formatTime = (seconds: number) => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 }
 
-const startTimer = () => {
-  if (isTimerMode.value) {
-    usedTime.value = 0
-    timerInterval = setInterval(() => {
-      if (remainingTime.value > 0) {
-        remainingTime.value--
-        usedTime.value++
-      } else {
-        clearInterval(timerInterval!)
-        showSummary.value = true
-      }
-    }, 1000)
-  }
+const stopTimer = () => {
+  if (timerInterval !== null) window.clearInterval(timerInterval)
+  timerInterval = null
 }
 
-const totalScore = ref(0)
-const questionScore = ref(10)
+const startTimer = () => {
+  // Timed quizzes use real elapsed time and deliberately continue while the page is hidden.
+  if (!isTimerMode.value) return
+  now.value = Date.now()
+  timer.value = createQuizTimer(now.value, QUIZ_DURATION_SECONDS)
+  timerInterval = window.setInterval(() => {
+    now.value = Date.now()
+    if (timer.value && isTimerExpired(timer.value, now.value)) finishTimedQuiz()
+  }, 250)
+}
 
-const queryLang = computed(() => (route.query.l as string) || 'zh_cn')
+const queryLang = ref<LanguageCode>('zh_cn')
 const quizCode = computed(() => route.params.code as string)
 const questions = ref<Question[]>([])
 const currentQuestion = computed(() => questions.value[currentIndex.value])
@@ -212,61 +235,21 @@ const boxes = computed(() => getBoxes())
 const canHint = computed(
   () =>
     !showSummary.value &&
-    boxes.value.filter((b) => !b.class.includes('correct') && !b.class.includes('hinted')).length >
+    boxes.value.filter((box) => box.state !== 'correct' && box.state !== 'hinted' && box.state !== 'hinted-correct').length >
       1,
 )
 const canSkip = computed(() => !showSummary.value && !canHint.value)
-const canShare = computed(() => !!navigator.share)
+const canShare = computed(() => typeof navigator !== 'undefined' && !!navigator.share)
 
 const fullStars = computed(() => Math.floor(currentQuestion.value?.rating || 0))
 const hasHalfStar = computed(() => (currentQuestion.value?.rating || 0) % 1 > 0)
 const totalLevel = computed(() => questions.value.reduce((sum, q) => sum + (q.rating || 0), 0))
+const totalScore = computed(() => aggregateScores(Object.values(questionResults.value)))
 
 const getBoxes = (): Box[] => {
   const cq = currentQuestion.value
   if (!cq) return []
-
-  const input = getSegmentedText(inputText.value)
-  const translation = getSegmentedText(cq.translation || '')
-
-  const correctMatchCounts = new Map<string, number>()
-  translation.forEach((char, i) => {
-    if (input[i] === char) {
-      correctMatchCounts.set(char, (correctMatchCounts.get(char) || 0) + 1)
-    }
-  })
-
-  const charTotalCounts = new Map<string, number>()
-  translation.forEach((char) => {
-    charTotalCounts.set(char, (charTotalCounts.get(char) || 0) + 1)
-  })
-
-  return translation.map((char, i) => {
-    const userChar = input[i] || ''
-    const isHinted = charStates.value[cq.key]?.[i]?.includes('hinted')
-    let boxClass = ''
-
-    if (isHinted) {
-      boxClass = 'hinted'
-      if (userChar === char) {
-        boxClass += ' correct'
-      }
-    } else if (!userChar) {
-      boxClass = ''
-    } else if (userChar === char) {
-      boxClass = 'correct'
-    } else if (
-      translation.includes(userChar) &&
-      (correctMatchCounts.get(userChar) || 0) < (charTotalCounts.get(userChar) || 0)
-    ) {
-      boxClass = 'exist'
-    }
-
-    return {
-      char: isHinted ? char : userChar || '',
-      class: boxClass,
-    }
-  })
+  return matchCharacters(cq.translation, inputText.value, new Set(hintsByQuestion.value[cq.key] ?? []))
 }
 
 const onInput = () => {
@@ -287,30 +270,14 @@ const handleCorrectAnswer = async () => {
   isLocked.value = true
   const cq = currentQuestion.value
   if (!cq) return
-  if (!charStates.value[cq.key]) {
-    charStates.value[cq.key] = []
-  }
-  const stateArr = charStates.value[cq.key] as string[]
-  boxes.value.forEach((box, index) => {
-    stateArr[index] = box.class
-  })
-  charStates.value[cq.key] = stateArr
-
-  totalScore.value += questionScore.value
+  recordCurrentResult('correct')
 
   await new Promise((resolve) => setTimeout(resolve, 800))
-
-  if (currentIndex.value >= questions.value.length - 1) {
-    if (timerInterval) {
-      clearInterval(timerInterval)
-    }
-    showSummary.value = true
-  } else {
-    currentIndex.value++
-    inputText.value = ''
-    questionScore.value = 10
+  if (showSummary.value) {
+    isLocked.value = false
+    return
   }
-
+  advanceQuestion()
   isLocked.value = false
 }
 
@@ -319,90 +286,109 @@ const showHint = () => {
   const cq = currentQuestion.value
   if (!cq) return
 
-  const translation = getSegmentedText(cq.translation || '')
   const currentBoxes = boxes.value
 
-  const hintIndex = currentBoxes.findIndex(
-    (b) => !b.class.includes('correct') && !b.class.includes('hinted'),
+  const hintIndex = currentBoxes.findIndex((box) =>
+    box.state !== 'correct' && box.state !== 'hinted' && box.state !== 'hinted-correct',
   )
 
   if (hintIndex !== -1) {
-    if (!charStates.value[cq.key]) {
-      charStates.value[cq.key] = []
-    }
-    const sArr = charStates.value[cq.key] as string[]
-    sArr[hintIndex] = 'hinted'
-    charStates.value[cq.key] = sArr
-
-    const hintCount = (sArr || []).filter((state) => state?.includes('hinted')).length
-    questionScore.value = Math.max(0, 10 * (1 - hintCount / (translation.length || 1)))
+    const currentHints = hintsByQuestion.value[cq.key] ?? []
+    hintsByQuestion.value = { ...hintsByQuestion.value, [cq.key]: [...currentHints, hintIndex] }
   }
 }
 
 const skipQuestion = async () => {
   if (isLocked.value) return
   isLocked.value = true
-
-  if (currentIndex.value >= questions.value.length - 1) {
-    if (timerInterval) {
-      clearInterval(timerInterval)
-    }
-    showSummary.value = true
-  } else {
-    currentIndex.value++
-    inputText.value = ''
-    questionScore.value = 10
-  }
-
+  recordCurrentResult('skipped')
+  advanceQuestion()
   isLocked.value = false
 }
 
+const recordCurrentResult = (completion: QuestionCompletion) => {
+  const question = currentQuestion.value
+  if (!question) return
+  const states = boxes.value.map((box) => box.state)
+  const score = calculateQuestionScore({
+    completion,
+    hintCount: (hintsByQuestion.value[question.key] ?? []).length,
+    segmentCount: questionSegmentCount(question),
+  })
+  questionResults.value = {
+    ...questionResults.value,
+    [question.key]: { completion, score: score.score, states },
+  }
+}
+
+const advanceQuestion = () => {
+  if (currentIndex.value >= questions.value.length - 1) {
+    stopTimer()
+    showSummary.value = true
+    return
+  }
+  currentIndex.value += 1
+  inputText.value = ''
+}
+
+const finishTimedQuiz = () => {
+  if (showSummary.value) return
+  for (let index = currentIndex.value; index < questions.value.length; index += 1) {
+    const question = questions.value[index] as Question
+    if (questionResults.value[question.key]) continue
+    const states = index === currentIndex.value ? boxes.value.map((box) => box.state) : []
+    const score = calculateQuestionScore({
+      completion: 'timed-out',
+      hintCount: (hintsByQuestion.value[question.key] ?? []).length,
+      segmentCount: questionSegmentCount(question),
+    })
+    questionResults.value = {
+      ...questionResults.value,
+      [question.key]: { completion: 'timed-out', score: score.score, states },
+    }
+  }
+  stopTimer()
+  showSummary.value = true
+}
+
 const copyCode = async () => {
-  await navigator.clipboard.writeText(quizCode.value)
+  const result = await copyText(quizCode.value)
+  if (!result.ok) {
+    actionError.value = 'Unable to copy the quiz code.'
+    return
+  }
+  actionError.value = null
   isCopied.value = true
   setTimeout(() => {
     isCopied.value = false
   }, 2000)
 }
 
-const shareResult = () => {
-  if (canShare.value) {
-    navigator.share({
-      title: t('quiz.title'),
-      text: t('quiz.description'),
-      url: window.location.href,
-    })
+const shareResult = async () => {
+  const result = await shareContent({
+    title: t('quiz.title'),
+    text: t('quiz.description'),
+    url: window.location.href,
+  })
+  if (!result.ok) {
+    actionError.value = 'Unable to share the quiz result.'
   }
 }
 
 const restartQuiz = () => {
-  const allKeys = Object.keys(idList)
-  const shuffled = allKeys.sort(() => Math.random() - 0.5)
-  const selectedKeys = shuffled.slice(0, 10)
-  const sortedKeys = selectedKeys.sort((a, b) =>
-    idList[a as keyof typeof idList].localeCompare(idList[b as keyof typeof idList]),
+  const eligible = buildEligibleQuestionPool(queryLang.value, languageFiles, quizIdData.ids)
+  const code = encodeQuizCode(
+    shuffle(eligible.map((question) => question.key)).slice(0, QUIZ_QUESTION_COUNT),
+    quizIdData.ids,
   )
-  const keys = sortedKeys.join('')
-  router.push(`/quiz/${keys}?l=${queryLang.value}`).then(() => {
-    currentIndex.value = 0
-    inputText.value = ''
-    showSummary.value = false
-    isComposing.value = false
-    isLocked.value = false
-    isCopied.value = false
-    charStates.value = {}
-    totalScore.value = 0
-    questionScore.value = 10
-    remainingTime.value = 240
-    usedTime.value = 0
-
-    if (timerInterval) {
-      clearInterval(timerInterval)
-      timerInterval = null
-    }
-
-    loadQuestions()
-    startTimer()
+  if (!code.ok) {
+    actionError.value = 'Unable to generate a replacement quiz.'
+    return
+  }
+  router.push({
+    name: 'TranslationQuizSub',
+    params: { code: code.value },
+    query: { l: queryLang.value, t: isTimerMode.value ? '1' : '0' },
   })
 }
 
@@ -410,78 +396,61 @@ const returnToPortal = () => {
   router.push('/quiz')
 }
 
-const langFiles: Record<LanguageCode, typeof languageFiles.en_us> = {
-  en_us: languageFiles.en_us,
-  zh_cn: languageFiles.zh_cn,
-  zh_hk: languageFiles.zh_hk,
-  zh_tw: languageFiles.zh_tw,
-  lzh: languageFiles.lzh,
-  ja_jp: languageFiles.ja_jp,
-  ko_kr: languageFiles.ko_kr,
-  vi_vn: languageFiles.vi_vn,
-  de_de: languageFiles.de_de,
-  es_es: languageFiles.es_es,
-  fr_fr: languageFiles.fr_fr,
-  it_it: languageFiles.it_it,
-  nl_nl: languageFiles.nl_nl,
-  pt_br: languageFiles.pt_br,
-  ru_ru: languageFiles.ru_ru,
-  th_th: languageFiles.th_th,
-  uk_ua: languageFiles.uk_ua,
+const resetQuizState = () => {
+  stopTimer()
+  currentIndex.value = 0
+  inputText.value = ''
+  showSummary.value = false
+  isComposing.value = false
+  isLocked.value = false
+  isCopied.value = false
+  actionError.value = null
+  questionResults.value = {}
+  hintsByQuestion.value = {}
+  timer.value = null
 }
 
 const loadQuestions = () => {
-  if (!quizCode.value || quizCode.value.length !== 30) {
-    router.push('/quiz')
+  resetQuizState()
+  routeError.value = null
+  const decoded = decodeQuizCode(quizCode.value, quizIdData.ids, legacyQuizIdMap)
+  if (!decoded.ok) {
+    routeError.value = 'This quiz code is missing, malformed, unsupported, or contains an unknown question.'
+    questions.value = []
     return
   }
-
-  const codeSegments = quizCode.value.match(/.{3}/g) || []
-  if (!codeSegments.every((seg) => Object.keys(idList).includes(seg))) {
-    router.push('/quiz')
+  const quizLanguages = languageRegistry.filter((language) => language.quiz.enabled).map((language) => language.code)
+  const language = parseTargetLanguage(route.query.l, quizLanguages, 'zh_cn')
+  const timerResult = parseTimerMode(route.query.t)
+  if (!language.ok || !timerResult.ok) {
+    routeError.value = 'The quiz language or timer mode is invalid.'
+    questions.value = []
     return
   }
-
-  const selectedKeys = codeSegments.map((seg) => idList[seg as keyof typeof idList]).sort()
-  const selectedLang = queryLang.value as LanguageCode
-  const langFile = langFiles[selectedLang] || {}
-
-  type LangFileKey = keyof typeof languageFiles.en_us
-
-  questions.value = selectedKeys
-    .map((key) => {
-      const langKey = key as LangFileKey
-      const src = (languageFiles.en_us && languageFiles.en_us[langKey]) || ''
-      const trans = (langFile && (langFile as Record<string, string>)[langKey]) || ''
-      return {
-        source: src,
-        key: key,
-        translation: trans,
-        rating:
-          selectedLang === 'zh_cn'
-            ? ratingData[langKey as keyof typeof ratingData] || 0
-            : undefined,
-        translationChars: getSegmentedText(trans || ''),
-      }
-    })
-    .filter((question) => question.source !== question.translation)
-    .sort(() => Math.random() - 0.5)
+  queryLang.value = language.value
+  timerMode.value = timerResult.value
+  const selected = buildQuizQuestions(decoded.value.keys, queryLang.value, languageFiles, quizIdData.ids)
+  if (!selected.ok) {
+    routeError.value = `This valid code provides fewer than ${QUIZ_QUESTION_COUNT} usable questions for the selected language.`
+    questions.value = []
+    return
+  }
+  questions.value = shuffle(selected.value).map((question) => ({
+    ...question,
+    rating: queryLang.value === 'zh_cn' ? ratingData[question.key as keyof typeof ratingData] : undefined,
+    translationChars: getSegmentedText(question.translation),
+  }))
+  startTimer()
 }
 
-onMounted(async () => {
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode === 'true') {
-    document.body.classList.add('dark-mode')
-    isDarkMode.value = true
-  }
-  loadQuestions()
-  startTimer()
-})
+watch(
+  () => [route.params.code, route.query.l, route.query.t],
+  () => loadQuestions(),
+  { immediate: true },
+)
 
 onUnmounted(() => {
-  if (timerInterval) {
-    clearInterval(timerInterval)
-  }
+  stopTimer()
 })
 </script>
 
@@ -515,6 +484,11 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
+.quiz-route-error {
+  color: #b42318;
+  text-align: center;
+}
+
 /* Character Boxes */
 .translation-character {
   display: inline-block;
@@ -544,12 +518,12 @@ onUnmounted(() => {
   background-color: #ef5350;
 }
 
-.translation-character.hinted.correct {
+.translation-character.hinted-correct {
   color: #000;
   background-color: #64b5f6;
 }
 
-.translation-character.exist {
+.translation-character.present {
   color: #000;
   background-color: #ffd600;
 }
@@ -779,7 +753,7 @@ button:hover {
   background-color: #85df4c;
 }
 
-.transl.exist {
+.transl.present {
   background-color: #f3d837;
 }
 
@@ -787,7 +761,7 @@ button:hover {
   background-color: #ff6d55;
 }
 
-.transl.hinted.correct {
+.transl.hinted-correct {
   background-color: #5ab0f3;
 }
 
@@ -806,12 +780,12 @@ button:hover {
   background-color: transparent;
 }
 
-.transl.hinted.correct.dark {
+.transl.hinted-correct.dark {
   color: #5ab0f3;
   background-color: transparent;
 }
 
-.transl.exist.dark {
+.transl.present.dark {
   color: #f3d837;
   background-color: transparent;
 }
@@ -826,7 +800,7 @@ button:hover {
   background-color: #43a047;
 }
 
-.translation-character.exist.dark {
+.translation-character.present.dark {
   color: #e0e0e0;
   background-color: #afb42b;
 }
@@ -836,7 +810,7 @@ button:hover {
   background-color: #d32f2f;
 }
 
-.translation-character.hinted.correct.dark {
+.translation-character.hinted-correct.dark {
   color: #e0e0e0;
   background-color: #0288d1;
 }

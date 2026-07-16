@@ -1,13 +1,10 @@
 import { ref } from 'vue'
 import { usePreferredDark } from '@vueuse/core'
+import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 
 export const useDarkMode = () => {
   const preferredDark = usePreferredDark()
-  const isDarkMode = ref(
-    localStorage.getItem('darkMode') === null
-      ? preferredDark.value
-      : localStorage.getItem('darkMode') === 'true',
-  )
+  const isDarkMode = ref(readBooleanPreference('darkMode', preferredDark.value))
 
   const toggleDarkMode = () => {
     isDarkMode.value = !isDarkMode.value
@@ -16,7 +13,7 @@ export const useDarkMode = () => {
 
   const updateDarkMode = () => {
     document.body.classList.toggle('dark-mode', isDarkMode.value)
-    localStorage.setItem('darkMode', isDarkMode.value.toString())
+    writeStoredValue('darkMode', isDarkMode.value)
   }
 
   updateDarkMode()

@@ -73,6 +73,7 @@ import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useDownload } from '@/composables/useDownload'
 import { type LanguageCode, languageFiles, languageList } from '@/utils/languages'
+import { readBooleanPreference, readLanguageList, writeStoredValue } from '@/utils/storage'
 
 import Header from './Table/TableHeader.vue'
 import Pagination from './Table/TablePagination.vue'
@@ -84,9 +85,11 @@ const translations = ref(languageFiles)
 const searchQuery = ref('')
 
 const selectedLanguages = ref<LanguageCode[]>(
-  JSON.parse(
-    localStorage.getItem('table:selectedLanguages') ||
-      '["en_us", "zh_cn", "zh_hk", "zh_tw", "lzh"]',
+  readLanguageList(
+    'verdigloss:table:selectedLanguages:v1',
+    languageList,
+    ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh'],
+    ['table:selectedLanguages'],
   ),
 )
 
@@ -97,8 +100,8 @@ interface TableRow extends Record<string, string> {
 const loading = ref(true)
 const tableData = ref<TableRow[]>([])
 const usePagination = ref(true)
-const downloadAllData = ref(localStorage.getItem('table:downloadAllData') !== 'false')
-const useSansFont = ref(localStorage.getItem('table:useSansFont') !== 'false')
+const downloadAllData = ref(readBooleanPreference('table:downloadAllData', true))
+const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
@@ -137,11 +140,6 @@ onMounted(() => {
     processBatch(0)
   })
 
-  const savedDarkMode = localStorage.getItem('darkMode')
-  if (savedDarkMode === 'true') {
-    document.body.classList.add('dark-mode')
-    isDarkMode.value = true
-  }
 })
 
 const displayLanguages = computed(() => {
@@ -215,14 +213,14 @@ function handleDownload({ type, all }: { type: string; all: boolean }) {
 watch(
   selectedLanguages,
   (newValue) => {
-    localStorage.setItem('table:selectedLanguages', JSON.stringify(newValue))
+    writeStoredValue('verdigloss:table:selectedLanguages:v1', newValue)
   },
   { deep: true },
 )
 
 const toggleSansFont = () => {
   useSansFont.value = !useSansFont.value
-  localStorage.setItem('table:useSansFont', useSansFont.value.toString())
+  writeStoredValue('table:useSansFont', useSansFont.value)
 }
 </script>
 

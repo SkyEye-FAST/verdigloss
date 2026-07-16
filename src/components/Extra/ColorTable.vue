@@ -89,17 +89,18 @@ import ColorPreview from './ColorTable/ColorPreview.vue'
 import colorTranslations from './ColorTable/colorTranslations'
 import dyeIcons from './ColorTable/dyeIcons'
 import dyeIconsNew from './ColorTable/dyeIconsNew'
+import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 const currentLang = computed(() => currentLocale.value)
 
 const showKoreanMixed = ref(true)
 const showChuNom = ref(true)
-const useSansFont = ref(localStorage.getItem('table:useSansFont') !== 'false')
+const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
 
 const toggleSansFont = () => {
   useSansFont.value = !useSansFont.value
-  localStorage.setItem('table:useSansFont', useSansFont.value.toString())
+  writeStoredValue('table:useSansFont', useSansFont.value)
 }
 
 const languages: Array<keyof (typeof colorData)[0]['translations']> = [
