@@ -2,9 +2,16 @@
   <header class="table-header">
     <div class="table-header__title">
       <h1>{{ $t('table.title') }}</h1>
-      <p>{{ $t('table.java_edition') }}{{ minecraftVersion }} · {{ $t('table.author') }}</p>
+      <p>
+        {{
+          $t('table.version_credit', {
+            version: minecraftVersion,
+            author: $t('table.author'),
+          })
+        }}
+      </p>
     </div>
-    <div class="table-toolbar" aria-label="Table controls">
+    <div class="table-toolbar" :aria-label="$t('table.controls_label')">
       <label class="search-field"
         ><span class="sr-only">{{ $t('table.search_placeholder') }}</span
         ><i-material-symbols-search aria-hidden="true" /><input
@@ -15,7 +22,8 @@
       /></label>
       <LanguageSelector
         v-model="selectedLanguages"
-        label="Displayed languages"
+        :label="$t('table.displayed_languages')"
+        :placeholder="$t('language_selector.choose')"
         :options="languageOptions"
       />
       <label class="toggle-control"
@@ -24,11 +32,13 @@
         }}</span></label
       >
       <details class="export-menu">
-        <summary><i-material-symbols-download aria-hidden="true" /> Export</summary>
+        <summary>
+          <i-material-symbols-download aria-hidden="true" /> {{ $t('table.export.label') }}
+        </summary>
         <div class="export-menu__content">
           <label class="toggle-control"
             ><input v-model="downloadAllData" type="checkbox" /><span>{{
-              downloadAllData ? 'All filtered rows' : 'Current page'
+              downloadAllData ? $t('table.export.all_rows') : $t('table.export.current_page')
             }}</span></label
           >
           <div class="export-menu__formats">
@@ -44,20 +54,17 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
+import type { LanguageMetadata } from '@/data/languages'
 import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 import LanguageSelector from '../Query/LanguageSelector.vue'
 
 const props = defineProps<{
   searchQuery: string
   minecraftVersion: string
-  languages: string[]
-  isDarkMode: boolean
-  useSansFont?: boolean
+  languages: readonly LanguageMetadata[]
 }>()
 const emit = defineEmits<{
   'update:searchQuery': [string]
-  'toggle-dark-mode': []
-  'toggle-sans-font': []
   download: [{ type: 'tsv' | 'csv' | 'json' | 'xml' | 'xlsx'; all: boolean }]
 }>()
 const selectedLanguages = defineModel<string[]>('selectedLanguages', {
@@ -69,10 +76,10 @@ const downloadAllData = defineModel('downloadAllData', {
 })
 const formats = ['tsv', 'csv', 'json', 'xml', 'xlsx'] as const
 const languageOptions = computed(() =>
-  props.languages.map((value) => ({
-    value,
-    label: value.replace('_', '-'),
-    htmlLang: value.replace('_', '-'),
+  props.languages.map((language) => ({
+    value: language.code,
+    label: language.gameName,
+    htmlLang: language.htmlLang,
   })),
 )
 function emitDownload(type: (typeof formats)[number]) {
@@ -218,7 +225,7 @@ watch(downloadAllData, (value) => writeStoredValue('table:downloadAllData', valu
     margin-top: 0.35rem;
   }
   .table-toolbar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .export-menu__content {
     left: 0;

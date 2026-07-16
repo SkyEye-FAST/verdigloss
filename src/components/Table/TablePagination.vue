@@ -1,5 +1,5 @@
 <template>
-  <nav class="pagination-controls" aria-label="Table pagination">
+  <nav class="pagination-controls" :aria-label="$t('table.pagination.label')">
     <p v-if="showInfo" class="pagination-info" aria-live="polite">
       {{ $t('table.pagination.total_rows') }}{{ totalItems }}
     </p>
@@ -8,10 +8,12 @@
         class="page-button"
         type="button"
         :disabled="currentPage <= 1 || !totalItems"
-        aria-label="Previous page"
+        :aria-label="$t('table.pagination.previous')"
         @click="emit('update:currentPage', currentPage - 1)"
       >
-        <i-material-symbols-arrow-back aria-hidden="true" /><span>Previous</span>
+        <i-material-symbols-arrow-back aria-hidden="true" /><span>{{
+          $t('table.pagination.previous_short')
+        }}</span>
       </button>
       <div class="page-numbers">
         <template v-for="(page, index) in displayedPages" :key="`${page}-${index}`">
@@ -22,7 +24,7 @@
             :class="{ active: currentPage === page }"
             type="button"
             :aria-current="currentPage === page ? 'page' : undefined"
-            :aria-label="`Page ${page}`"
+            :aria-label="$t('table.pagination.page', { page })"
             @click="emit('update:currentPage', page)"
           >
             {{ page }}
@@ -30,7 +32,7 @@
         </template>
       </div>
       <label class="page-jump"
-        ><span class="sr-only">Jump to page</span
+        ><span class="sr-only">{{ $t('table.pagination.jump') }}</span
         ><input
           v-model="jumpPage"
           type="number"
@@ -38,17 +40,18 @@
           :max="totalPages || 1"
           inputmode="numeric"
           placeholder="#"
-          aria-label="Jump to page"
+          :aria-label="$t('table.pagination.jump')"
           @change="jump"
       /></label>
       <button
         class="page-button"
         type="button"
         :disabled="currentPage >= totalPages || !totalItems"
-        aria-label="Next page"
+        :aria-label="$t('table.pagination.next')"
         @click="emit('update:currentPage', currentPage + 1)"
       >
-        <span>Next</span><i-material-symbols-arrow-forward aria-hidden="true" />
+        <span>{{ $t('table.pagination.next_short') }}</span
+        ><i-material-symbols-arrow-forward aria-hidden="true" />
       </button>
     </div>
   </nav>

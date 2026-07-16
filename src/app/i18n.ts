@@ -3,19 +3,18 @@ import en from '@/locales/en.json'
 import zhCN from '@/locales/zh-cn.json'
 import zhTW from '@/locales/zh-tw.json'
 
-export type InterfaceLocale = 'en' | 'zh' | 'zh-CN' | 'zh-TW'
+export type InterfaceLocale = 'en' | 'zh-CN' | 'zh-TW'
 
 export const i18n = createI18n({
   legacy: false,
   locale: resolveInterfaceLocale(navigator.language),
   fallbackLocale: 'en',
-  messages: { en, zh: zhCN, 'zh-CN': zhCN, 'zh-TW': zhTW },
+  messages: { en, 'zh-CN': zhCN, 'zh-TW': zhTW },
 })
 
 export function resolveInterfaceLocale(language: string | undefined): InterfaceLocale {
   const normalized = language?.toLowerCase() ?? 'en'
   if (!normalized.startsWith('zh')) return 'en'
-  if (normalized.includes('cn') || normalized.includes('hans')) return 'zh-CN'
-  if (normalized.includes('tw') || normalized.includes('hant')) return 'zh-TW'
-  return 'zh'
+  if (normalized.includes('hant') || /-(tw|hk|mo)(?:-|$)/.test(normalized)) return 'zh-TW'
+  return 'zh-CN'
 }

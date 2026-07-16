@@ -24,8 +24,26 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
       },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['iPhone 13'], browserName: 'chromium' } },
+    {
+      name: 'desktop-large',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 768 } },
+    },
+    {
+      name: 'tablet',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } },
+    },
+    {
+      name: 'mobile',
+      use: {
+        ...devices['iPhone 13'],
+        browserName: 'chromium',
+        viewport: { width: 390, height: 844 },
+      },
+    },
     {
       name: 'landscape',
       use: { ...devices['Desktop Chrome'], viewport: { width: 844, height: 390 } },

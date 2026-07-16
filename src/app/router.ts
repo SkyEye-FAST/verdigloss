@@ -42,7 +42,7 @@ const routes: RouteRecordRaw[] = [
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/components/NotFoundPage.vue'),
-    meta: { fallbackTitle: 'Page not found' },
+    meta: { titleKey: 'not_found.title', fallbackTitle: 'Page not found' },
   },
 ]
 

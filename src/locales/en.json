@@ -1,5 +1,49 @@
 {
+  "app": {
+    "font": {
+      "sans": "Sans serif",
+      "serif": "Serif",
+      "use_sans": "Use sans-serif translation font",
+      "use_serif": "Use serif translation font"
+    },
+    "github": "Verdigloss on GitHub",
+    "home": "Verdigloss home",
+    "nav": {
+      "colors": "Colours",
+      "query": "Query",
+      "quiz": "Quiz",
+      "table": "Table"
+    },
+    "primary_navigation": "Primary navigation",
+    "theme": {
+      "dark": "Dark",
+      "light": "Light",
+      "use_dark": "Use dark theme",
+      "use_light": "Use light theme"
+    }
+  },
+  "error_boundary": {
+    "description": "Verdigloss could not load this view. Try again, or return to the translation query.",
+    "retry": "Try again",
+    "return_to_query": "Return to query",
+    "title": "Something went wrong"
+  },
+  "language_selector": {
+    "choose": "Choose languages",
+    "clear": "Clear",
+    "select_all": "Select all",
+    "selected": "Selected languages"
+  },
+  "not_found": {
+    "description": "This page does not exist.",
+    "return_home": "Back to Verdigloss",
+    "title": "Page not found"
+  },
   "query": {
+    "controls": {
+      "collapse": "Collapse query controls",
+      "expand": "Expand query controls"
+    },
     "error": {
       "missing_query_content": "Please enter query content",
       "no-matching-translations": "No matching translations found"
@@ -7,76 +51,166 @@
     "java_edition": "Java Edition ",
     "locale_key": "Select a translation key",
     "nav": {
-      "dark_mode": "Toggle Dark Mode",
-      "github": "GitHub Repository",
-      "query": "Translation Query Tool",
-      "quiz": "Standard Translation Quiz",
-      "table": "Translation Table",
-      "toggle_font": "Toggle Font"
+      "dark_mode": "Toggle dark mode",
+      "github": "GitHub repository",
+      "query": "Translation query tool",
+      "quiz": "Standard translation quiz",
+      "table": "Translation table",
+      "toggle_font": "Toggle font"
     },
-    "query_content": "Query Content",
-    "query_lang": "Query Language",
-    "query_mode": "Query Mode",
+    "query_content": "Query content",
+    "query_lang": "Query language",
+    "query_mode": "Query mode",
     "query_modes": {
       "key": "Query by translation key",
       "source": "Query by source string",
-      "translation": "Query by translated Text"
+      "translation": "Query by translated text"
     },
-    "select_languages": "Select Languages",
+    "results": {
+      "caption": "Translations for {source}",
+      "enter_query": "Enter a query to search translation keys.",
+      "matching": "{count} matching translation key available. | {count} matching translation keys available."
+    },
+    "select_languages": "Select languages",
     "table": {
-      "langName": "Language Name",
+      "langName": "Language name",
       "translation": "Translation"
     },
     "title": "Minecraft Standard Translations"
   },
   "quiz": {
-    "answer_placeholder": "Enter translation here...",
-    "code_placeholder": "Enter question group code...",
+    "actions": {
+      "copy_code": "Copy quiz code",
+      "share_result": "Share quiz result"
+    },
+    "active": {
+      "character_states": "Answer character states",
+      "loading": "Loading quiz questions…",
+      "state_legend": "Character state legend"
+    },
+    "answer_placeholder": "Enter translation here…",
+    "character_state": {
+      "absent": "Incorrect",
+      "correct": "Correct",
+      "empty": "Not answered",
+      "hinted": "Hinted",
+      "hinted-correct": "Hinted and correct",
+      "present": "Present elsewhere"
+    },
+    "code_placeholder": "Enter question group code…",
     "complete": "All questions completed!",
-    "description": "Test your mastery of standard translations...",
+    "completion": {
+      "correct": "Correct",
+      "incomplete": "Incomplete",
+      "skipped": "Skipped",
+      "timed-out": "Timed out",
+      "unanswered": "Unanswered"
+    },
+    "description": "Test your mastery of standard translations.",
+    "eligibility": {
+      "available": "{count} eligible questions are available for this language.",
+      "failure": "Eligibility could not be loaded. Try selecting the language again.",
+      "loading": "Checking available questions…",
+      "loading_button": "Checking questions…",
+      "unavailable": "This language has {count} eligible questions; at least {minimum} are required."
+    },
+    "errors": {
+      "copy_failure": "Unable to copy the quiz code.",
+      "generate_failure": "Unable to load the questions needed to generate a quiz.",
+      "insufficient_route_questions": "This code provides fewer than {minimum} usable questions for the selected language.",
+      "invalid_mapping": "Unable to generate a quiz code because its question mapping is invalid.",
+      "invalid_route_code": "This quiz code is missing, malformed, unsupported, or contains an unknown question.",
+      "invalid_route_options": "The quiz language or timer mode is invalid.",
+      "load_failure": "The quiz questions could not be loaded.",
+      "replacement_failure": "Unable to generate a replacement quiz.",
+      "share_failure": "Unable to share the quiz result.",
+      "unsupported_code": "Enter a complete, supported quiz code."
+    },
+    "feedback": {
+      "code_copied": "Quiz code copied."
+    },
     "hint": "Hint",
-    "language": "Language: ",
+    "language": "Language",
     "nav": {
       "enter": "Enter",
-      "query": "Query Page",
-      "quiz": "Quiz Portal",
-      "table": "Table Page"
+      "query": "Query page",
+      "quiz": "Quiz portal",
+      "table": "Table page"
     },
-    "random_quiz": "Random questions (refresh to reselect)",
+    "portal_description": "Choose a target language, then start a generated quiz or enter a code shared with you.",
+    "progress": {
+      "timed": "Question {current} of {total}. {time} remaining.",
+      "untimed": "Question {current} of {total}. Untimed quiz."
+    },
+    "random_quiz": "Random questions",
     "restart": "One more group",
-    "return": "Return to Quiz Portal",
+    "return": "Return to quiz portal",
     "skip": "Skip",
     "source": "Source",
-    "timer_mode": "Timer Mode",
+    "summary": {
+      "caption": "Question results",
+      "level": "Difficulty {level}",
+      "results_region": "Quiz results table; scroll horizontally to see all columns",
+      "score": "{score} points",
+      "status": "Status",
+      "used_time": "Time used: {time}"
+    },
+    "timer_mode": "Timer mode",
     "title": "Minecraft Standard Translation Quiz",
     "translation": "Translation"
   },
   "table": {
     "action": {
-      "colors": "Color Table",
-      "dark_mode": "Toggle Dark Mode",
+      "colors": "Colour table",
+      "dark_mode": "Toggle dark mode",
       "download": "Download",
-      "download_all_data": "Download All Data",
-      "query": "Query Tool",
+      "download_all_data": "Download all data",
+      "query": "Query tool",
       "quiz": "Quiz",
-      "toggle_font": "Toggle Font"
+      "toggle_font": "Toggle font"
     },
     "author": "Compiled by SkyEye_FAST",
+    "caption": "Filtered Minecraft translation comparison",
     "colors": {
+      "caption": "Colour names and identifiers across Minecraft translations",
+      "color_id": "Colour / ID",
+      "color_value": "Colour value {color}",
+      "dye_icon": "Minecraft dye icon",
+      "region": "Colour translation table; scroll horizontally to see all languages",
       "show_chu_nom": "Show Chữ Nôm",
-      "show_korean_mixed": "Show Korean Mixed Script",
-      "title": "Minecraft Color Translation Table"
+      "show_korean_mixed": "Show Korean mixed script",
+      "title": "Minecraft Colour Translation Table",
+      "updated": "Updated {date}",
+      "variants": "Translation variants"
+    },
+    "comparison_region": "Translation comparison table; scroll horizontally to see all languages",
+    "controls_label": "Table controls",
+    "displayed_languages": "Displayed languages",
+    "empty": "No translation keys match the current filters.",
+    "export": {
+      "all_rows": "All filtered rows",
+      "current_page": "Current page",
+      "label": "Export",
+      "started_all": "{format} export started for all filtered rows.",
+      "started_page": "{format} export started for the current page."
     },
     "java_edition": "Java Edition ",
-    "loading": "Loading...",
+    "keys": "Keys",
+    "loading": "Loading…",
     "pagination": {
+      "jump": "Jump to page",
+      "label": "Table pagination",
       "next": "Next page",
+      "next_short": "Next",
+      "page": "Page {page}",
       "previous": "Previous page",
+      "previous_short": "Previous",
       "total_rows": "Total number of strings: "
     },
-    "search_placeholder": "Search content...",
-    "selected_languages": "Selected Languages",
+    "search_placeholder": "Search content…",
+    "selected_languages": "Selected languages",
     "title": "Minecraft Standard Translation Table",
-    "use_pagination": "Use Pagination"
+    "use_pagination": "Use pagination",
+    "version_credit": "Java Edition {version} · {author}"
   }
 }

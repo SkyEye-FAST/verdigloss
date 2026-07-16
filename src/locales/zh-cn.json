@@ -1,5 +1,49 @@
 {
+  "app": {
+    "font": {
+      "sans": "无衬线体",
+      "serif": "衬线体",
+      "use_sans": "译名改用无衬线字体",
+      "use_serif": "译名改用衬线字体"
+    },
+    "github": "Verdigloss 的 GitHub 仓库",
+    "home": "Verdigloss 首页",
+    "nav": {
+      "colors": "颜色",
+      "query": "查询",
+      "quiz": "测验",
+      "table": "表格"
+    },
+    "primary_navigation": "主导航",
+    "theme": {
+      "dark": "深色",
+      "light": "浅色",
+      "use_dark": "使用深色主题",
+      "use_light": "使用浅色主题"
+    }
+  },
+  "error_boundary": {
+    "description": "Verdigloss 无法加载此视图。请重试，或返回译名查询页面。",
+    "retry": "重试",
+    "return_to_query": "返回查询",
+    "title": "出现错误"
+  },
+  "language_selector": {
+    "choose": "选择语言",
+    "clear": "清除",
+    "select_all": "全选",
+    "selected": "已选择的语言"
+  },
+  "not_found": {
+    "description": "此页面不存在。",
+    "return_home": "返回 Verdigloss",
+    "title": "找不到页面"
+  },
   "query": {
+    "controls": {
+      "collapse": "收起查询控件",
+      "expand": "展开查询控件"
+    },
     "error": {
       "missing_query_content": "请输入查询内容",
       "no-matching-translations": "找不到匹配的译名"
@@ -20,7 +64,12 @@
     "query_modes": {
       "key": "按本地化键名查询",
       "source": "按源字符串查询",
-      "translation": "按翻译后字符串查询"
+      "translation": "按译文查询"
+    },
+    "results": {
+      "caption": "{source} 的译名",
+      "enter_query": "输入查询内容以搜索本地化键名。",
+      "matching": "有 {count} 个匹配的本地化键名。"
     },
     "select_languages": "选择语言",
     "table": {
@@ -30,23 +79,82 @@
     "title": "Minecraft 标准译名"
   },
   "quiz": {
+    "actions": {
+      "copy_code": "复制题组编号",
+      "share_result": "分享测验结果"
+    },
+    "active": {
+      "character_states": "答案字符状态",
+      "loading": "正在加载测验题目…",
+      "state_legend": "字符状态图例"
+    },
     "answer_placeholder": "在此输入译名…",
+    "character_state": {
+      "absent": "错误",
+      "correct": "正确",
+      "empty": "尚未作答",
+      "hinted": "提示字符",
+      "hinted-correct": "提示且正确",
+      "present": "出现在其他位置"
+    },
     "code_placeholder": "输入题组编号…",
     "complete": "已完成所有题目！",
-    "description": "测一测你对标准译名的掌握程度…",
+    "completion": {
+      "correct": "正确",
+      "incomplete": "未完成",
+      "skipped": "已跳过",
+      "timed-out": "已超时",
+      "unanswered": "未作答"
+    },
+    "description": "测试你对标准译名的掌握程度。",
+    "eligibility": {
+      "available": "该语言有 {count} 道可用题目。",
+      "failure": "无法加载可用题目。请重新选择该语言。",
+      "loading": "正在检查可用题目…",
+      "loading_button": "正在检查题目…",
+      "unavailable": "该语言有 {count} 道可用题目，至少需要 {minimum} 道。"
+    },
+    "errors": {
+      "copy_failure": "无法复制题组编号。",
+      "generate_failure": "无法加载生成测验所需的题目。",
+      "insufficient_route_questions": "该编号在所选语言中提供的可用题目少于 {minimum} 道。",
+      "invalid_mapping": "题目映射无效，无法生成题组编号。",
+      "invalid_route_code": "题组编号缺失、格式错误、不受支持，或包含未知题目。",
+      "invalid_route_options": "测验语言或计时模式无效。",
+      "load_failure": "无法加载测验题目。",
+      "replacement_failure": "无法生成新的题组。",
+      "share_failure": "无法分享测验结果。",
+      "unsupported_code": "请输入完整且受支持的题组编号。"
+    },
+    "feedback": {
+      "code_copied": "已复制题组编号。"
+    },
     "hint": "提示",
-    "language": "语言：",
+    "language": "语言",
     "nav": {
       "enter": "进入",
       "query": "查询页面",
       "quiz": "测验门户",
       "table": "表格页面"
     },
-    "random_quiz": "随机题组（刷新以重新选择）",
+    "portal_description": "选择目标语言，然后生成随机题组或输入他人分享的题组编号。",
+    "progress": {
+      "timed": "第 {current} 题，共 {total} 题。剩余 {time}。",
+      "untimed": "第 {current} 题，共 {total} 题。不计时。"
+    },
+    "random_quiz": "生成随机题组",
     "restart": "再来一组",
     "return": "返回测验门户",
     "skip": "跳过",
     "source": "原文",
+    "summary": {
+      "caption": "答题结果",
+      "level": "难度 {level}",
+      "results_region": "测验结果表；可横向滚动查看所有列",
+      "score": "{score} 分",
+      "status": "状态",
+      "used_time": "用时：{time}"
+    },
     "timer_mode": "计时模式",
     "title": "Minecraft 译名认知测验",
     "translation": "译名"
@@ -62,21 +170,47 @@
       "toggle_font": "切换字体"
     },
     "author": "由 SkyEye_FAST 整理",
+    "caption": "筛选后的 Minecraft 译名对照",
     "colors": {
+      "caption": "Minecraft 各语言的颜色名称与标识符",
+      "color_id": "颜色 / 标识符",
+      "color_value": "颜色值 {color}",
+      "dye_icon": "Minecraft 染料图标",
+      "region": "颜色译名表；可横向滚动查看所有语言",
       "show_chu_nom": "显示喃字",
       "show_korean_mixed": "显示汉谚混写",
-      "title": "Minecraft 颜色译名表"
+      "title": "Minecraft 颜色译名表",
+      "updated": "更新于 {date}",
+      "variants": "译名变体"
+    },
+    "comparison_region": "译名对照表；可横向滚动查看所有语言",
+    "controls_label": "表格控件",
+    "displayed_languages": "显示的语言",
+    "empty": "没有本地化键名符合当前筛选条件。",
+    "export": {
+      "all_rows": "所有筛选结果",
+      "current_page": "当前页",
+      "label": "导出",
+      "started_all": "已开始导出所有筛选结果的 {format} 文件。",
+      "started_page": "已开始导出当前页的 {format} 文件。"
     },
     "java_edition": "Java版 ",
+    "keys": "键名",
     "loading": "加载中…",
     "pagination": {
+      "jump": "跳转到页面",
+      "label": "表格分页",
       "next": "下一页",
+      "next_short": "下一页",
+      "page": "第 {page} 页",
       "previous": "上一页",
+      "previous_short": "上一页",
       "total_rows": "字符串总数："
     },
     "search_placeholder": "搜索内容…",
     "selected_languages": "已选择的语言",
     "title": "Minecraft 标准译名表",
-    "use_pagination": "使用分页"
+    "use_pagination": "使用分页",
+    "version_credit": "Java版 {version} · {author}"
   }
 }

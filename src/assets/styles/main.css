@@ -230,8 +230,30 @@ a {
 .th-th.sans {
   font-family: var(--sans-font);
 }
+body.translation-font-sans
+  :is(
+    .en-us,
+    .de-de,
+    .es-es,
+    .fr-fr,
+    .it-it,
+    .nl-nl,
+    .pt-br,
+    .ru-ru,
+    .uk-ua,
+    .vi-vn,
+    .zh-cn,
+    .zh-hk,
+    .zh-tw,
+    .lzh,
+    .ja-jp,
+    .ko-kr,
+    .th-th
+  ) {
+  font-family: var(--sans-font);
+}
 
-@media (max-width: 767px) {
+@media (max-width: 800px) {
   .app-bar {
     grid-template-columns: 1fr auto;
     min-height: 56px;
@@ -279,6 +301,14 @@ a {
 @media (max-width: 420px) {
   .brand {
     font-size: 1.35rem;
+  }
+}
+@media (min-width: 801px) and (max-width: 1024px) {
+  .app-bar {
+    grid-template-columns: minmax(120px, 1fr) auto auto;
+  }
+  .utility-button__label {
+    display: none;
   }
 }
 @media (max-height: 500px) and (orientation: landscape) {

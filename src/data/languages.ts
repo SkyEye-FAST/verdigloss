@@ -19,8 +19,7 @@ export type LanguageCode =
 
 export interface LanguageMetadata {
   code: LanguageCode
-  nativeName: string
-  displayName: string
+  gameName: string
   htmlLang: string
   typographyClass: string
   dataSource: 'mc_lang/valid'
@@ -33,27 +32,26 @@ const definitions: Omit<
   LanguageMetadata,
   'dataSource' | 'availableInQuery' | 'availableInTable' | 'quiz'
 >[] = [
-  ['en_us', 'English (United States)', 'English (United States)', 'en-US'],
-  ['zh_cn', '简体中文（中国大陆）', 'Simplified Chinese (Mainland China)', 'zh-Hans-CN'],
-  ['zh_hk', '繁體中文（香港特別行政區）', 'Traditional Chinese (Hong Kong SAR)', 'zh-Hant-HK'],
-  ['zh_tw', '繁體中文（台灣）', 'Traditional Chinese (Taiwan)', 'zh-Hant-TW'],
-  ['lzh', '文言（華夏）', 'Classical Chinese', 'lzh'],
-  ['ja_jp', '日本語（日本）', 'Japanese (Japan)', 'ja-JP'],
-  ['ko_kr', '한국어(대한민국)', 'Korean (South Korea)', 'ko-KR'],
-  ['vi_vn', 'Tiếng Việt (Việt Nam)', 'Vietnamese (Vietnam)', 'vi-VN'],
-  ['de_de', 'Deutsch (Deutschland)', 'German (Germany)', 'de-DE'],
-  ['es_es', 'Español (España)', 'Spanish (Spain)', 'es-ES'],
-  ['fr_fr', 'Français (France)', 'French (France)', 'fr-FR'],
-  ['it_it', 'Italiano (Italia)', 'Italian (Italy)', 'it-IT'],
-  ['nl_nl', 'Nederlands (Nederland)', 'Dutch (Netherlands)', 'nl-NL'],
-  ['pt_br', 'Português (Brasil)', 'Portuguese (Brazil)', 'pt-BR'],
-  ['ru_ru', 'Русский (Россия)', 'Russian (Russia)', 'ru-RU'],
-  ['th_th', 'ไทย (ประเทศไทย)', 'Thai (Thailand)', 'th-TH'],
-  ['uk_ua', 'Українська (Україна)', 'Ukrainian (Ukraine)', 'uk-UA'],
-].map(([code, nativeName, displayName, htmlLang]) => ({
+  ['en_us', 'English (United States)', 'en-US'],
+  ['zh_cn', '简体中文（中国大陆）', 'zh-Hans-CN'],
+  ['zh_hk', '繁體中文（香港特別行政區）', 'zh-Hant-HK'],
+  ['zh_tw', '繁體中文（台灣）', 'zh-Hant-TW'],
+  ['lzh', '文言（華夏）', 'lzh'],
+  ['ja_jp', '日本語（日本）', 'ja-JP'],
+  ['ko_kr', '한국어(대한민국)', 'ko-KR'],
+  ['vi_vn', 'Tiếng Việt (Việt Nam)', 'vi-VN'],
+  ['de_de', 'Deutsch (Deutschland)', 'de-DE'],
+  ['es_es', 'Español (España)', 'es-ES'],
+  ['fr_fr', 'Français (France)', 'fr-FR'],
+  ['it_it', 'Italiano (Italia)', 'it-IT'],
+  ['nl_nl', 'Nederlands (Nederland)', 'nl-NL'],
+  ['pt_br', 'Português (Brasil)', 'pt-BR'],
+  ['ru_ru', 'Русский (Россия)', 'ru-RU'],
+  ['th_th', 'ไทย (ประเทศไทย)', 'th-TH'],
+  ['uk_ua', 'Українська (Україна)', 'uk-UA'],
+].map(([code, gameName, htmlLang]) => ({
   code,
-  nativeName,
-  displayName,
+  gameName,
   htmlLang,
   typographyClass: code.replace('_', '-'),
 })) as Omit<LanguageMetadata, 'dataSource' | 'availableInQuery' | 'availableInTable' | 'quiz'>[]

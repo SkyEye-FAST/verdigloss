@@ -3,7 +3,7 @@
     :src="src"
     width="16"
     height="16"
-    alt="Minecraft dye icon"
+    :alt="$t('table.colors.dye_icon')"
     style="image-rendering: pixelated"
   />
 </template>
