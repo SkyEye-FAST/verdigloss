@@ -109,6 +109,7 @@
 import { computed, ref, watch } from 'vue'
 
 import { currentLocale } from '@/main'
+import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 
 const currentLang = computed(() => currentLocale.value)
 
@@ -136,13 +137,13 @@ const selectedLanguages = defineModel<string[]>('selectedLanguages', {
 })
 const usePagination = defineModel('usePagination', { default: true })
 const downloadAllData = defineModel('downloadAllData', {
-  default: localStorage.getItem('table:downloadAllData') !== 'false',
+  default: readBooleanPreference('table:downloadAllData', true),
 })
 
 const isLangFilterVisible = ref(true)
 
 watch(downloadAllData, (newValue) => {
-  localStorage.setItem('table:downloadAllData', newValue.toString())
+  writeStoredValue('table:downloadAllData', newValue)
 })
 </script>
 

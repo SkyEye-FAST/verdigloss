@@ -9,16 +9,21 @@
       <div class="quiz-select-group">
         <label for="query-lang">{{ $t('quiz.language') }}</label>
         <select :class="`${queryLang.replace('_', '-')} sans`" v-model="queryLang" id="query-lang">
-          <option value="zh_cn" class="zh-cn sans" lang="zh-Hans-CN">简体中文 (中国大陆)</option>
-          <option value="zh_hk" class="zh-hk sans" lang="zh-Hant-HK">
-            繁體中文 (香港特別行政區)
+          <option
+            v-for="language in quizLanguages"
+            :key="language.code"
+            :value="language.code"
+            :class="[language.typographyClass, 'sans']"
+            :lang="language.htmlLang"
+            :disabled="!language.available"
+          >
+            {{ language.nativeName }} ({{ language.eligibleCount }}/{{ quizQuestionCount }})
           </option>
-          <option value="zh_tw" class="zh-tw sans" lang="zh-Hant-TW">繁體中文 (台灣)</option>
-          <option value="lzh" class="lzh sans" lang="lzh">文言 (華夏)</option>
         </select>
         <input type="checkbox" id="timer-mode" v-model="timerMode" class="timer-checkbox" />
         <label for="timer-mode" class="timer-label">{{ $t('quiz.timer_mode') }}</label>
       </div>
+      <p v-if="quizError" role="alert" class="quiz-error">{{ quizError }}</p>
       <div class="quiz-input-group">
         <input
           v-model="inputCode"
@@ -60,9 +65,15 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import { useRouter } from 'vue-router'
 
-import idList from '@/assets/data/id.json'
+import quizIdData from '@/assets/data/quiz-id-map.json'
+import legacyQuizIdMap from '@/assets/data/id.json'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { QUIZ_QUESTION_COUNT, buildEligibleQuestionPool, getQuizLanguageAvailability } from '@/domain/quiz'
+import { decodeQuizCode, encodeQuizCode } from '@/domain/quiz-code'
+import { shuffle } from '@/domain/shuffle'
 import { currentLocale } from '@/main'
+import { languageFiles, languageRegistry, type LanguageCode } from '@/utils/languages'
+import { hasStoredValue } from '@/utils/storage'
 import { usePreferredDark } from '@vueuse/core'
 
 import Nav from './PageNav.vue'
@@ -71,29 +82,54 @@ const router = useRouter()
 const preferredDark = usePreferredDark()
 const currentLang = computed(() => currentLocale.value)
 
-const queryLang = ref('zh_cn')
+const queryLang = ref<LanguageCode>('zh_cn')
 const inputCode = ref('')
 const timerMode = ref(false)
+const quizError = ref('')
+const quizQuestionCount = QUIZ_QUESTION_COUNT
+const quizIdMap = quizIdData.ids
+
+const quizLanguages = computed(() =>
+  languageRegistry
+    .filter((language) => language.quiz.enabled)
+    .map((language) => ({
+      ...language,
+      ...getQuizLanguageAvailability(language.code, languageFiles, quizIdMap),
+    })),
+)
 
 const generateQuizCode = () => {
-  const allKeys = Object.keys(idList)
-  const shuffled = allKeys.sort(() => Math.random() - 0.5)
-  const selectedKeys = shuffled.slice(0, 10)
-  const sortedKeys = selectedKeys.sort((a, b) =>
-    idList[a as keyof typeof idList].localeCompare(idList[b as keyof typeof idList]),
+  const eligible = buildEligibleQuestionPool(queryLang.value, languageFiles, quizIdMap)
+  if (eligible.length < QUIZ_QUESTION_COUNT) {
+    quizError.value = `This language needs at least ${QUIZ_QUESTION_COUNT} eligible questions; it has ${eligible.length}.`
+    return undefined
+  }
+  return encodeQuizCode(
+    shuffle(eligible.map((question) => question.key)).slice(0, QUIZ_QUESTION_COUNT),
+    quizIdMap,
   )
-  return sortedKeys.join('')
 }
 
 const startRandomQuiz = () => {
-  const quizCode = generateQuizCode()
-  router.push(`/quiz/${quizCode}?l=${queryLang.value}&t=${timerMode.value ? '1' : '0'}`)
+  quizError.value = ''
+  const result = generateQuizCode()
+  if (!result) return
+  if (!result.ok) {
+    quizError.value = 'Unable to generate a quiz code because its question mapping is invalid.'
+    return
+  }
+  router.push({ name: 'TranslationQuizSub', params: { code: result.value }, query: { l: queryLang.value, t: timerMode.value ? '1' : '0' } })
 }
 
 const startQuiz = () => {
-  if (inputCode.value.trim() && inputCode.value.length === 30) {
-    router.push(`/quiz/${inputCode.value}?l=${queryLang.value}&t=${timerMode.value ? '1' : '0'}`)
+  quizError.value = ''
+  const code = inputCode.value.trim()
+  const result = decodeQuizCode(code, quizIdMap, legacyQuizIdMap)
+  if (!result.ok) {
+    quizError.value = 'Enter a complete, supported quiz code.'
+    return
   }
+  router.push({ name: 'TranslationQuizSub', params: { code }, query: { l: queryLang.value, t: timerMode.value ? '1' : '0' } })
 }
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
@@ -103,7 +139,7 @@ onMounted(() => {
 })
 
 watch(preferredDark, (newValue) => {
-  if (localStorage.getItem('darkMode') === null) {
+  if (!hasStoredValue('darkMode')) {
     isDarkMode.value = newValue
     document.body.classList.toggle('dark-mode', newValue)
   }
@@ -147,6 +183,11 @@ body {
 .quiz-container label {
   font-size: x-large;
   text-align: right;
+}
+
+.quiz-error {
+  color: #b42318;
+  margin: 0 0 1rem;
 }
 
 /* Form Groups & Inputs */

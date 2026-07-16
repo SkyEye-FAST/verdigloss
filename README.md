@@ -63,6 +63,18 @@ pnpm build
 
 The built files will be in the `dist` directory.
 
+### Quiz codes and tests
+
+New quiz links use the versioned `v1.<7-character-id>.<7-character-id>...` format. The mapping is generated deterministically with `pnpm generate-id-mapping`; it fails if an ID collision or a missing English key is detected. Existing 30-character links continue to use the preserved legacy mapping where their original IDs still exist.
+
+Quiz eligibility is evaluated per target language: a question must have a non-empty translation that differs from English. Timed quizzes use real elapsed time, including while the page is hidden.
+
+Run the unit suite with:
+
+```shell
+pnpm test
+```
+
 ## Feedback
 
 Please feel free to raise issues for any problems encountered or feature suggestions.

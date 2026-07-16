@@ -154,7 +154,8 @@ import { useI18n } from 'vue-i18n'
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { currentLocale } from '@/main'
-import { type LanguageCode, languageFiles } from '@/utils/languages'
+import { type LanguageCode, languageFiles, languageList, languageRegistry } from '@/utils/languages'
+import { readLanguageList, readStringPreference, writeStoredValue, writeStringPreference, readBooleanPreference } from '@/utils/storage'
 
 import Nav from './PageNav.vue'
 import LanguageSelector from './Query/LanguageSelector.vue'
@@ -179,103 +180,19 @@ interface SelectedTranslation {
   }[]
 }
 
-interface LanguageInfo {
-  code: string
-  displayName: string
-  htmlLang: string
-}
-
-const languages: LanguageInfo[] = [
-  {
-    code: 'zh_cn',
-    displayName: '简体中文 (中国大陆)',
-    htmlLang: 'zh-Hans-CN',
-  },
-  {
-    code: 'zh_hk',
-    displayName: '繁體中文 (香港特別行政區)',
-    htmlLang: 'zh-Hant-HK',
-  },
-  {
-    code: 'zh_tw',
-    displayName: '繁體中文 (台灣)',
-    htmlLang: 'zh-Hant-TW',
-  },
-  {
-    code: 'lzh',
-    displayName: '文言 (華夏)',
-    htmlLang: 'lzh',
-  },
-  {
-    code: 'ja_jp',
-    displayName: '日本語 (日本)',
-    htmlLang: 'ja',
-  },
-  {
-    code: 'ko_kr',
-    displayName: '한국어 (대한민국)',
-    htmlLang: 'ko',
-  },
-  {
-    code: 'vi_vn',
-    displayName: 'Tiếng Việt (Việt Nam)',
-    htmlLang: 'vi',
-  },
-  {
-    code: 'de_de',
-    displayName: 'Deutsch (Deutschland)',
-    htmlLang: 'de',
-  },
-  {
-    code: 'es_es',
-    displayName: 'Español (España)',
-    htmlLang: 'es',
-  },
-  {
-    code: 'fr_fr',
-    displayName: 'Français (France)',
-    htmlLang: 'fr',
-  },
-  {
-    code: 'it_it',
-    displayName: 'Italiano (Italia)',
-    htmlLang: 'it',
-  },
-  {
-    code: 'nl_nl',
-    displayName: 'Nederlands (Nederland)',
-    htmlLang: 'nl',
-  },
-  {
-    code: 'pt_br',
-    displayName: 'Português (Brasil)',
-    htmlLang: 'pt-BR',
-  },
-  {
-    code: 'ru_ru',
-    displayName: 'Русский (Россия)',
-    htmlLang: 'ru',
-  },
-  {
-    code: 'th_th',
-    displayName: 'ไทย (ประเทศไทย)',
-    htmlLang: 'th',
-  },
-  {
-    code: 'uk_ua',
-    displayName: 'Українська (Україна)',
-    htmlLang: 'uk',
-  },
-]
+const languages = languageRegistry.filter((language) => language.availableInQuery)
 
 const isSidebarOpen = ref(true)
-const queryMode = ref(localStorage.getItem('queryMode') || 'source')
-const queryLang = ref(localStorage.getItem('queryLang') || 'zh_cn')
-const queryContent = ref(localStorage.getItem('queryContent') || 'The End')
-const localeKey = ref(localStorage.getItem('localeKey') || 'advancements.end.respawn_dragon.title')
-const selectedLanguages = ref<string[]>(
-  JSON.parse(
-    localStorage.getItem('query:selectedLanguages') || '["zh_cn", "zh_hk", "zh_tw", "lzh"]',
+const queryMode = ref(readStringPreference('queryMode', 'source'))
+const queryLang = ref(readStringPreference('queryLang', 'zh_cn'))
+const queryContent = ref(readStringPreference('queryContent', 'The End'))
+const localeKey = ref(readStringPreference('localeKey', 'advancements.end.respawn_dragon.title'))
+const selectedLanguages = ref<LanguageCode[]>(
+  readLanguageList(
+    'verdigloss:query:selectedLanguages:v1',
+    languageList,
+    ['zh_cn', 'zh_hk', 'zh_tw', 'lzh'],
+    ['query:selectedLanguages'],
   ),
 )
 const translations = ref<Translation[]>([])
@@ -498,11 +415,11 @@ const onQueryInput = debounce(() => {
 watch(
   [queryMode, queryLang, queryContent, localeKey, selectedLanguages],
   ([mode, lang, content, key, langs]) => {
-    localStorage.setItem('queryMode', mode)
-    localStorage.setItem('queryLang', lang)
-    localStorage.setItem('queryContent', content)
-    localStorage.setItem('localeKey', key)
-    localStorage.setItem('query:selectedLanguages', JSON.stringify(langs))
+    writeStringPreference('queryMode', mode)
+    writeStringPreference('queryLang', lang)
+    writeStringPreference('queryContent', content)
+    writeStringPreference('localeKey', key)
+    writeStoredValue('verdigloss:query:selectedLanguages:v1', langs)
   },
 )
 
@@ -519,11 +436,11 @@ onMounted(async () => {
   }
 })
 
-const useSansFont = ref(localStorage.getItem('table:useSansFont') == 'false')
+const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
 
 const toggleSansFont = () => {
   useSansFont.value = !useSansFont.value
-  localStorage.setItem('table:useSansFont', useSansFont.value.toString())
+  writeStoredValue('table:useSansFont', useSansFont.value)
 }
 </script>
 

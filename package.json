@@ -9,10 +9,11 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "generate-id-mapping": "node scripts/generate-id-mapping.js",
-    "generate-ratings": "node scripts/generate-ratings.js"
+    "generate-id-mapping": "node scripts/generate-id-mapping.js"
   },
   "dependencies": {
     "@vueuse/core": "^14.3.0",
@@ -38,14 +39,16 @@
     "eslint": "^10.7.0",
     "eslint-plugin-vue": "~10.9.2",
     "jiti": "^2.7.0",
+    "jsdom": "^29.1.1",
     "npm-run-all2": "^9.0.2",
     "prettier": "3.9.5",
-    "typescript": "~7.0.2",
+    "typescript": "~5.9.3",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "unplugin-vue-components": "^32.1.0",
     "vite": "^8.1.4",
     "vite-plugin-vue-devtools": "^8.1.5",
+    "vitest": "^4.1.10",
     "vue-tsc": "^3.3.7"
   },
   "pnpm": {
