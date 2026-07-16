@@ -3,6 +3,10 @@ coverage/
 playwright-report/
 test-results/
 node_modules/
+.pnpm-store/
+.vite/
+*.tsbuildinfo
+pnpm-lock.yaml
 src/assets/mc_lang/
 auto-imports.d.ts
 components.d.ts
