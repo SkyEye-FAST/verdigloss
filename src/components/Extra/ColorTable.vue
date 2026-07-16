@@ -3,9 +3,11 @@
     <h1 class="page-title" :class="currentLang.toLowerCase()">
       {{ $t('table.colors.title') }}
     </h1>
-    <p class="updated-at">Updated {{ colorDataset.updatedAt }}</p>
+    <p class="updated-at">
+      {{ $t('table.colors.updated', { date: colorDataset.updatedAt }) }}
+    </p>
     <fieldset class="color-variants">
-      <legend>Translation variants</legend>
+      <legend>{{ $t('table.colors.variants') }}</legend>
       <label>
         <input type="checkbox" v-model="showKoreanMixed" />
         {{ $t('table.colors.show_korean_mixed') }}
@@ -15,19 +17,16 @@
         {{ $t('table.colors.show_chu_nom') }}
       </label>
     </fieldset>
-    <div
-      class="table-wrapper"
-      role="region"
-      tabindex="0"
-      aria-label="Colour translation table; scroll horizontally to see all languages"
-    >
+    <div class="table-wrapper" role="region" tabindex="0" :aria-label="$t('table.colors.region')">
       <table>
         <caption>
-          Colour names and identifiers across Minecraft translations
+          {{
+            $t('table.colors.caption')
+          }}
         </caption>
         <thead>
           <tr>
-            <th scope="col">Color / ID</th>
+            <th scope="col">{{ $t('table.colors.color_id') }}</th>
             <th v-for="lang in languages" :key="lang" scope="col">{{ lang }}</th>
           </tr>
         </thead>
@@ -42,11 +41,7 @@
                 {{ color.key }}
               </div>
             </th>
-            <td
-              v-for="lang in languages"
-              :key="lang"
-              :class="[lang.replace(/_/, '-'), { sans: useSansFont }]"
-            >
+            <td v-for="lang in languages" :key="lang" :class="lang.replace(/_/, '-')">
               <template v-if="lang === 'ko_kr'">
                 <span>{{ color.korean.label }}</span>
                 <span v-if="showKoreanMixed"> {{ color.korean.annotation }}</span>
@@ -74,14 +69,11 @@ import { colorDataset } from '@/features/colors/color-data'
 
 import ColorIcon from './ColorTable/ColorIcon.vue'
 import ColorPreview from './ColorTable/ColorPreview.vue'
-import { readBooleanPreference } from '@/utils/storage'
 
 const { locale: currentLang } = useLocale()
 
 const showKoreanMixed = ref(true)
 const showChuNom = ref(true)
-const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
-
 const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = [
   'en_us',
   'zh_cn',
@@ -96,277 +88,152 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
 
 <style scoped>
 .page-content {
-  max-width: 1600px;
+  width: min(calc(100% - 2rem), var(--content-max));
   margin: 0 auto;
-  min-height: calc(100vh - 60px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: var(--space-6) 0 var(--space-8);
 }
 
-.page-title {
-  font-weight: 900;
-  text-align: center;
-  font-size: 2.5rem;
-  margin-top: 20px;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-table {
-  width: max-content;
-  min-width: 80%;
-  max-width: 1600px;
-  margin: 0 auto;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  table-layout: fixed;
-  border-collapse: collapse;
-  border: 2px solid #5b9bd5;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-table td,
-table th {
-  border: 2px solid #5b9bd5;
-  padding: 6px 8px;
-  text-align: left;
-  min-width: 80px;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-table thead th {
-  background-color: #5b9bd5;
-  color: white;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 10px 8px;
-  font-family: var(--monospace-font), monospace !important;
-  border: 2px solid #4a8ac4;
-}
-
-.key-column {
-  min-width: 100px;
-  max-width: 300px;
-  font-family: var(--monospace-font), monospace;
-  background: inherit;
-}
-
-.key-cell-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.color-preview {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-table tr:nth-child(even) {
-  background-color: #5b9bd515;
-}
-
-table tr:hover {
-  background-color: #5b9bd530;
-}
-
-table tr:nth-child(even) td.key-column {
-  background-color: #f3f6f8;
-}
-
-table tr:hover td.key-column {
-  background-color: #e9ecef;
-}
-
-/* Dark mode */
-body.dark-mode table {
-  background: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  border-color: #555;
-}
-
-body.dark-mode table td,
-body.dark-mode table th {
-  border-color: #555;
-}
-
-body.dark-mode table thead th {
-  background-color: #4a4a4a;
-  border-color: #555;
-  box-shadow:
-    inset 1px 0 0 rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 2px 0 #555;
-}
-
-body.dark-mode table tr td.key-column {
-  background-color: #2a2a2a;
-}
-
-body.dark-mode table tr:nth-child(even) {
-  background-color: #3a3a3a;
-}
-
-body.dark-mode table tr:nth-child(even) td.key-column {
-  background-color: #333;
-}
-
-body.dark-mode table tr:hover {
-  background-color: #4a4a4a;
-}
-
-body.dark-mode table tr:hover td.key-column {
-  background-color: #444;
-}
-
-body.dark-mode .page-title {
-  color: #e0e0e0;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  .table-wrapper {
-    margin: 0 -10px;
-    padding: 0 10px;
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  table {
-    font-size: 13px;
-  }
-
-  table td,
-  table th {
-    padding: 4px 6px;
-    min-width: 50px;
-    font-size: 12px;
-  }
-
-  .key-column {
-    min-width: 100px;
-  }
-
-  .color-preview {
-    width: 14px;
-    height: 14px;
-  }
-}
-
-.page-content {
-  width: min(100% - 2rem, var(--content-max));
-  min-height: auto;
-  margin: 0 auto;
-  padding: var(--space-6) 0;
-  justify-content: start;
-}
 .page-title {
   margin: 0;
-  color: var(--text);
-  font: 700 clamp(1.6rem, 3vw, 2.25rem)/1.15 var(--serif-font);
-  text-align: left;
+  font: 700 clamp(1.75rem, 4vw, 2.75rem)/1.1 var(--serif-font);
+  letter-spacing: -0.02em;
 }
+
 .updated-at {
-  margin: 0.35rem 0 var(--space-4);
+  margin: var(--space-2) 0 var(--space-4);
   color: var(--muted);
-  font-size: 0.9rem;
 }
+
 .color-variants {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
   margin: 0 0 var(--space-4);
-  padding: var(--space-3) 0;
+  padding: var(--space-4) 0;
   border: 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-block: 1px solid var(--border);
 }
+
 .color-variants legend {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-}
-.color-variants label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: var(--control-height);
+  width: 100%;
+  padding: 0;
   color: var(--text-secondary);
+  font-weight: 700;
 }
+
+.color-variants label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .color-variants input {
   width: 1.1rem;
   height: 1.1rem;
   accent-color: var(--accent);
 }
+
 .table-wrapper {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
   border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  overscroll-behavior-inline: contain;
 }
+
 .table-wrapper table {
-  min-width: 900px;
-  max-width: none;
-  margin: 0;
-  border: 0;
+  width: max-content;
+  min-width: 58rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+  font-size: 0.86rem;
+}
+
+.table-wrapper caption {
+  padding: var(--space-2) var(--space-3);
+  color: var(--muted);
+  text-align: left;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  min-width: 8.5rem;
+  padding: 0.48rem 0.58rem;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   background: var(--surface);
-  color: var(--text);
-  box-shadow: none;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
 }
-.table-wrapper table td,
-.table-wrapper table th {
-  border-color: var(--border);
-}
-.table-wrapper table thead th {
-  top: 64px;
+
+.table-wrapper thead th {
+  position: sticky;
+  z-index: 3;
+  top: 0;
   background: var(--surface-subtle);
-  color: var(--text);
-  border-color: var(--border);
+  color: var(--text-secondary);
+  font: 700 0.78rem var(--monospace-font);
 }
+
 .table-wrapper .key-column {
   position: sticky;
-  left: 0;
-  z-index: 1;
-  background: var(--surface-raised);
-}
-.table-wrapper table thead .key-column {
   z-index: 2;
-}
-.table-wrapper table tr:nth-child(even),
-.table-wrapper table tr:nth-child(even) .key-column {
+  left: 0;
+  min-width: 12rem;
   background: var(--surface);
 }
-.table-wrapper table tr:hover,
-.table-wrapper table tr:hover .key-column {
+
+.table-wrapper thead .key-column {
+  z-index: 5;
+  background: var(--surface-subtle);
+}
+
+.table-wrapper tr:nth-child(even) > * {
+  background: color-mix(in srgb, var(--surface-subtle) 72%, var(--surface));
+}
+
+.table-wrapper tr:nth-child(even) > .key-column {
+  background: color-mix(in srgb, var(--surface-subtle) 72%, var(--surface));
+}
+
+.table-wrapper tbody tr:hover > *,
+.table-wrapper tbody tr:hover > .key-column {
   background: var(--accent-soft);
 }
-@media (max-width: 767px) {
+
+.key-cell-content {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font: 0.78rem var(--monospace-font);
+}
+
+@media (max-width: 800px) {
   .page-content {
-    width: min(100% - 1rem, var(--content-max));
+    width: calc(100% - 1rem);
     padding-top: var(--space-4);
   }
-  .table-wrapper table thead th {
-    top: 56px;
+
+  .table-wrapper {
+    width: 100%;
+    margin: 0;
+  }
+
+  .table-wrapper table {
+    min-width: 54rem;
+  }
+
+  .table-wrapper th,
+  .table-wrapper td {
+    min-width: 7.5rem;
+  }
+
+  .table-wrapper .key-column {
+    min-width: 11.5rem;
   }
 }
 </style>

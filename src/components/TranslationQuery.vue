@@ -5,7 +5,7 @@
         <button
           class="toggle-button"
           type="button"
-          :aria-label="isSidebarOpen ? 'Collapse query controls' : 'Expand query controls'"
+          :aria-label="isSidebarOpen ? $t('query.controls.collapse') : $t('query.controls.expand')"
           @click="toggleSidebar"
         >
           <i-material-symbols-chevron-left
@@ -40,8 +40,14 @@
                 {{ $t('query.query_lang') }}
               </label>
               <select id="queryLang" v-model="queryLang">
-                <option v-for="lang in filteredLanguages" :key="lang.code" :value="lang.code">
-                  {{ lang.displayName }}
+                <option
+                  v-for="lang in filteredLanguages"
+                  :key="lang.code"
+                  :value="lang.code"
+                  :lang="lang.htmlLang"
+                  :class="lang.typographyClass"
+                >
+                  {{ lang.gameName }}
                 </option>
               </select>
             </div>
@@ -110,7 +116,7 @@
                 :options="
                   languages.map((lang) => ({
                     value: lang.code,
-                    label: lang.displayName,
+                    label: lang.gameName,
                     htmlLang: lang.htmlLang,
                   }))
                 "
@@ -124,29 +130,20 @@
         <p class="result-count" aria-live="polite">{{ resultAnnouncement }}</p>
         <div v-if="error" class="error" role="alert">{{ error }}</div>
         <div v-if="selectedTranslation" class="result-section" tabindex="0">
-          <div class="title" :class="{ sans: useSansFont }">{{ selectedTranslation.source }}</div>
+          <div class="title">{{ selectedTranslation.source }}</div>
           <p class="subtitle">{{ selectedTranslation.key }}</p>
           <table :class="'table-' + (selectedTranslation?.category || 'block')">
             <caption class="sr-only">
-              Translations for
               {{
-                selectedTranslation.source
+                $t('query.results.caption', { source: selectedTranslation.source })
               }}
             </caption>
             <thead>
               <tr>
-                <th
-                  scope="col"
-                  :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
-                  class="table-header"
-                >
+                <th scope="col" :class="currentLang.toLowerCase()" class="table-header">
                   {{ $t('query.table.langName') }}
                 </th>
-                <th
-                  scope="col"
-                  :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
-                  class="table-header"
-                >
+                <th scope="col" :class="currentLang.toLowerCase()" class="table-header">
                   {{ $t('query.table.translation') }}
                 </th>
               </tr>
@@ -156,9 +153,9 @@
                 v-for="lang in displayLanguages"
                 :key="lang.code"
                 :lang="lang.htmlLang"
-                :class="[lang.code.replace(/_/, '-'), { sans: useSansFont }]"
+                :class="lang.code.replace(/_/, '-')"
               >
-                <th scope="row" class="lang-name">{{ lang.displayName }}</th>
+                <th scope="row" class="lang-name">{{ lang.gameName }}</th>
                 <td class="string">
                   {{
                     selectedTranslation?.translations.find((t) => t.code === lang.code)?.text || '—'
@@ -167,10 +164,7 @@
               </tr>
             </tbody>
           </table>
-          <footer
-            class="minecraft-title"
-            :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
-          >
+          <footer class="minecraft-title" :class="currentLang.toLowerCase()">
             {{ $t('query.title') }}<br />
             {{ $t('query.java_edition') }}{{ minecraftVersion }}
           </footer>
@@ -196,7 +190,6 @@ import {
   readStringPreference,
   writeStoredValue,
   writeStringPreference,
-  readBooleanPreference,
 } from '@/utils/storage'
 
 import LanguageSelector from './Query/LanguageSelector.vue'
@@ -270,8 +263,12 @@ const availableKeys = computed(() => {
 })
 const resultAnnouncement = computed(() => {
   if (error.value) return error.value
-  if (!queryContent.value.trim()) return 'Enter a query to search translation keys.'
-  return `${availableKeys.value.length} matching translation ${availableKeys.value.length === 1 ? 'key' : 'keys'} available.`
+  if (!queryContent.value.trim()) return t('query.results.enter_query')
+  return t(
+    'query.results.matching',
+    { count: availableKeys.value.length },
+    availableKeys.value.length,
+  )
 })
 
 function selectKey(key: string) {
@@ -430,7 +427,7 @@ const updateSelectedTranslation = (key: string) => {
     .filter((lang) => lang.code !== 'en_us')
     .map((lang) => ({
       code: lang.code,
-      name: lang.displayName,
+      name: lang.gameName,
       text: (langFiles.value[lang.code] || {})[key] || '',
     }))
 
@@ -514,759 +511,119 @@ onMounted(async () => {
     onQueryInput()
   }
 })
-
-const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
 </script>
 
 <style scoped>
 .translation-query {
   width: 100%;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
+  min-height: calc(100dvh - 64px);
+  padding: var(--space-6);
 }
 
-.main-content {
-  flex: 1;
-  min-width: 0;
-  margin-left: 350px;
-  padding: 2rem;
-  transition: margin-left 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-/* Sidebar */
 .sidebar-layout {
-  display: flex;
-  align-items: stretch;
-  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+  gap: var(--space-8);
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+}
+
+.sidebar-layout.sidebar-collapsed {
+  grid-template-columns: var(--control-height) minmax(0, 1fr);
 }
 
 .sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
-  width: 350px;
-  transition: width 0.3s ease;
-  background: #fff;
-  z-index: 100;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: flex-start;
-  padding-top: 2rem;
-}
-
-.sidebar-collapsed .sidebar {
-  width: 40px;
-}
-
-.toggle-button {
-  position: absolute;
-  top: 1rem;
-  right: -30px;
-  width: 30px;
-  height: 40px;
-  background: #7aa2ea;
-  color: white;
-  border: none;
-  border-radius: 0 6px 6px 0;
-  cursor: pointer;
-  z-index: 100;
-}
-
-.sidebar-collapsed .main-content {
-  margin-left: 40px;
+  position: sticky;
+  top: calc(64px + var(--space-4));
+  align-self: start;
+  min-width: 0;
 }
 
 .settings {
-  height: auto;
-  padding: 1.5rem;
-  box-sizing: border-box;
-  width: 100%;
+  padding: calc(var(--space-5) + var(--control-height)) var(--space-5) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
 }
 
 .input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 .input-group label {
-  font-weight: 500;
-  color: #666;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-weight: 700;
 }
 
 .label-icon {
-  font-size: 1.2em;
+  flex: none;
+  color: var(--muted);
+  font-size: 1.25rem;
 }
 
 .input-group input,
 .input-group select {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-  font-family: inherit;
-}
-
-.input-group input:focus,
-.input-group select:focus {
-  border-color: #7aa2ea;
-  outline: none;
-}
-
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.result-card {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.result-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
-.result-key {
-  font-family: var(--monospace-font), monospace;
-  color: #666;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.translation-item {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 1rem;
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
-}
-
-.translation-item:last-child {
-  border-bottom: none;
-}
-
-.lang-name {
-  font-weight: 500;
-}
-
-.translation-text {
-  font-size: 1.1rem;
-}
-
-/* Table */
-/* Table base styles */
-table {
-  border-collapse: collapse;
-  margin: 1em auto;
-}
-
-table td,
-table th {
-  text-align: center;
-  padding: 0.4em 1em;
-  border-width: 2px;
-  border-style: solid;
-  font-size: 1.5em;
-}
-
-/* Table themes */
-.table-advancements td,
-.table-advancements th {
-  border-color: #a02b93;
-}
-.table-advancements tr:nth-child(even) {
-  background-color: #a02b9333;
-}
-
-.table-block td,
-.table-block th {
-  border-color: #5b9bd5;
-}
-.table-block tr:nth-child(even) {
-  background-color: #5b9bd533;
-}
-
-.table-effect td,
-.table-effect th {
-  border-color: #ffc000;
-}
-.table-effect tr:nth-child(even) {
-  background-color: #ffc00033;
-}
-
-.table-enchantment td,
-.table-enchantment th {
-  border-color: #44546a;
-}
-.table-enchantment tr:nth-child(even) {
-  background-color: #44546a33;
-}
-
-.table-entity td,
-.table-entity th {
-  border-color: #ed7d31;
-}
-.table-entity tr:nth-child(even) {
-  background-color: #ed7d3133;
-}
-
-.table-item td,
-.table-item th {
-  border-color: #70ad47;
-}
-.table-item tr:nth-child(even) {
-  background-color: #70ad4733;
-}
-
-/* Table contents */
-.title {
-  font-size: 2.5em;
-  font-weight: 600;
-  text-align: center;
-}
-
-.subtitle {
-  font-family: var(--monospace-font), monospace;
-  font-size: 1.25em;
-  text-align: center;
-}
-
-.table-header {
-  font-size: 2.25em;
-  white-space: nowrap;
-}
-
-.string {
-  font-size: 1.75em;
-  min-width: 20vw;
-  max-width: 40vw;
-}
-
-.lang-name {
-  white-space: nowrap;
-}
-
-.title {
-  font-family: var(--serif-font), serif;
-}
-
-.title.sans {
-  font-family: var(--sans-font), sans-serif;
-}
-
-/* Footer */
-.minecraft-title {
-  text-align: center;
-  font-size: 2.25em;
-  font-weight: 900;
-  color: #bfbfbf;
-}
-
-/* Dark mode */
-body.dark-mode .settings,
-body.dark-mode .result-card {
-  background: #333;
-}
-
-body.dark-mode .input-group input,
-body.dark-mode .input-group select {
-  background: #424242;
-  border-color: #555;
-  color: #e0e0e0;
-}
-
-body.dark-mode .translation-item {
-  border-bottom-color: #444;
-}
-
-body.dark-mode table td,
-body.dark-mode table th {
-  border-color: #666;
-}
-
-body.dark-mode .sidebar {
-  background: #1a1a1a;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .settings {
-  background: #1a1a1a;
-}
-
-body.dark-mode .input-group label {
-  color: #aaa;
-}
-
-body.dark-mode .input-group input,
-body.dark-mode .input-group select {
-  background: #2a2a2a;
-  border-color: #444;
-  color: #e0e0e0;
-}
-
-body.dark-mode .input-group input:focus,
-body.dark-mode .input-group select:focus {
-  border-color: #7aa2ea;
-}
-
-body.dark-mode .checkbox-group label {
-  color: #aaa;
-}
-
-body.dark-mode .toggle-button {
-  background: #4a4a4a;
-}
-
-body.dark-mode .toggle-button:hover {
-  background: #5a5a5a;
-}
-
-/* Responsive styles */
-@media (max-width: 1200px) {
-  .two-column-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .left-column {
-    position: static;
-  }
-
-  .right-column {
-    padding: 0;
-  }
-}
-
-@media (max-width: 768px) {
-  .toggle-button {
-    display: none;
-  }
-
-  .translation-item {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .lang-name {
-    font-size: 0.9rem;
-  }
-
-  .translation-text {
-    font-size: 1rem;
-  }
-
-  .sidebar-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    position: relative;
-    width: 100% !important;
-    height: auto;
-    min-height: auto;
-    padding-top: 1rem;
-  }
-
-  .settings {
-    padding: 1rem;
-  }
-
-  .main-content {
-    margin-left: 0 !important;
-    padding: 1rem;
-    min-height: auto;
-  }
-
-  .form-container {
-    gap: 0.75rem;
-  }
-
-  .input-group input,
-  .input-group select {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  table {
-    width: 100%;
-    margin: 0.5em auto;
-  }
-
-  table td,
-  table th {
-    padding: 0.25em 0.5em;
-    font-size: 1em;
-  }
-
-  .title {
-    font-size: 1.75em;
-    padding: 0 10px;
-  }
-
-  .subtitle {
-    font-size: 0.9em;
-    word-break: break-all;
-    padding: 0 10px;
-  }
-
-  .table-header {
-    font-size: 1em;
-  }
-
-  .string {
-    font-size: 0.9em;
-    min-width: auto;
-    max-width: none;
-    word-break: break-word;
-  }
-
-  .lang-name {
-    font-size: 0.8em;
-    padding: 0.4em 0.8em;
-  }
-
-  .minecraft-title {
-    font-size: 1em;
-    margin-top: 1em;
-  }
-
-  .result-section {
-    max-width: 100%;
-    overflow-x: auto;
-    padding: 0 10px;
-  }
-
-  .input-group {
-    margin-bottom: 0.5rem;
-  }
-
-  .checkbox-group {
-    margin-top: 0.25rem;
-  }
-
-  td.string {
-    max-width: 60vw;
-    overflow-wrap: break-word;
-    hyphens: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  table td,
-  table th {
-    padding: 0.4em 1em;
-    font-size: 0.8em;
-  }
-
-  .title {
-    font-size: 1.5em;
-  }
-
-  .subtitle {
-    font-size: 0.7em;
-  }
-
-  .minecraft-title {
-    font-size: 1.2em;
-  }
-
-  .form-container {
-    gap: 0.5rem;
-  }
-}
-
-@media (max-height: 480px) and (orientation: landscape) {
-  .sidebar {
-    position: fixed;
-    width: 280px !important;
-    height: 100vh;
-    padding-top: 0.5rem;
-    z-index: 99;
-  }
-
-  .settings {
-    padding: 0.5rem;
-  }
-
-  .main-content {
-    margin-left: 280px;
-    height: 100vh;
-    overflow-y: auto;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-  }
-
-  .result-section {
-    transform: scale(0.75);
-    transform-origin: top center;
-    margin: 0;
-    width: 100%;
-    min-height: min-content;
-  }
-
-  .title {
-    margin-top: 0;
-  }
-
-  table {
-    margin: 1rem auto;
-    max-width: 100%;
-    overflow-x: visible;
-  }
-
-  table td,
-  table th {
-    padding: 0.25em 0.75em;
-    font-size: 1.1em;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .sidebar-collapsed .main-content {
-    margin-left: 40px !important;
-  }
-
-  .result-section {
-    margin-top: 1rem;
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  table {
-    min-width: 100%;
-  }
-
-  table {
-    width: auto;
-    min-width: 90%;
-  }
-
-  table td,
-  table th {
-    padding: 0.4em 1.5em;
-    font-size: clamp(1em, 3vw, 3em);
-  }
-
-  .title {
-    font-size: clamp(2em, 3.5vw, 4em);
-  }
-
-  .subtitle {
-    font-size: clamp(1.1em, 2vw, 3em);
-  }
-
-  .lang-name {
-    font-size: clamp(1em, 2.5vw, 3em);
-  }
-
-  .string {
-    font-size: clamp(1em, 3vw, 3em);
-    min-width: 15vw;
-    max-width: 35vw;
-  }
-
-  .table-header {
-    font-size: 1.5em;
-  }
-
-  .minecraft-title {
-    font-size: 1.5em;
-  }
-
-  .form-container {
-    gap: 0.8rem;
-  }
-
-  .input-group input,
-  .input-group select {
-    padding: 0.6rem;
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .main-content {
-    margin-left: 350px !important;
-    padding: 1rem;
-    transition: margin-left 0.3s ease;
-  }
-
-  table td,
-  table th {
-    padding: 0.4em 1.5em;
-    font-size: clamp(0.8em, var(--table-font-size), 2.5em);
-  }
-
-  .lang-name {
-    font-size: clamp(0.8em, var(--table-font-size), 2.5em);
-  }
-
-  .string {
-    font-size: clamp(0.8em, calc(var(--table-font-size) + 0.6vw), 2.5em);
-    min-width: 15vw;
-    max-width: 35vw;
-  }
-}
-
-@media (480px <= width <= 1024px) and (max-height: 480px) and (orientation: landscape) {
-  .sidebar-collapsed .sidebar {
-    width: 40px !important;
-  }
-
-  .sidebar-layout {
-    height: 100vh;
-  }
-
-  .main-content {
-    overflow-y: auto;
-    height: 100vh;
-  }
-
-  .main-content {
-    margin-left: 280px !important;
-    padding: 1rem;
-    transition: margin-left 0.3s ease;
-  }
-}
-
-/* Phase three task layout overrides the former fixed-width sidebar. */
-.translation-query {
-  min-height: calc(100dvh - 64px);
-}
-.sidebar-layout {
-  display: grid;
-  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
-  min-height: auto;
-  align-items: start;
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: var(--space-6);
-  gap: var(--space-8);
-}
-.sidebar,
-.sidebar-collapsed .sidebar {
-  position: sticky;
-  top: calc(64px + var(--space-4));
-  width: auto;
-  height: auto;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
-.sidebar-collapsed .sidebar {
-  width: auto;
-}
-.toggle-button {
-  position: static;
   width: 100%;
+  min-width: 0;
   min-height: var(--control-height);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.toggle-button {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border: 0;
+  border-radius: var(--radius-sm);
   background: var(--accent);
+  color: #fff;
 }
-.settings {
-  padding: var(--space-5);
+
+.sidebar:not(:has(.settings[style*='display: none'])) .toggle-button {
+  top: var(--space-2);
+  right: var(--space-2);
+  left: auto;
 }
-.main-content,
-.sidebar-collapsed .main-content {
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  align-items: start;
-  justify-content: stretch;
+
+.sidebar-collapsed .toggle-button {
+  position: static;
 }
-.result-count {
-  min-height: 1.5rem;
-  margin: 0 0 var(--space-3);
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-.result-section {
-  width: min(100%, 960px);
-  margin: 0;
-  padding: clamp(1rem, 3vw, 2.5rem);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
-.title {
-  color: var(--text);
-  font-size: clamp(1.6rem, 4vw, 3rem);
-  line-height: 1.15;
-}
-.subtitle {
-  overflow-wrap: anywhere;
-  color: var(--muted);
-  font-family: var(--monospace-font);
-}
-.result-section table {
-  width: 100%;
-  border-color: var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-}
-.result-section th,
-.result-section td {
-  border-color: var(--border);
-}
-.result-section .table-header {
-  background: var(--surface-subtle);
-  color: var(--text);
-}
-.result-section .lang-name {
-  color: var(--text-secondary);
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-.result-section .string {
-  overflow-wrap: anywhere;
-}
-.minecraft-title {
-  margin-top: var(--space-5);
-  color: var(--muted);
-  font-size: 0.82rem;
-  text-align: left;
-}
+
 .query-combobox {
   position: relative;
 }
+
 .query-key-results {
   position: absolute;
-  z-index: 20;
-  top: calc(100% + 0.25rem);
+  z-index: 30;
+  top: calc(100% + var(--space-1));
   right: 0;
   left: 0;
-  max-height: 14rem;
+  max-height: min(44dvh, 24rem);
   margin: 0;
-  padding: 0;
+  padding: var(--space-1);
   overflow: auto;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
@@ -1274,79 +631,221 @@ body.dark-mode .toggle-button:hover {
   box-shadow: var(--shadow-md);
   list-style: none;
 }
+
 .query-key-results li {
-  padding: 0.5rem 0.7rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+  font-family: var(--monospace-font);
+  font-size: 0.84rem;
+}
+
+.query-key-results li:hover,
+.query-key-results li.active {
+  background: var(--accent-soft);
+}
+
+.main-content {
+  min-width: 0;
+  outline: none;
+}
+
+.result-count {
+  min-height: 1.5rem;
+  margin: 0 0 var(--space-3);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.error {
+  padding: var(--space-4);
+  border-left: 4px solid var(--error);
+  background: color-mix(in srgb, var(--error) 8%, var(--surface));
+  color: var(--error);
+}
+
+.result-section {
+  width: min(100%, 58rem);
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  color: var(--text);
+  font: 700 clamp(2rem, 5vw, 3.75rem)/1.08 var(--serif-font);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.subtitle {
+  margin: var(--space-3) 0 var(--space-6);
+  color: var(--muted);
+  font: clamp(0.8rem, 1.4vw, 1rem) var(--monospace-font);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.result-section table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.result-section caption {
+  padding-bottom: var(--space-2);
+}
+
+.result-section th,
+.result-section td {
+  padding: clamp(0.7rem, 1.5vw, 1rem);
+  border: 1px solid var(--result-accent, var(--accent));
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.result-section thead th {
+  background: color-mix(in srgb, var(--result-accent, var(--accent)) 11%, var(--surface));
+  font-size: clamp(1.05rem, 2vw, 1.5rem);
+}
+
+.lang-name {
+  width: 46%;
+  font-weight: 700;
+}
+
+.string {
+  font-size: clamp(1rem, 2vw, 1.45rem);
+}
+
+.table-advancements {
+  --result-accent: #9b3f91;
+}
+
+.table-block,
+.table-biome {
+  --result-accent: #3978aa;
+}
+
+.table-effect {
+  --result-accent: #a36b00;
+}
+
+.table-enchantment {
+  --result-accent: #59667a;
+}
+
+.table-entity {
+  --result-accent: #b65f28;
+}
+
+.table-item {
+  --result-accent: #4e8035;
+}
+
+.result-section tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--result-accent, var(--accent)) 13%, var(--surface));
+}
+
+.minecraft-title {
+  margin-top: var(--space-5);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  font: 0.8rem var(--monospace-font);
-  text-overflow: ellipsis;
+  clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
-.query-key-results li.active,
-.query-key-results li:hover {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-}
-@media (max-width: 1023px) {
+
+@media (max-width: 900px) {
   .sidebar-layout {
-    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-    padding: var(--space-4);
+    grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
     gap: var(--space-4);
   }
-  .sidebar {
-    top: calc(64px + var(--space-2));
-  }
 }
-@media (max-width: 767px) {
-  .sidebar-layout {
-    display: block;
+
+@media (max-width: 800px) {
+  .translation-query {
+    min-height: calc(100dvh - 56px);
     padding: var(--space-3);
   }
-  .sidebar,
-  .sidebar-collapsed .sidebar {
+
+  .sidebar-layout,
+  .sidebar-layout.sidebar-collapsed {
+    display: block;
+  }
+
+  .sidebar {
     position: static;
     margin-bottom: var(--space-4);
   }
-  .sidebar-collapsed .settings {
-    display: none;
+
+  .settings {
+    padding: var(--space-4);
   }
+
+  .toggle-button,
+  .sidebar:not(:has(.settings[style*='display: none'])) .toggle-button,
+  .sidebar-collapsed .toggle-button {
+    position: static;
+    width: 100%;
+    height: 40px;
+    margin-bottom: var(--space-2);
+  }
+
+  .toggle-button svg {
+    transform: rotate(-90deg);
+  }
+
+  .sidebar-collapsed .toggle-button svg {
+    transform: rotate(90deg);
+  }
+
+  .result-count {
+    margin-left: var(--space-1);
+  }
+
   .result-section {
     padding: var(--space-4);
   }
-  .result-section table,
-  .result-section tbody,
-  .result-section tr,
+
+  .title {
+    font-size: clamp(1.75rem, 10vw, 2.5rem);
+  }
+
   .result-section th,
   .result-section td {
-    display: block;
+    padding: 0.65rem 0.5rem;
   }
-  .result-section thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
+
+  .lang-name {
+    width: 52%;
+    font-size: 0.85rem;
   }
-  .result-section tr {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .result-section th,
-  .result-section td {
-    padding: 0;
-    border: 0;
-    text-align: start;
-  }
-  .result-section .string {
-    margin-top: 0.25rem;
-    font-size: 1.05rem;
+
+  .string {
+    font-size: 1rem;
   }
 }
-@media (max-height: 500px) and (orientation: landscape) {
-  .sidebar-layout {
-    grid-template-columns: 220px minmax(0, 1fr);
+
+@media (max-width: 390px) {
+  .result-section {
+    padding: var(--space-3);
   }
-  .sidebar {
-    position: static;
+
+  .result-section th,
+  .result-section td {
+    padding-inline: 0.4rem;
   }
 }
 </style>

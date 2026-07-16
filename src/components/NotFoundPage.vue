@@ -1,7 +1,8 @@
 <template>
   <main class="not-found">
     <h1>404</h1>
-    <router-link to="/">Back to Verdigloss</router-link>
+    <p>{{ $t('not_found.description') }}</p>
+    <router-link to="/">{{ $t('not_found.return_home') }}</router-link>
   </main>
 </template>
 <style scoped>

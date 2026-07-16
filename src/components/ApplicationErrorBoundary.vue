@@ -1,11 +1,11 @@
 <template>
   <slot v-if="!error" :key="revision" />
   <main v-else class="application-error" role="alert">
-    <h1>Something went wrong</h1>
-    <p>Verdigloss could not load this view. Try again, or return to the translation query.</p>
+    <h1>{{ $t('error_boundary.title') }}</h1>
+    <p>{{ $t('error_boundary.description') }}</p>
     <div>
-      <button type="button" @click="retry">Try again</button>
-      <router-link to="/">Return to query</router-link>
+      <button type="button" @click="retry">{{ $t('error_boundary.retry') }}</button>
+      <router-link to="/">{{ $t('error_boundary.return_to_query') }}</router-link>
     </div>
   </main>
 </template>

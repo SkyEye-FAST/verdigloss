@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { i18n } from '@/app/i18n'
+import { i18n, resolveInterfaceLocale } from '@/app/i18n'
 import { documentTitleFor } from '@/app/document-title'
 import { router } from '@/app/router'
 import { languageList } from '@/data/languages'
@@ -82,9 +82,21 @@ describe('phase-two data boundaries', () => {
     expect(documentTitleFor(table.meta)).toContain('Translation')
     i18n.global.locale.value = 'zh-CN'
     expect(documentTitleFor(table.meta)).toContain('标准译名表')
+    expect(documentTitleFor(router.resolve('/does-not-exist').meta)).toBe('找不到页面 - Verdigloss')
+    i18n.global.locale.value = 'en'
     expect(documentTitleFor(router.resolve('/does-not-exist').meta)).toBe(
       'Page not found - Verdigloss',
     )
-    i18n.global.locale.value = 'en'
+  })
+
+  it('resolves Chinese script and region variants to the correct interface locale', () => {
+    expect(resolveInterfaceLocale('zh-CN')).toBe('zh-CN')
+    expect(resolveInterfaceLocale('zh-Hans-SG')).toBe('zh-CN')
+    expect(resolveInterfaceLocale('zh-TW')).toBe('zh-TW')
+    expect(resolveInterfaceLocale('zh-Hant-TW')).toBe('zh-TW')
+    expect(resolveInterfaceLocale('zh-HK')).toBe('zh-TW')
+    expect(resolveInterfaceLocale('zh-MO')).toBe('zh-TW')
+    expect(resolveInterfaceLocale('zh-Hant-HK')).toBe('zh-TW')
+    expect(resolveInterfaceLocale('en-US')).toBe('en')
   })
 })

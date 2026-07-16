@@ -2,7 +2,7 @@
   <span
     class="color-preview"
     :style="{ backgroundColor: color }"
-    :aria-label="`Colour value ${color}`"
+    :aria-label="$t('table.colors.color_value', { color })"
     role="img"
     :title="color"
   ></span>

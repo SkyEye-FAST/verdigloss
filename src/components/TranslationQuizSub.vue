@@ -4,11 +4,13 @@
       <div class="progress-fill" :style="{ width: progressWidth + '%' }"></div>
     </div>
     <div class="quiz-container">
+      <p v-if="loadingQuestions" class="quiz-loading" role="status" aria-live="polite">
+        {{ $t('quiz.active.loading') }}
+      </p>
       <p v-if="routeError" role="alert" class="quiz-route-error">{{ routeError }}</p>
-      <div class="quiz-info" v-show="!showSummary && !routeError">
+      <div class="quiz-info" v-show="!loadingQuestions && !showSummary && !routeError">
         <p class="quiz-progress" aria-live="polite">
-          Question {{ currentIndex + 1 }} of {{ questions.length }}.
-          {{ isTimerMode ? `${formatTime(remainingTime)} remaining.` : 'Untimed quiz.' }}
+          {{ progressAnnouncement }}
         </p>
         <div class="info">
           <div v-if="isTimerMode" class="timer">
@@ -32,21 +34,36 @@
           class="quiz-boxes"
           :class="queryLang"
           role="group"
-          aria-label="Answer character states: green correct, yellow present, red hint, blue hinted correct"
+          :aria-label="$t('quiz.active.character_states')"
         >
           <div
             v-for="(box, index) in boxes"
             :key="index"
             class="translation-character"
             :class="[queryLang.replace(/_/, '-'), box.state, { dark: isDarkMode }]"
+            role="img"
+            :aria-label="$t(`quiz.character_state.${box.state}`)"
           >
             {{ box.char }}
           </div>
         </div>
+        <ul class="state-legend" :aria-label="$t('quiz.active.state_legend')">
+          <li>
+            <span class="state-swatch correct"></span>{{ $t('quiz.character_state.correct') }}
+          </li>
+          <li>
+            <span class="state-swatch present"></span>{{ $t('quiz.character_state.present') }}
+          </li>
+          <li><span class="state-swatch hinted"></span>{{ $t('quiz.character_state.hinted') }}</li>
+          <li>
+            <span class="state-swatch hinted-correct"></span
+            >{{ $t('quiz.character_state.hinted-correct') }}
+          </li>
+        </ul>
       </div>
 
       <input
-        v-if="!showSummary && !routeError"
+        v-if="!loadingQuestions && !showSummary && !routeError"
         v-model="inputText"
         autocomplete="off"
         class="quiz-input"
@@ -59,7 +76,7 @@
         type="text"
       />
 
-      <div class="quiz-controls" v-if="!showSummary && !routeError">
+      <div class="quiz-controls" v-if="!loadingQuestions && !showSummary && !routeError">
         <button v-if="canHint" class="quiz-hint-btn" @click="showHint">
           {{ $t('quiz.hint') }}
         </button>
@@ -68,35 +85,43 @@
         </button>
       </div>
 
-      <div class="quiz-summary" v-if="showSummary && !routeError">
+      <div ref="summaryRef" class="quiz-summary" v-if="showSummary && !routeError">
         <div class="quiz-title" :class="currentLang.toLowerCase()">
           {{ $t('quiz.complete') }}
         </div>
         <div v-if="isTimerMode" class="summary-info">
           <i-material-symbols-timer style="font-size: smaller" />
-          <span class="summary-label">{{ formatTime(usedTime) }}</span>
+          <span class="summary-label">{{
+            $t('quiz.summary.used_time', { time: formatTime(usedTime) })
+          }}</span>
         </div>
         <div class="summary-info" v-if="queryLang === 'zh_cn'">
           <i-material-symbols-star style="font-size: smaller" />
-          <span class="summary-label">{{ totalLevel.toFixed(2) }} /</span>
+          <span class="summary-label">{{
+            $t('quiz.summary.level', { level: totalLevel.toFixed(2) })
+          }}</span>
           <i-material-symbols-stars style="font-size: smaller" />
-          <span class="summary-label">{{ totalScore.toFixed(2) }} pts</span>
+          <span class="summary-label">{{
+            $t('quiz.summary.score', { score: totalScore.toFixed(2) })
+          }}</span>
         </div>
         <div
           class="quiz-summary-table-wrapper"
           role="region"
           tabindex="0"
-          aria-label="Quiz results table; scroll horizontally to see all columns"
+          :aria-label="$t('quiz.summary.results_region')"
         >
           <table class="quiz-summary-table">
             <caption class="sr-only">
-              Question results
+              {{
+                $t('quiz.summary.caption')
+              }}
             </caption>
             <thead :class="currentLang.toLowerCase()">
               <tr>
                 <th scope="col">{{ $t('quiz.source') }}</th>
                 <th scope="col">{{ $t('quiz.translation') }}</th>
-                <th scope="col">Status</th>
+                <th scope="col">{{ $t('quiz.summary.status') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -114,7 +139,9 @@
                     >{{ char }}</span
                   >
                 </td>
-                <td>{{ questionResults[question.key]?.completion || 'unanswered' }}</td>
+                <td class="status-cell">
+                  {{ completionLabel(questionResults[question.key]?.completion) }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -124,7 +151,9 @@
           <span class="quiz-code-actions">
             <button
               type="button"
-              :aria-label="isCopied ? 'Quiz code copied' : 'Copy quiz code'"
+              :aria-label="
+                isCopied ? $t('quiz.feedback.code_copied') : $t('quiz.actions.copy_code')
+              "
               @click="copyCode"
             >
               <i-material-symbols-check
@@ -135,14 +164,16 @@
             <button
               v-if="canShare"
               type="button"
-              aria-label="Share quiz result"
+              :aria-label="$t('quiz.actions.share_result')"
               @click="shareResult"
             >
               <i-material-symbols-share aria-hidden="true" />
             </button>
           </span>
         </div>
-        <p class="quiz-feedback" aria-live="polite">{{ isCopied ? 'Quiz code copied.' : '' }}</p>
+        <p class="quiz-feedback" aria-live="polite">
+          {{ isCopied ? $t('quiz.feedback.code_copied') : '' }}
+        </p>
         <p v-if="actionError" role="alert" class="quiz-route-error">{{ actionError }}</p>
         <div class="quiz-summary-buttons">
           <button class="button" @click="restartQuiz">
@@ -223,10 +254,12 @@ const { isDarkMode } = useDarkMode()
 const currentIndex = ref(0)
 const inputText = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
+const summaryRef = ref<HTMLElement | null>(null)
 const showSummary = ref(false)
 const isComposing = ref(false)
 const isLocked = ref(false)
 const isCopied = ref(false)
+const loadingQuestions = ref(true)
 const routeError = ref<string | null>(null)
 const actionError = ref<string | null>(null)
 const questionResults = ref<Record<string, StoredQuestionResult>>({})
@@ -260,6 +293,16 @@ const usedTime = computed(() =>
 const progressWidth = computed(() =>
   timer.value ? timerProgressPercent(timer.value, now.value) : 0,
 )
+const progressAnnouncement = computed(() =>
+  t(isTimerMode.value ? 'quiz.progress.timed' : 'quiz.progress.untimed', {
+    current: currentIndex.value + 1,
+    total: questions.value.length,
+    time: formatTime(remainingTime.value),
+  }),
+)
+
+const completionLabel = (completion: QuestionCompletion | undefined) =>
+  t(`quiz.completion.${completion ?? 'unanswered'}`)
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -386,6 +429,7 @@ const advanceQuestion = () => {
   if (currentIndex.value >= questions.value.length - 1) {
     stopTimer()
     showSummary.value = true
+    void nextTick(() => summaryRef.value?.scrollIntoView({ block: 'start' }))
     return
   }
   currentIndex.value += 1
@@ -411,12 +455,13 @@ const finishTimedQuiz = () => {
   }
   stopTimer()
   showSummary.value = true
+  void nextTick(() => summaryRef.value?.scrollIntoView({ block: 'start' }))
 }
 
 const copyCode = async () => {
   const result = await copyText(quizCode.value)
   if (!result.ok) {
-    actionError.value = 'Unable to copy the quiz code.'
+    actionError.value = t('quiz.errors.copy_failure')
     return
   }
   actionError.value = null
@@ -433,7 +478,7 @@ const shareResult = async () => {
     url: window.location.href,
   })
   if (!result.ok) {
-    actionError.value = 'Unable to share the quiz result.'
+    actionError.value = t('quiz.errors.share_failure')
   }
 }
 
@@ -448,7 +493,7 @@ const restartQuiz = () => {
     quizIdData.ids,
   )
   if (!code.ok) {
-    actionError.value = 'Unable to generate a replacement quiz.'
+    actionError.value = t('quiz.errors.replacement_failure')
     return
   }
   router.push({
@@ -478,12 +523,13 @@ const resetQuizState = () => {
 
 const loadQuestions = async () => {
   resetQuizState()
+  loadingQuestions.value = true
   routeError.value = null
   const decoded = decodeQuizCode(quizCode.value, quizIdData.ids, legacyQuizIdMap)
   if (!decoded.ok) {
-    routeError.value =
-      'This quiz code is missing, malformed, unsupported, or contains an unknown question.'
+    routeError.value = t('quiz.errors.invalid_route_code')
     questions.value = []
+    loadingQuestions.value = false
     return
   }
   const quizLanguages = languageRegistry
@@ -492,15 +538,23 @@ const loadQuestions = async () => {
   const language = parseTargetLanguage(route.query.l, quizLanguages, 'zh_cn')
   const timerResult = parseTimerMode(route.query.t)
   if (!language.ok || !timerResult.ok) {
-    routeError.value = 'The quiz language or timer mode is invalid.'
+    routeError.value = t('quiz.errors.invalid_route_options')
     questions.value = []
+    loadingQuestions.value = false
     return
   }
   queryLang.value = language.value
   timerMode.value = timerResult.value
-  languageFiles.value = {
-    ...languageFiles.value,
-    ...(await loadLanguages(['en_us', queryLang.value])),
+  try {
+    languageFiles.value = {
+      ...languageFiles.value,
+      ...(await loadLanguages(['en_us', queryLang.value])),
+    }
+  } catch {
+    routeError.value = t('quiz.errors.load_failure')
+    questions.value = []
+    loadingQuestions.value = false
+    return
   }
   const selected = buildQuizQuestions(
     decoded.value.keys,
@@ -509,8 +563,11 @@ const loadQuestions = async () => {
     quizIdData.ids,
   )
   if (!selected.ok) {
-    routeError.value = `This valid code provides fewer than ${QUIZ_QUESTION_COUNT} usable questions for the selected language.`
+    routeError.value = t('quiz.errors.insufficient_route_questions', {
+      minimum: QUIZ_QUESTION_COUNT,
+    })
     questions.value = []
+    loadingQuestions.value = false
     return
   }
   questions.value = shuffle(selected.value).map((question) => ({
@@ -519,6 +576,7 @@ const loadQuestions = async () => {
       queryLang.value === 'zh_cn' ? ratingData[question.key as keyof typeof ratingData] : undefined,
     translationChars: getSegmentedText(question.translation),
   }))
+  loadingQuestions.value = false
   startTimer()
 }
 
@@ -534,803 +592,405 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Progress Bar */
+.translation-quiz-sub {
+  --app-bar-offset: 64px;
+  min-height: calc(100dvh - var(--app-bar-offset));
+}
+
 .progress-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+  position: sticky;
+  z-index: 45;
+  top: var(--app-bar-offset);
   height: 4px;
-  background-color: #e0e0e0;
-  z-index: 1000;
+  background: var(--border);
 }
 
 .progress-fill {
   height: 100%;
-  background-color: #5b9bd5;
-  transition: width 1s linear;
+  background: var(--accent);
+  transition: width 250ms linear;
 }
 
-/* Main Container */
 .quiz-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  text-align: center;
-  flex-direction: column;
-  padding: 2rem;
-  box-sizing: border-box;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  width: min(calc(100% - 2rem), 64rem);
+  min-height: calc(100dvh - var(--app-bar-offset) - 4px);
+  margin: 0 auto;
+  padding: clamp(2rem, 7vh, 5rem) 0 max(3rem, env(keyboard-inset-height, 0px));
+}
+
+.quiz-loading,
+.quiz-route-error {
+  width: min(100%, 42rem);
+  margin: 0;
+  padding: var(--space-4);
+  border-left: 4px solid var(--info);
+  background: color-mix(in srgb, var(--info) 8%, var(--surface));
+  color: var(--text-secondary);
 }
 
 .quiz-route-error {
-  color: #b42318;
-  text-align: center;
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) 8%, var(--surface));
+  color: var(--error);
 }
 
-/* Character Boxes */
-.translation-character {
-  display: inline-block;
-  width: 7rem;
-  height: 7rem;
-  line-height: 7rem;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  margin: 5px;
-  font-size: 3em;
-  text-align: center;
-  vertical-align: top;
-  box-sizing: border-box;
-  color: #000;
-  background-color: #9ca3af25;
-  font-weight: 700;
-  transition: all 0.2s ease;
-}
-
-.translation-character.correct {
-  color: #000;
-  background-color: #64dd17;
-}
-
-.translation-character.hinted {
-  color: #000;
-  background-color: #ef5350;
-}
-
-.translation-character.hinted-correct {
-  color: #000;
-  background-color: #64b5f6;
-}
-
-.translation-character.present {
-  color: #000;
-  background-color: #ffd600;
-}
-
-/* Input & Controls */
-.quiz-controls button,
-.quiz-input {
-  font-size: 1.75em;
-  text-align: center;
-  border: 2px solid;
-  border-radius: 8px;
-  box-sizing: border-box;
-  background-color: transparent;
-  color: #000;
-}
-
-.quiz-input {
-  margin-top: 20px;
-  height: 3em;
-  width: 50%;
-  border-color: #50535a1a;
-}
-
-.quiz-controls {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 50%;
-  gap: 15px;
-}
-
-.quiz-controls button {
-  height: 2.25em;
-  flex: 1;
-}
-
-.quiz-controls button[disabled] {
-  opacity: 0.5 !important;
-}
-
-/* Info & Typography */
-.info {
-  margin-bottom: 20px;
-}
-
-.source {
-  font-family: var(--serif-font), serif;
-  font-size: clamp(2.5em, calc(3em + 1vw), 4em);
-  font-weight: 600;
-  text-align: center;
-}
-
-.key {
-  font-family: var(--monospace-font), monospace;
-  font-size: clamp(1.5em, calc(1.5em + 0.6vw), 3em);
-  text-align: center;
-  padding-top: 10px;
-}
-
-.rating span {
-  display: inline-flex;
-  align-items: center;
-  vertical-align: middle;
-}
-
-.quiz-title {
-  font-size: 2.8em;
-  font-weight: 900;
-}
-
-/* Summary Section */
-.quiz-summary {
-  text-align: center;
-  background-color: white;
-  padding: 20px 30px;
-  width: max-content;
-  border-radius: 8px;
-}
-
-.summary-info {
-  font-family: var(--monospace-font), monospace;
-  font-size: clamp(1.5em, calc(1.5em + 0.6vw), 3em);
-  text-align: center;
-  padding: 0;
-  font-size: 1.5em;
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-.summary-info {
-  display: flex;
-  align-items: center;
-}
-.summary-label {
-  margin: 0 10px;
-}
-
-.quiz-summary-buttons {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.button {
-  font-size: 1.2em;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  background: #1d5848 !important;
-  color: white;
-  text-decoration: none;
-  transition: background-color 0.2s;
-  font-weight: 600;
-  border: none;
-}
-
-.button:hover {
-  background: #174739 !important;
-}
-
-.quiz-code-container {
-  margin: 0 auto;
-  padding: 15px 0 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.quiz-code {
-  padding: 0 5px;
-  font-size: 16px;
-  font-family: var(--monospace-font), monospace;
-}
-
-/* Summary Table */
-.quiz-summary-table {
-  margin: 10px auto 0 auto;
-  border-collapse: collapse;
-  font-size: larger;
-}
-
-.quiz-summary-table tr td,
-.quiz-summary-table thead th {
-  border: 2px solid #5b9bd5;
-  padding: 5px;
-}
-
-.quiz-summary-table tr:nth-child(odd) {
-  background-color: #2e4e6c0f;
-}
-
-.quiz-summary-table tr:nth-child(even) {
-  background-color: #5b9bd533;
-}
-
-.quiz-summary-table thead {
-  font-size: larger;
-}
-
-/* Navigation Buttons */
-.nav-buttons {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.nav-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #fff !important;
-  color: #666;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.nav-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  color: #7aa2ea;
-}
-
-/* Timer */
-.timer {
-  font-family: var(--monospace-font), monospace;
-  font-size: 2em;
-  font-weight: bold;
-  color: #5b9bd5;
-  margin-bottom: 10px;
-}
-
-/* Answer Highlighting */
-.transl {
-  color: #000;
-}
-
-.transl.correct {
-  background-color: #85df4c;
-}
-
-.transl.present {
-  background-color: #f3d837;
-}
-
-.transl.hinted {
-  background-color: #ff6d55;
-}
-
-.transl.hinted-correct {
-  background-color: #5ab0f3;
-}
-
-.transl.dark {
-  color: #fff;
-  background-color: transparent;
-}
-
-.transl.correct.dark {
-  color: #85df4c;
-  background-color: transparent;
-}
-
-.transl.hinted.dark {
-  color: #ff6d55;
-  background-color: transparent;
-}
-
-.transl.hinted-correct.dark {
-  color: #5ab0f3;
-  background-color: transparent;
-}
-
-.transl.present.dark {
-  color: #f3d837;
-  background-color: transparent;
-}
-
-.translation-character.dark {
-  color: #e0e0e0;
-  background-color: #9ca3af25;
-}
-
-.translation-character.correct.dark {
-  color: #e0e0e0;
-  background-color: #43a047;
-}
-
-.translation-character.present.dark {
-  color: #e0e0e0;
-  background-color: #afb42b;
-}
-
-.translation-character.hinted.dark {
-  color: #e0e0e0;
-  background-color: #d32f2f;
-}
-
-.translation-character.hinted-correct.dark {
-  color: #e0e0e0;
-  background-color: #0288d1;
-}
-
-/*  Dark Mode */
-body.dark-mode .progress-bar {
-  background-color: #333;
-}
-
-body.dark-mode .progress-fill {
-  background-color: #64b5f6;
-}
-
-body.dark-mode .quiz-input {
-  border-color: #e0e0e01a;
-}
-
-body.dark-mode .quiz-controls button,
-body.dark-mode .quiz-input {
-  color: #e0e0e0;
-  border-color: #505050;
-}
-
-body.dark-mode .quiz-summary {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
-}
-
-body.dark-mode .quiz-summary-table td,
-body.dark-mode .quiz-summary-table th {
-  border-color: #505050;
-}
-
-body.dark-mode .quiz-summary-table tr:nth-child(odd) {
-  background-color: #2a2a2a;
-}
-
-body.dark-mode .quiz-summary-table tr:nth-child(even) {
-  background-color: #333333;
-}
-
-body.dark-mode .quiz-code {
-  background-color: #2a2a2a;
-  color: #e0e0e0;
-}
-
-body.dark-mode .nav-button {
-  background: #333 !important;
-  color: #e0e0e0;
-}
-
-body.dark-mode .button {
-  background: #4a4a4a !important;
-}
-
-body.dark-mode .button:hover {
-  background: #5a5a5a !important;
-}
-
-body.dark-mode .timer {
-  color: #64b5f6;
-}
-
-/* Responsive Styles */
-@media (orientation: landscape) and (max-height: 520px) {
-  .quiz-container {
-    padding: 1rem;
-  }
-
-  .source {
-    font-size: clamp(1em, calc(1.4em + 1vw), 3em);
-  }
-
-  .key {
-    font-size: clamp(0.5em, calc(0.5em + 1vw), 1.75em);
-  }
-
-  .translation-character {
-    width: clamp(2em, calc(2em + 0.4vw), 3em);
-    height: clamp(2em, calc(2em + 0.4vw), 3em);
-    line-height: clamp(2em, calc(2em + 0.4vw), 3em);
-    font-size: clamp(1.5em, calc(1.5em + 0.4vw), 3em);
-    margin: 3px;
-  }
-
-  .quiz-input {
-    width: 65%;
-    height: 2.5em;
-    font-size: 1.25em;
-  }
-
-  .quiz-controls button {
-    height: 2.5em;
-    font-size: 1.25em;
-  }
-
-  .quiz-controls {
-    width: 65%;
-  }
-
-  .quiz-summary-table {
-    display: none;
-  }
-}
-
-@media (orientation: landscape) and (min-height: 520px) and (max-height: 850px) {
-  .source {
-    font-size: clamp(2.5em, calc(2.5em + 0.8vw), 4em);
-  }
-
-  .key {
-    font-size: clamp(1em, calc(1em + 1vw), 2.5em);
-  }
-
-  .translation-character {
-    width: clamp(2.25em, calc(2.25em + 0.6vw), 3.5em);
-    height: clamp(2.25em, calc(2.25em + 0.6vw), 3.5em);
-    line-height: clamp(2.25em, calc(2.25em + 0.6vw), 3.5em);
-    font-size: clamp(1.9em, calc(1.9em + 0.5vw), 3em);
-  }
-}
-
-@media (orientation: portrait) and (max-width: 768px) {
-  .quiz-container {
-    padding: 1rem;
-  }
-
-  .source {
-    font-size: clamp(1.1em, calc(1.1em + 0.9vw), 2.5em);
-  }
-
-  .key {
-    font-size: clamp(0.5em, calc(0.5em + 1vw), 1.6em);
-  }
-
-  .translation-character {
-    width: clamp(2em, calc(2em + 0.4vw), 3em);
-    height: clamp(2em, calc(2em + 0.4vw), 3em);
-    line-height: clamp(2em, calc(2em + 0.4vw), 3em);
-    font-size: clamp(1.5em, calc(1.5em + 0.4vw), 3em);
-    margin: 3px;
-  }
-
-  .quiz-controls button,
-  .quiz-input {
-    font-size: 1.25em;
-  }
-
-  .quiz-controls {
-    margin-top: 1.5em !important;
-  }
-
-  .quiz-summary {
-    font-size: smaller;
-  }
-
-  .quiz-summary button {
-    font-size: 16px;
-  }
-
-  .nav-buttons {
-    top: auto;
-    bottom: 1rem;
-    right: 1rem;
-  }
-}
-
-@media (orientation: portrait) and (min-width: 768px) and (max-width: 1024px) {
-  .quiz-container {
-    padding: 1rem;
-  }
-
-  .source {
-    font-size: clamp(2em, calc(2em + 1vw), 3em);
-  }
-
-  .key {
-    font-size: clamp(0.8em, calc(0.8em + 1vw), 2.25em);
-  }
-
-  .translation-character {
-    width: clamp(2em, calc(2em + 0.4vw), 3em);
-    height: clamp(2em, calc(2em + 0.4vw), 3em);
-    line-height: clamp(2em, calc(2em + 0.4vw), 3em);
-    font-size: clamp(1.75em, calc(1.75em + 0.4vw), 3em);
-    margin: 3px;
-  }
-
-  .quiz-controls button,
-  .quiz-input {
-    font-size: 1.75em;
-  }
-}
-
-@media (orientation: portrait) and (min-width: 1024px) {
-  .quiz-container {
-    padding: 1rem;
-  }
-
-  .source {
-    font-size: clamp(2.5em, calc(2.5em + 1vw), 4em);
-  }
-
-  .key {
-    font-size: clamp(1em, calc(1em + 1vw), 2.5em);
-  }
-
-  .translation-character {
-    width: clamp(2.5em, calc(2.5em + 0.6vw), 3em);
-    height: clamp(2.5em, calc(2.5em + 0.6vw), 3em);
-    line-height: clamp(2.5em, calc(2.5em + 0.6vw), 3em);
-    font-size: clamp(1.75em, calc(1.75em + 0.6vw), 3em);
-    margin: 3px;
-  }
-
-  .quiz-controls button,
-  .quiz-input {
-    font-size: 2em;
-  }
-}
-
-@media (orientation: portrait) {
-  .quiz-container {
-    padding: 1rem;
-  }
-
-  .quiz-controls {
-    margin-top: 2em;
-    width: 80%;
-    height: 2.5em;
-  }
-
-  .quiz-input {
-    width: 80%;
-  }
-
-  .quiz-controls button {
-    height: 2.5em;
-  }
-
-  .zh-cn.title {
-    font-size: 2em;
-  }
-
-  .quiz-summary {
-    width: auto;
-    padding: 20px 20px;
-  }
-
-  .translation-character {
-    width: 4rem;
-    height: 4rem;
-    line-height: 4rem;
-    font-size: 2em;
-    margin: 3px;
-  }
-
-  .quiz-input {
-    width: 90%;
-    font-size: 1.5em;
-  }
-
-  .quiz-controls {
-    width: 90%;
-  }
-
-  .quiz-controls button {
-    font-size: 1.5em;
-  }
-
-  .source {
-    font-size: 2em;
-  }
-
-  .key {
-    font-size: 1.2em;
-  }
-}
-
-.translation-quiz-sub {
-  min-height: calc(100dvh - 64px);
-  background: var(--page);
-}
-.quiz-container {
-  width: min(100% - 2rem, 880px);
-  min-height: calc(100dvh - 64px);
-  margin: 0 auto;
-  padding: clamp(1rem, 4vw, 3rem) 0;
-  color: var(--text);
-}
 .quiz-info {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  text-align: center;
+}
+
+.quiz-progress {
+  margin: 0;
+  color: var(--muted);
+}
+
+.info {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
   width: 100%;
 }
-.quiz-progress {
-  margin: 0 0 var(--space-4);
-  color: var(--muted);
-  font-size: 0.9rem;
+
+.timer {
+  color: var(--warning);
+  font: 700 1.1rem var(--monospace-font);
 }
+
 .source {
-  color: var(--text);
-  font-size: clamp(1.8rem, 6vw, 4.2rem);
+  max-width: 100%;
+  font: 700 clamp(2rem, 6vw, 4.25rem)/1.08 var(--serif-font);
   overflow-wrap: anywhere;
 }
+
 .key {
   max-width: 100%;
-  overflow-wrap: anywhere;
   color: var(--muted);
-  font-size: clamp(0.8rem, 2vw, 1.25rem);
+  font: clamp(0.78rem, 2vw, 1.05rem) var(--monospace-font);
+  overflow-wrap: anywhere;
 }
-.timer {
-  color: var(--accent-strong);
-  font-size: clamp(1.2rem, 3vw, 1.8rem);
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
+
+.rating > span:first-child {
+  display: inline-flex;
+  margin-right: 0 !important;
+  color: var(--warning);
+}
+
 .quiz-boxes {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.4rem;
-  max-width: 100%;
-  margin-top: var(--space-5);
+  gap: clamp(0.3rem, 1vw, 0.55rem);
+  width: 100%;
 }
+
 .translation-character {
   display: grid;
   place-items: center;
-  width: clamp(2.7rem, 8vw, 5.25rem);
-  height: clamp(2.7rem, 8vw, 5.25rem);
-  margin: 0;
+  inline-size: clamp(2.7rem, 6vw, 5.2rem);
+  block-size: clamp(3rem, 7vw, 5.4rem);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface-subtle);
   color: var(--text);
-  font-size: clamp(1.2rem, 4vw, 2.5rem);
-  line-height: 1;
+  font-size: clamp(1.25rem, 3vw, 2.2rem);
 }
-.translation-character.correct {
-  background: var(--success);
-  color: #fff;
+
+.translation-character.correct,
+.transl.correct,
+.state-swatch.correct {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 24%, var(--surface));
 }
-.translation-character.present {
-  background: var(--warning);
-  color: #241a00;
+
+.translation-character.present,
+.transl.present,
+.state-swatch.present {
+  border-color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 24%, var(--surface));
 }
-.translation-character.hinted {
-  background: var(--error);
-  color: #fff;
+
+.translation-character.absent,
+.transl.absent,
+.state-swatch.absent {
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) 18%, var(--surface));
 }
-.translation-character.hinted-correct {
-  background: var(--info);
-  color: #fff;
+
+.translation-character.hinted,
+.transl.hinted,
+.state-swatch.hinted {
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) 28%, var(--surface));
 }
-.quiz-input {
-  width: min(100%, 42rem);
-  min-height: var(--control-height);
-  height: auto;
-  margin-top: var(--space-6);
-  padding: 0.65rem 0.8rem;
-  border-color: var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-  font-size: clamp(1rem, 3vw, 1.35rem);
+
+.translation-character.hinted-correct,
+.transl.hinted-correct,
+.state-swatch.hinted-correct {
+  border-color: var(--info);
+  background: color-mix(in srgb, var(--info) 24%, var(--surface));
 }
+
+.state-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  list-style: none;
+}
+
+.state-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.state-swatch {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+}
+
+.quiz-input,
 .quiz-controls {
   width: min(100%, 42rem);
-  height: auto;
-  margin-top: var(--space-3);
-  gap: var(--space-3);
 }
-.quiz-controls button {
-  min-height: var(--control-height);
-  border-color: var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-  font-size: 1rem;
-}
-.quiz-controls button:hover {
-  border-width: 2px !important;
-  background: var(--accent-soft);
-}
-.quiz-summary {
-  width: 100%;
-  padding: clamp(1rem, 3vw, 2rem);
-  border: 1px solid var(--border);
+
+.quiz-input {
+  min-height: 3.5rem;
+  padding: 0.65rem 1rem;
+  border: 2px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--text);
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  text-align: center;
+  scroll-margin-bottom: 40dvh;
 }
-.quiz-summary-table-wrapper {
-  max-width: 100%;
-  overflow: auto;
-  overscroll-behavior: contain;
-}
-.quiz-summary-table {
-  width: 100%;
-  min-width: 560px;
-  background: var(--surface);
-  color: var(--text);
-}
-.quiz-summary-table tr td,
-.quiz-summary-table thead th {
-  border-color: var(--border);
-}
-.quiz-summary-table tr:nth-child(odd),
-.quiz-summary-table tr:nth-child(even) {
-  background: var(--surface);
-}
-.quiz-summary-table tr:nth-child(even) {
-  background: var(--surface-subtle);
-}
-.quiz-code-container {
-  white-space: normal;
-}
-.quiz-code {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-.quiz-code-actions {
-  display: inline-flex;
-  gap: 0.25rem;
-}
-.quiz-code-actions button {
+
+.quiz-controls {
   display: grid;
-  place-items: center;
-  min-width: var(--control-height);
+  gap: var(--space-3);
+}
+
+.quiz-controls button,
+.quiz-summary-buttons .button,
+.quiz-code-actions button {
   min-height: var(--control-height);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
 }
+
+.quiz-controls button:hover,
+.quiz-summary-buttons .button:hover,
+.quiz-code-actions button:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.quiz-title {
+  color: var(--text);
+  font: 700 clamp(2rem, 5vw, 3rem)/1.1 var(--serif-font);
+  text-align: center;
+}
+
+.quiz-summary {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  scroll-margin-top: calc(var(--app-bar-offset) + var(--space-3));
+}
+
+.summary-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+}
+
+.quiz-summary-table-wrapper {
+  width: 100%;
+  max-height: min(55dvh, 34rem);
+  overflow: auto;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.quiz-summary-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+}
+
+.quiz-summary-table th,
+.quiz-summary-table td {
+  min-width: 13rem;
+  padding: 0.65rem 0.75rem;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.quiz-summary-table th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  background: var(--surface-subtle);
+}
+
+.quiz-summary-table tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--surface-subtle) 72%, var(--surface));
+}
+
+.transl {
+  display: inline-block;
+  min-width: 1.15em;
+  margin: 1px;
+  padding: 0.08rem 0.16rem;
+  border-radius: 2px;
+  text-align: center;
+}
+
+.status-cell {
+  font-weight: 700;
+}
+
+.quiz-code-container {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  width: min(100%, 48rem);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+}
+
+.quiz-code {
+  min-width: 0;
+  font: 0.75rem/1.5 var(--monospace-font);
+  overflow-wrap: anywhere;
+}
+
+.quiz-code-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.quiz-code-actions button {
+  display: grid;
+  width: var(--control-height);
+  padding: 0;
+  place-items: center;
+}
+
 .quiz-feedback {
   min-height: 1.5rem;
-  margin: 0.4rem 0 0;
+  margin: 0;
   color: var(--success);
 }
-@media (max-width: 767px) {
-  .quiz-container {
-    width: min(100% - 1rem, 880px);
-    min-height: auto;
-    padding: var(--space-4) 0;
+
+.quiz-summary-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.quiz-summary-buttons .button {
+  padding: 0.6rem 1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+  .translation-quiz-sub {
+    --app-bar-offset: 56px;
   }
-  .quiz-summary {
-    padding: var(--space-4);
+
+  .quiz-container {
+    width: min(calc(100% - 1rem), 64rem);
+    min-height: calc(100dvh - var(--app-bar-offset) - 70px);
+    padding: var(--space-5) 0 max(6rem, env(keyboard-inset-height, 0px));
+    align-content: start;
+  }
+
+  .source {
+    font-size: clamp(1.8rem, 9vw, 2.8rem);
+  }
+
+  .translation-character {
+    inline-size: clamp(2.35rem, 13vw, 3.2rem);
+    block-size: clamp(2.7rem, 14vw, 3.4rem);
+  }
+
+  .state-legend {
+    gap: var(--space-2);
+  }
+
+  .quiz-summary-table th,
+  .quiz-summary-table td {
+    min-width: 10rem;
+  }
+
+  .quiz-code-container {
+    grid-template-columns: 1fr;
   }
 }
+
 @media (max-height: 500px) and (orientation: landscape) {
   .quiz-container {
     min-height: auto;
-    padding: var(--space-3) 0;
+    padding-block: var(--space-4);
+    align-content: start;
   }
+
+  .source {
+    font-size: 2rem;
+  }
+
   .translation-character {
-    width: 2.5rem;
-    height: 2.5rem;
+    inline-size: 2.5rem;
+    block-size: 2.7rem;
+    font-size: 1.2rem;
+  }
+
+  .quiz-summary-table-wrapper {
+    max-height: 65dvh;
   }
 }
 </style>

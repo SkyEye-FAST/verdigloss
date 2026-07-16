@@ -6,7 +6,7 @@
       type="button"
       :aria-expanded="isOpen"
       :aria-controls="popupId"
-      :aria-label="`${label}: ${selectedSummary}`"
+      :aria-label="`${resolvedLabel}: ${selectedSummary}`"
       @click="toggleDropdown"
       @keydown.escape="closeDropdown"
     >
@@ -18,12 +18,12 @@
       :id="popupId"
       class="language-selector__popover"
       role="group"
-      :aria-label="label"
+      :aria-label="resolvedLabel"
       @keydown.esc.stop.prevent="closeAndRestoreFocus"
     >
       <div class="language-selector__actions">
-        <button type="button" @click="selectAll">Select all</button>
-        <button type="button" @click="clearAll">Clear</button>
+        <button type="button" @click="selectAll">{{ $t('language_selector.select_all') }}</button>
+        <button type="button" @click="clearAll">{{ $t('language_selector.clear') }}</button>
       </div>
       <div class="language-selector__options">
         <label v-for="option in options" :key="option.value" class="language-selector__option">
@@ -45,16 +45,20 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 interface Option {
   value: string
   label: string
   htmlLang: string
 }
-const props = withDefaults(
-  defineProps<{ modelValue: string[]; options: Option[]; placeholder?: string; label?: string }>(),
-  { placeholder: 'Choose languages', label: 'Selected languages' },
-)
+const props = defineProps<{
+  modelValue: string[]
+  options: Option[]
+  placeholder?: string
+  label?: string
+}>()
+const { t } = useI18n()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
   (e: 'change', value: string[]): void
@@ -63,11 +67,13 @@ const root = ref<HTMLElement | null>(null)
 const trigger = ref<HTMLButtonElement | null>(null)
 const isOpen = ref(false)
 const popupId = `language-selector-${Math.random().toString(36).slice(2)}`
+const resolvedLabel = computed(() => props.label ?? t('language_selector.selected'))
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('language_selector.choose'))
 const selectedSummary = computed(() => {
   const labels = props.options
     .filter((option) => props.modelValue.includes(option.value))
     .map((option) => option.label)
-  return labels.length ? labels.join(', ') : props.placeholder
+  return labels.length ? labels.join(', ') : resolvedPlaceholder.value
 })
 function toggleDropdown() {
   isOpen.value = !isOpen.value
@@ -109,6 +115,8 @@ onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown)
 .language-selector {
   position: relative;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 .language-selector__trigger {
   display: flex;
@@ -180,6 +188,12 @@ onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown)
   padding: 0.45rem 0.75rem;
   border-bottom: 1px solid var(--border);
 }
+.language-selector__option > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .language-selector__option:hover {
   background: var(--surface-subtle);
 }
@@ -192,10 +206,14 @@ onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown)
   color: var(--muted);
   font: 0.75rem var(--monospace-font);
 }
-@media (max-width: 767px) {
+@media (max-width: 800px) {
   .language-selector__popover {
     position: fixed;
+    z-index: 100;
     inset: auto var(--space-4) calc(70px + var(--safe-bottom)) var(--space-4);
+    width: auto;
+    min-width: 0;
+    max-width: none;
   }
   .language-selector__options {
     max-height: min(48dvh, 360px);

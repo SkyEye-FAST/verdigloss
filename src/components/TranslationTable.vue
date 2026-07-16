@@ -5,12 +5,8 @@
       v-model:selected-languages="selectedLanguages"
       v-model:use-pagination="usePagination"
       :minecraft-version="minecraftVersion"
-      :languages="languages"
-      :is-dark-mode="isDarkMode"
-      :use-sans-font="useSansFont"
+      :languages="tableLanguages"
       v-model:download-all-data="downloadAllData"
-      @toggle-dark-mode="toggleDarkMode"
-      @toggle-sans-font="toggleSansFont"
       @download="handleDownload"
     />
 
@@ -31,15 +27,17 @@
         class="table-wrapper"
         role="region"
         tabindex="0"
-        aria-label="Translation comparison table; scroll horizontally to see all languages"
+        :aria-label="$t('table.comparison_region')"
       >
         <table>
           <caption>
-            Filtered Minecraft translation comparison
+            {{
+              $t('table.caption')
+            }}
           </caption>
           <thead>
-            <tr v-memo="[displayLanguages, useSansFont]">
-              <th scope="col" class="key-column">keys</th>
+            <tr v-memo="[displayLanguages]">
+              <th scope="col" class="key-column">{{ $t('table.keys') }}</th>
               <th
                 v-for="lang in displayLanguages"
                 :key="lang"
@@ -51,17 +49,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="row in displayData"
-              :key="row.key"
-              v-memo="[row, displayLanguages, useSansFont]"
-            >
+            <tr v-for="row in displayData" :key="row.key" v-memo="[row, displayLanguages]">
               <th scope="row" class="key-column">{{ row.key }}</th>
-              <td
-                :class="[lang.replace(/_/, '-'), { sans: useSansFont }]"
-                v-for="lang in displayLanguages"
-                :key="lang"
-              >
+              <td :class="lang.replace(/_/, '-')" v-for="lang in displayLanguages" :key="lang">
                 {{ row[lang] }}
               </td>
             </tr>
@@ -69,7 +59,7 @@
         </table>
       </div>
       <p v-if="filteredTableData.length === 0" class="empty-results" role="status">
-        No translation keys match the current filters.
+        {{ $t('table.empty') }}
       </p>
       <p class="export-feedback" aria-live="polite">{{ exportFeedback }}</p>
 
@@ -85,11 +75,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
-import { useDarkMode } from '@/composables/useDarkMode'
 import { useDownload } from '@/composables/useDownload'
-import { type LanguageCode, languageList } from '@/data/languages'
+import { type LanguageCode, languageList, languageRegistry } from '@/data/languages'
 import {
   clampPage,
   filterTranslationKeys,
@@ -103,7 +93,9 @@ import Header from './Table/TableHeader.vue'
 import Pagination from './Table/TablePagination.vue'
 
 const minecraftVersion = ref(mcVersion)
+const { t } = useI18n()
 const languages = languageList
+const tableLanguages = languageRegistry.filter((language) => language.availableInTable)
 const translations = shallowRef<Partial<Record<LanguageCode, LanguageFile>>>({})
 const orderedKeys = shallowRef<string[]>([])
 
@@ -125,10 +117,7 @@ interface TableRow extends Record<string, string> {
 const loading = ref(true)
 const usePagination = ref(true)
 const downloadAllData = ref(readBooleanPreference('table:downloadAllData', true))
-const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
 const exportFeedback = ref('')
-
-const { isDarkMode, toggleDarkMode } = useDarkMode()
 
 async function ensureLanguages(codes: readonly LanguageCode[]) {
   const missing = codes.filter((code) => !translations.value[code])
@@ -211,7 +200,9 @@ function handleDownload({ type, all }: { type: string; all: boolean }) {
     else if (type === 'xml') downloadXml()
     else if (type === 'xlsx') downloadXlsx()
   }
-  exportFeedback.value = `${type.toUpperCase()} export started for ${all ? 'all filtered rows' : 'the current page'}.`
+  exportFeedback.value = t(all ? 'table.export.started_all' : 'table.export.started_page', {
+    format: type.toUpperCase(),
+  })
 }
 
 watch(
@@ -222,330 +213,170 @@ watch(
   },
   { deep: true },
 )
-
-const toggleSansFont = () => {
-  useSansFont.value = !useSansFont.value
-  writeStoredValue('table:useSansFont', useSansFont.value)
-}
 </script>
 
 <style scoped>
 .translation-table {
-  min-height: 100vh;
-  padding: 10px 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-table {
-  width: calc(100% - 20px);
-  max-width: 1600px;
-  margin: 0 auto;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  table-layout: fixed;
-  border-collapse: collapse;
-  border: 2px solid #5b9bd5;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-table td,
-table th {
-  border: 2px solid #5b9bd5;
-  padding: 6px 8px;
-  text-align: left;
-  max-width: 300px;
-  min-width: 100px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-table thead th {
-  background-color: #5b9bd5;
-  color: white;
-  font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 10px 8px;
-  font-family: var(--monospace-font), monospace !important;
-  border: 2px solid #4a8ac4;
-  box-shadow:
-    inset 1px 0 0 rgba(255, 255, 255, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 2px 0 #a9bfd4;
-}
-
-table thead th:first-child {
-  border-left: none;
-}
-
-table thead th:last-child {
-  border-right: none;
-}
-
-table thead {
-  border-bottom: 2px solid #4a8ac4;
-}
-
-.key-column {
-  min-width: 200px;
-  font-family: var(--monospace-font), monospace;
-}
-
-table thead th.key-column {
-  position: sticky;
-  left: 0;
-  z-index: 3;
-}
-
-table tr td.key-column {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background-color: #f8f9fa;
-  font-size: smaller;
-}
-
-table tr:nth-child(even) {
-  background-color: #5b9bd515;
-}
-
-table tr:hover {
-  background-color: #5b9bd530;
-}
-
-table tr:nth-child(even) td.key-column {
-  background-color: #f3f6f8;
-}
-
-table tr:hover td.key-column {
-  background-color: #e9ecef;
-}
-
-table tr:hover td {
-  white-space: normal;
-  word-break: break-all;
-  position: relative;
+  --app-bar-offset: 64px;
+  min-width: 0;
+  padding-bottom: var(--space-6);
 }
 
 .loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  margin: 2rem;
+  display: grid;
+  min-height: 18rem;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  color: var(--muted);
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #5b9bd5;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+  animation: spin 700ms linear infinite;
+}
+
+.table-wrapper {
+  width: min(calc(100% - 2rem), var(--content-max));
+  max-width: 100%;
+  max-height: calc(100dvh - var(--app-bar-offset) - var(--space-4));
+  margin: 0 auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-block: 1px solid var(--border);
+  background: var(--surface);
+  scrollbar-gutter: stable;
+  scroll-margin-top: var(--app-bar-offset);
+}
+
+.table-wrapper table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+  font-size: 0.88rem;
+}
+
+.table-wrapper caption {
+  padding: var(--space-2) var(--space-3);
+  color: var(--muted);
+  text-align: left;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+  min-width: 15rem;
+  padding: 0.6rem 0.75rem;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.table-wrapper thead th {
+  position: sticky;
+  z-index: 4;
+  top: 0;
+  border-bottom: 2px solid var(--accent);
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  font: 700 0.78rem var(--monospace-font);
+}
+
+.table-wrapper tbody tr:nth-child(even) > * {
+  background: color-mix(in srgb, var(--surface-subtle) 72%, var(--surface));
+}
+
+.table-wrapper tbody tr:hover > * {
+  background: var(--accent-soft);
+}
+
+.table-wrapper .key-column {
+  position: sticky;
+  z-index: 2;
+  left: 0;
+  min-width: 21rem;
+  max-width: 28rem;
+  border-right: 2px solid var(--border-strong);
+  background: var(--surface);
+  font: 0.76rem/1.45 var(--monospace-font);
+  overflow-wrap: anywhere;
+}
+
+.table-wrapper thead .key-column {
+  z-index: 6;
+  background: var(--surface-subtle);
+}
+
+.table-wrapper tbody tr:nth-child(even) > .key-column {
+  background: color-mix(in srgb, var(--surface-subtle) 72%, var(--surface));
+}
+
+.table-wrapper tbody tr:hover > .key-column {
+  background: var(--accent-soft);
+}
+
+.table-wrapper thead th.selected {
+  color: var(--accent-strong);
+}
+
+.empty-results {
+  width: min(calc(100% - 2rem), var(--content-max));
+  margin: var(--space-4) auto 0;
+  padding: var(--space-4);
+  border: 1px dashed var(--border-strong);
+  color: var(--muted);
+  text-align: center;
+}
+
+.export-feedback {
+  min-height: 1.5rem;
+  width: min(calc(100% - 2rem), var(--content-max));
+  margin: var(--space-3) auto 0;
+  color: var(--success);
+  font-size: 0.9rem;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-/* Dark mode */
-body.dark-mode .translation-table {
-  background-color: #424242;
-}
-
-body.dark-mode table {
-  background: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  border-color: #555;
-}
-
-body.dark-mode table td,
-body.dark-mode table th {
-  border-color: #555;
-}
-
-body.dark-mode table thead th {
-  background-color: #4a4a4a;
-  border-color: #555;
-  box-shadow:
-    inset 1px 0 0 rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 2px 0 #555;
-}
-
-body.dark-mode table tr td.key-column {
-  background-color: #2a2a2a;
-}
-
-body.dark-mode table tr:nth-child(even) {
-  background-color: #3a3a3a;
-}
-
-body.dark-mode table tr:nth-child(even) td.key-column {
-  background-color: #333;
-}
-
-body.dark-mode table tr:hover {
-  background-color: #4a4a4a;
-}
-
-body.dark-mode table tr:hover td.key-column {
-  background-color: #444;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  table {
-    width: calc(100% - 20px);
-    font-size: 13px;
-    border: 1px solid #5b9bd5;
+@media (max-width: 800px) {
+  .translation-table {
+    --app-bar-offset: 56px;
   }
 
-  table td,
-  table th {
-    padding: 4px 6px;
-    border: 1px solid #5b9bd5;
-    min-width: 90px;
+  .table-wrapper {
+    width: 100%;
+    max-height: calc(100dvh - var(--app-bar-offset) - 78px);
   }
 
-  .key-column {
-    min-width: 140px;
+  .table-wrapper th,
+  .table-wrapper td {
+    min-width: 12rem;
+    padding: 0.55rem 0.65rem;
   }
 
-  table td:first-child {
-    min-width: 140px;
-  }
-
-  table td,
-  table th {
-    min-width: 100px;
-    padding: 6px 8px;
+  .table-wrapper .key-column {
+    min-width: 12rem;
+    max-width: 15rem;
+    font-size: 0.7rem;
   }
 }
 
-/* Dense comparison stays a table; this wrapper owns horizontal touch scrolling. */
-.translation-table {
-  min-height: calc(100dvh - 64px);
-  padding: 0 0 var(--space-4);
-  background: var(--page);
-}
-.table-wrapper {
-  position: relative;
-  width: min(100%, var(--content-max));
-  margin: 0 auto;
-  overflow: auto;
-  overscroll-behavior-inline: contain;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
-.table-wrapper::after {
-  content: '';
-  position: sticky;
-  right: 0;
-  display: block;
-  width: 16px;
-  height: 1px;
-  box-shadow: -12px 0 12px -12px rgb(0 0 0 / 45%);
-  pointer-events: none;
-}
-.translation-table table {
-  width: max-content;
-  min-width: 100%;
-  margin: 0;
-  border: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--surface);
-  box-shadow: none;
-  color: var(--text);
-  font-size: 0.875rem;
-}
-.translation-table caption {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-}
-.translation-table table td,
-.translation-table table th {
-  min-width: 12rem;
-  max-width: 22rem;
-  padding: 0.65rem 0.75rem;
-  border: 0;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  overflow: visible;
-  text-align: start;
-  text-overflow: initial;
-  white-space: normal;
-}
-.translation-table table thead th {
-  position: sticky;
-  top: 64px;
-  z-index: 2;
-  background: var(--surface-subtle);
-  color: var(--text);
-  box-shadow: 0 1px var(--border);
-}
-.translation-table table .key-column {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  min-width: 15rem;
-  max-width: 15rem;
-  background: var(--surface-raised);
-  color: var(--text-secondary);
-  font-family: var(--monospace-font);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-.translation-table table thead .key-column {
-  z-index: 3;
-}
-.translation-table tbody tr:hover td,
-.translation-table tbody tr:hover .key-column {
-  background: var(--accent-soft);
-}
-.translation-table thead th.selected {
-  color: var(--accent-strong);
-  box-shadow: inset 0 -3px var(--accent);
-}
-.export-feedback {
-  min-height: 1.5rem;
-  margin: var(--space-3) auto 0;
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-.empty-results {
-  margin: var(--space-4) auto 0;
-  color: var(--muted);
-}
-@media (max-width: 767px) {
-  .translation-table table thead th {
-    top: 56px;
-  }
-  .translation-table table td,
-  .translation-table table th {
-    min-width: 10rem;
-  }
-  .translation-table table .key-column {
-    min-width: 10.5rem;
-    max-width: 10.5rem;
+@media (max-height: 500px) and (orientation: landscape) {
+  .table-wrapper {
+    max-height: calc(100dvh - var(--app-bar-offset) - var(--space-3));
   }
 }
 </style>

@@ -103,7 +103,7 @@ test('quiz portal and deterministic active quiz handle invalid and completed rou
 
 test('color route, shell navigation, dark mode, and SPA fallbacks work', async ({ page }) => {
   await page.goto('/table/color')
-  await expect(page.getByRole('heading', { name: /color translation table/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /colou?r translation table/i })).toBeVisible()
   await page.getByLabel(/Korean Mixed/i).uncheck()
   await page.getByLabel(/Chữ Nôm/i).uncheck()
   await expect(page.getByRole('img', { name: /Colour value/i }).first()).toBeVisible()

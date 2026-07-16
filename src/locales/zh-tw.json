@@ -1,14 +1,58 @@
 {
+  "app": {
+    "font": {
+      "sans": "無襯線體",
+      "serif": "襯線體",
+      "use_sans": "譯名改用無襯線字型",
+      "use_serif": "譯名改用襯線字型"
+    },
+    "github": "Verdigloss 的 GitHub 儲存庫",
+    "home": "Verdigloss 首頁",
+    "nav": {
+      "colors": "顏色",
+      "query": "查詢",
+      "quiz": "測驗",
+      "table": "表格"
+    },
+    "primary_navigation": "主導覽",
+    "theme": {
+      "dark": "深色",
+      "light": "淺色",
+      "use_dark": "使用深色主題",
+      "use_light": "使用淺色主題"
+    }
+  },
+  "error_boundary": {
+    "description": "Verdigloss 無法載入此檢視。請重試，或返回譯名查詢頁面。",
+    "retry": "重試",
+    "return_to_query": "返回查詢",
+    "title": "發生錯誤"
+  },
+  "language_selector": {
+    "choose": "選擇語言",
+    "clear": "清除",
+    "select_all": "全選",
+    "selected": "已選擇的語言"
+  },
+  "not_found": {
+    "description": "此頁面不存在。",
+    "return_home": "返回 Verdigloss",
+    "title": "找不到頁面"
+  },
   "query": {
+    "controls": {
+      "collapse": "收合查詢控制項",
+      "expand": "展開查詢控制項"
+    },
     "error": {
       "missing_query_content": "請輸入查詢內容",
-      "no-matching-translations": "找不到匹配的譯名"
+      "no-matching-translations": "找不到符合的譯名"
     },
     "java_edition": "Java版 ",
     "locale_key": "選擇本地化鍵名",
     "nav": {
       "dark_mode": "切換深色模式",
-      "github": "GitHub 倉庫",
+      "github": "GitHub 儲存庫",
       "query": "譯名查詢工具",
       "quiz": "譯名認知測驗",
       "table": "譯名表",
@@ -18,9 +62,14 @@
     "query_lang": "查詢語言",
     "query_mode": "查詢模式",
     "query_modes": {
-      "key": "依在地化鍵名查詢",
-      "source": "依原始字串查詢",
-      "translation": "依翻譯後字串查詢"
+      "key": "依本地化鍵名查詢",
+      "source": "依來源字串查詢",
+      "translation": "依譯文查詢"
+    },
+    "results": {
+      "caption": "{source} 的譯名",
+      "enter_query": "輸入查詢內容以搜尋本地化鍵名。",
+      "matching": "有 {count} 個符合的本地化鍵名。"
     },
     "select_languages": "選擇語言",
     "table": {
@@ -30,23 +79,82 @@
     "title": "Minecraft 標準譯名"
   },
   "quiz": {
-    "answer_placeholder": "在此輸入譯名...",
-    "code_placeholder": "輸入題組編號...",
-    "complete": "已完成所有問題！",
-    "description": "測一測你對標準譯名的掌握程度…",
+    "actions": {
+      "copy_code": "複製題組編號",
+      "share_result": "分享測驗結果"
+    },
+    "active": {
+      "character_states": "答案字元狀態",
+      "loading": "正在載入測驗題目…",
+      "state_legend": "字元狀態圖例"
+    },
+    "answer_placeholder": "在此輸入譯名…",
+    "character_state": {
+      "absent": "錯誤",
+      "correct": "正確",
+      "empty": "尚未作答",
+      "hinted": "提示字元",
+      "hinted-correct": "提示且正確",
+      "present": "出現在其他位置"
+    },
+    "code_placeholder": "輸入題組編號…",
+    "complete": "已完成所有題目！",
+    "completion": {
+      "correct": "正確",
+      "incomplete": "未完成",
+      "skipped": "已跳過",
+      "timed-out": "已逾時",
+      "unanswered": "未作答"
+    },
+    "description": "測試你對標準譯名的掌握程度。",
+    "eligibility": {
+      "available": "此語言有 {count} 道可用題目。",
+      "failure": "無法載入可用題目。請重新選擇此語言。",
+      "loading": "正在檢查可用題目…",
+      "loading_button": "正在檢查題目…",
+      "unavailable": "此語言有 {count} 道可用題目，至少需要 {minimum} 道。"
+    },
+    "errors": {
+      "copy_failure": "無法複製題組編號。",
+      "generate_failure": "無法載入產生測驗所需的題目。",
+      "insufficient_route_questions": "此編號在所選語言中提供的可用題目少於 {minimum} 道。",
+      "invalid_mapping": "題目對應無效，無法產生題組編號。",
+      "invalid_route_code": "題組編號缺少、格式錯誤、不受支援，或包含未知題目。",
+      "invalid_route_options": "測驗語言或計時模式無效。",
+      "load_failure": "無法載入測驗題目。",
+      "replacement_failure": "無法產生新的題組。",
+      "share_failure": "無法分享測驗結果。",
+      "unsupported_code": "請輸入完整且受支援的題組編號。"
+    },
+    "feedback": {
+      "code_copied": "已複製題組編號。"
+    },
     "hint": "提示",
-    "language": "語言：",
+    "language": "語言",
     "nav": {
       "enter": "進入",
       "query": "查詢頁面",
-      "quiz": "測驗門戶",
+      "quiz": "測驗入口",
       "table": "表格頁面"
     },
-    "random_quiz": "隨機題組（重新整理以重新選取）",
+    "portal_description": "選擇目標語言，然後產生隨機題組或輸入他人分享的題組編號。",
+    "progress": {
+      "timed": "第 {current} 題，共 {total} 題。剩餘 {time}。",
+      "untimed": "第 {current} 題，共 {total} 題。不計時。"
+    },
+    "random_quiz": "產生隨機題組",
     "restart": "再來一組",
-    "return": "返回測驗門戶",
+    "return": "返回測驗入口",
     "skip": "跳過",
     "source": "原文",
+    "summary": {
+      "caption": "作答結果",
+      "level": "難度 {level}",
+      "results_region": "測驗結果表；可橫向捲動查看所有欄位",
+      "score": "{score} 分",
+      "status": "狀態",
+      "used_time": "用時：{time}"
+    },
     "timer_mode": "計時模式",
     "title": "Minecraft 譯名認知測驗",
     "translation": "譯名"
@@ -56,27 +164,53 @@
       "colors": "顏色表",
       "dark_mode": "切換深色模式",
       "download": "下載",
-      "download_all_data": "下載所有數據",
+      "download_all_data": "下載所有資料",
       "query": "查詢工具",
       "quiz": "認知測驗",
       "toggle_font": "切換字型"
     },
     "author": "由 SkyEye_FAST 整理",
+    "caption": "篩選後的 Minecraft 譯名對照",
     "colors": {
+      "caption": "Minecraft 各語言的顏色名稱與識別碼",
+      "color_id": "顏色 / 識別碼",
+      "color_value": "顏色值 {color}",
+      "dye_icon": "Minecraft 染料圖示",
+      "region": "顏色譯名表；可橫向捲動查看所有語言",
       "show_chu_nom": "顯示喃字",
       "show_korean_mixed": "顯示漢諺混寫",
-      "title": "Minecraft 顏色譯名表"
+      "title": "Minecraft 顏色譯名表",
+      "updated": "更新於 {date}",
+      "variants": "譯名變體"
+    },
+    "comparison_region": "譯名對照表；可橫向捲動查看所有語言",
+    "controls_label": "表格控制項",
+    "displayed_languages": "顯示的語言",
+    "empty": "沒有本地化鍵名符合目前的篩選條件。",
+    "export": {
+      "all_rows": "所有篩選結果",
+      "current_page": "目前頁面",
+      "label": "匯出",
+      "started_all": "已開始匯出所有篩選結果的 {format} 檔案。",
+      "started_page": "已開始匯出目前頁面的 {format} 檔案。"
     },
     "java_edition": "Java版 ",
-    "loading": "載入中...",
+    "keys": "鍵名",
+    "loading": "載入中…",
     "pagination": {
+      "jump": "跳至頁面",
+      "label": "表格分頁",
       "next": "下一頁",
+      "next_short": "下一頁",
+      "page": "第 {page} 頁",
       "previous": "上一頁",
+      "previous_short": "上一頁",
       "total_rows": "字串總數："
     },
-    "search_placeholder": "搜尋內容...",
+    "search_placeholder": "搜尋內容…",
     "selected_languages": "已選擇的語言",
     "title": "Minecraft 標準譯名表",
-    "use_pagination": "使用分頁"
+    "use_pagination": "使用分頁",
+    "version_credit": "Java版 {version} · {author}"
   }
 }

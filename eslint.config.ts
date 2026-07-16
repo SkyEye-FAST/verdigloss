@@ -21,5 +21,31 @@ export default defineConfigWithVueTs(
 
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
+  {
+    name: 'app/localized-templates',
+    files: ['src/**/*.vue'],
+    rules: {
+      'vue/no-bare-strings-in-template': [
+        'error',
+        {
+          allowlist: [
+            'Verdigloss',
+            'Minecraft',
+            'GitHub',
+            'Java',
+            'SkyEye_FAST',
+            'TSV',
+            'CSV',
+            'JSON',
+            'XML',
+            'XLSX',
+            '404',
+            '…',
+            '#',
+          ],
+        },
+      ],
+    },
+  },
   skipFormatting,
 ) as FlatConfig.Config[]
