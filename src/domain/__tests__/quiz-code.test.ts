@@ -1,6 +1,6 @@
 import legacyIdMap from '@/assets/data/id.json'
 import generatedIdData from '@/assets/data/quiz-id-map.json'
-import { languageFiles } from '@/utils/languages'
+import { loadLanguage } from '@/services/translation-data'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -13,13 +13,14 @@ import {
 } from '../quiz-code'
 
 describe('quiz-code integrity', () => {
-  it('generates deterministic mappings without losing English keys', () => {
+  it('generates deterministic mappings without losing English keys', async () => {
     const keys = ['z.key', 'a.key', 'm.key']
     const first = buildQuizIdMap(keys, (key) => ({ 'a.key': 'AAAAAAA', 'm.key': 'BBBBBBB', 'z.key': 'CCCCCCC' })[key] as string)
     const second = buildQuizIdMap([...keys].reverse(), (key) => ({ 'a.key': 'AAAAAAA', 'm.key': 'BBBBBBB', 'z.key': 'CCCCCCC' })[key] as string)
     expect(first).toEqual(second)
-    expect(Object.keys(generatedIdData.ids)).toHaveLength(Object.keys(languageFiles.en_us).length)
-    expect(new Set(Object.values(generatedIdData.ids)).size).toBe(Object.keys(languageFiles.en_us).length)
+    const english = await loadLanguage('en_us')
+    expect(Object.keys(generatedIdData.ids)).toHaveLength(Object.keys(english).length)
+    expect(new Set(Object.values(generatedIdData.ids)).size).toBe(Object.keys(english).length)
   })
 
   it('fails generation clearly on an ID collision', () => {

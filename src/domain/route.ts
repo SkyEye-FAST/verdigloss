@@ -1,4 +1,4 @@
-import type { LanguageCode } from '@/utils/languages'
+import type { LanguageCode } from '@/data/languages'
 
 import { err, ok, type Result } from './result'
 

@@ -147,14 +147,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
-import { currentLocale } from '@/main'
-import { type LanguageCode, languageFiles, languageList, languageRegistry } from '@/utils/languages'
+import { useLocale } from '@/composables/useLocale'
+import { type LanguageCode, languageList, languageRegistry } from '@/data/languages'
+import { getSearchIndex, type QueryMode } from '@/features/query/search-index'
+import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import { readLanguageList, readStringPreference, writeStoredValue, writeStringPreference, readBooleanPreference } from '@/utils/storage'
 
 import Nav from './PageNav.vue'
@@ -183,7 +185,7 @@ interface SelectedTranslation {
 const languages = languageRegistry.filter((language) => language.availableInQuery)
 
 const isSidebarOpen = ref(true)
-const queryMode = ref(readStringPreference('queryMode', 'source'))
+const queryMode = ref<QueryMode>(readStringPreference('queryMode', 'source') as QueryMode)
 const queryLang = ref(readStringPreference('queryLang', 'zh_cn'))
 const queryContent = ref(readStringPreference('queryContent', 'The End'))
 const localeKey = ref(readStringPreference('localeKey', 'advancements.end.respawn_dragon.title'))
@@ -204,36 +206,23 @@ onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
 })
 
-const langFiles = languageFiles
+const langFiles = shallowRef<Partial<Record<LanguageCode, LanguageFile>>>({})
+const { locale: currentLang } = useLocale()
+let searchRevision = 0
 
-const currentLang = computed(() => currentLocale.value)
+async function ensureLanguages(codes: readonly LanguageCode[]) {
+  const missing = codes.filter((code) => !langFiles.value[code])
+  if (!missing.length) return
+  langFiles.value = { ...langFiles.value, ...(await loadLanguages(missing)) }
+}
 
 const availableKeys = computed(() => {
   if (!queryContent.value) return []
-
-  const searchText = queryContent.value.trim().toLowerCase()
-
-  switch (queryMode.value) {
-    case 'key':
-      return Object.keys(langFiles['en_us'] || {}).filter((key) =>
-        key.toLowerCase().includes(searchText),
-      )
-    case 'source':
-      return Object.entries(langFiles['en_us'] || {})
-        .filter(([, value]) => value.toLowerCase().includes(searchText))
-        .map(([key]) => key)
-    case 'translation': {
-      const langCode = getLanguageCode(queryLang.value)
-      if (!langCode) return []
-      const langData = langFiles[langCode]
-      if (!langData) return []
-      return Object.entries(langData)
-        .filter(([, value]) => value.toLowerCase().includes(searchText))
-        .map(([key]) => key)
-    }
-    default:
-      return []
-  }
+  const language = queryMode.value === 'translation' ? getLanguageCode(queryLang.value) : 'en_us'
+  const data = language ? langFiles.value[language] : undefined
+  if (!language || !data) return []
+  const mode = queryMode.value === 'source' ? 'source' : queryMode.value
+  return getSearchIndex(language, data).search(mode, queryContent.value, 100).map((result) => result.key)
 })
 
 const displayLanguages = computed(() => {
@@ -261,7 +250,11 @@ const getCategoryFromKey = (key: string): string => {
   return 'block'
 }
 
-const search = () => {
+const search = async () => {
+  const revision = ++searchRevision
+  const target = queryMode.value === 'translation' ? getLanguageCode(queryLang.value) : undefined
+  await ensureLanguages(['en_us', ...selectedLanguages.value, ...(target ? [target] : [])])
+  if (revision !== searchRevision) return
   error.value = ''
   translations.value = []
 
@@ -306,17 +299,17 @@ const search = () => {
 const searchByKey = (key: string) => {
   const searchText = key.trim().toLowerCase()
   if (!searchText) return
-  Object.keys(langFiles['en_us'] || {})
-    .filter((key) => key.toLowerCase().includes(searchText))
-    .forEach((key) => collectTranslationsForKey(key))
+  const english = langFiles.value.en_us
+  if (!english) return
+  getSearchIndex('en_us', english).search('key', searchText).forEach((result) => collectTranslationsForKey(result.key))
 }
 
 const searchBySourceText = (text: string) => {
   const searchText = text.trim().toLowerCase()
   if (!searchText) return
-  Object.entries(langFiles['en_us'] || {})
-    .filter(([, value]) => value.toLowerCase().includes(searchText))
-    .forEach(([key]) => collectTranslationsForKey(key))
+  const english = langFiles.value.en_us
+  if (!english) return
+  getSearchIndex('en_us', english).search('source', searchText).forEach((result) => collectTranslationsForKey(result.key))
 }
 
 const searchByTranslation = (text: string) => {
@@ -324,15 +317,13 @@ const searchByTranslation = (text: string) => {
   if (!searchText) return
 
   const langCode = getLanguageCode(queryLang.value)
-  if (!langCode || !langFiles[langCode]) return
-
-  Object.entries(langFiles[langCode])
-    .filter(([, value]) => value.toLowerCase().includes(searchText))
-    .forEach(([key]) => collectTranslationsForKey(key))
+  const data = langCode ? langFiles.value[langCode] : undefined
+  if (!langCode || !data) return
+  getSearchIndex(langCode, data).search('translation', searchText).forEach((result) => collectTranslationsForKey(result.key))
 }
 
 const collectTranslationsForKey = (key: string) => {
-  const en = langFiles['en_us'] || {}
+  const en = langFiles.value.en_us || {}
   translations.value.push({
     language: 'en_us',
     name: en[key] || key,
@@ -341,11 +332,11 @@ const collectTranslationsForKey = (key: string) => {
 }
 
 const getLanguageCode = (lang: string): LanguageCode | undefined => {
-  return Object.keys(langFiles).includes(lang) ? (lang as LanguageCode) : undefined
+  return languageList.includes(lang as LanguageCode) ? (lang as LanguageCode) : undefined
 }
 
 const updateSelectedTranslation = (key: string) => {
-  const source = ((langFiles['en_us'] || {}) as Record<string, string>)[key] || ''
+  const source = (langFiles.value.en_us || {})[key] || ''
   const category = getCategoryFromKey(key)
 
   const filteredTranslations = languages
@@ -353,7 +344,7 @@ const updateSelectedTranslation = (key: string) => {
     .map((lang) => ({
       code: lang.code,
       name: lang.displayName,
-      text: ((langFiles as Record<string, Record<string, string>>)[lang.code] || {})[key] || '',
+      text: (langFiles.value[lang.code] || {})[key] || '',
     }))
 
   selectedTranslation.value = {
@@ -409,7 +400,7 @@ const onQueryInput = debounce(() => {
     return
   }
 
-  search()
+  void search()
 }, 300)
 
 watch(
@@ -429,8 +420,9 @@ onMounted(async () => {
     isSidebarOpen.value ? '1.8vw' : '2.4vw',
   )
 
+  await ensureLanguages(['en_us', ...selectedLanguages.value, queryLang.value as LanguageCode])
   if (localeKey.value) {
-    search()
+    void search()
   } else if (queryContent.value) {
     onQueryInput()
   }

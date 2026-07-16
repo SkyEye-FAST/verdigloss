@@ -6,7 +6,8 @@ import { parseTargetLanguage, parseTimerMode } from '../route'
 import { aggregateScores, calculateQuestionScore } from '../scoring'
 import { shuffle } from '../shuffle'
 import { createQuizTimer, isTimerExpired, remainingSeconds, timerProgressPercent } from '../timer'
-import type { LanguageCode, LanguageFile } from '@/utils/languages'
+import type { LanguageCode } from '@/data/languages'
+import type { LanguageFile } from '@/services/translation-data'
 
 const files = {
   en_us: { one: 'Stone', two: 'Dirt', same: 'Same', missing: 'Missing', unmapped: 'Unmapped' },

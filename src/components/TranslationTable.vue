@@ -67,12 +67,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useDownload } from '@/composables/useDownload'
-import { type LanguageCode, languageFiles, languageList } from '@/utils/languages'
+import { type LanguageCode, languageList } from '@/data/languages'
+import { clampPage, filterTranslationKeys, pageKeys, TABLE_PAGE_SIZE } from '@/features/table/table-data'
+import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import { readBooleanPreference, readLanguageList, writeStoredValue } from '@/utils/storage'
 
 import Header from './Table/TableHeader.vue'
@@ -80,7 +82,8 @@ import Pagination from './Table/TablePagination.vue'
 
 const minecraftVersion = ref(mcVersion)
 const languages = languageList
-const translations = ref(languageFiles)
+const translations = shallowRef<Partial<Record<LanguageCode, LanguageFile>>>({})
+const orderedKeys = shallowRef<string[]>([])
 
 const searchQuery = ref('')
 
@@ -98,88 +101,46 @@ interface TableRow extends Record<string, string> {
 }
 
 const loading = ref(true)
-const tableData = ref<TableRow[]>([])
 const usePagination = ref(true)
 const downloadAllData = ref(readBooleanPreference('table:downloadAllData', true))
 const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
-onMounted(() => {
-  document.body.classList.toggle('dark-mode', isDarkMode.value)
+async function ensureLanguages(codes: readonly LanguageCode[]) {
+  const missing = codes.filter((code) => !translations.value[code])
+  if (!missing.length) return
+  translations.value = { ...translations.value, ...(await loadLanguages(missing)) }
+  if (translations.value.en_us) orderedKeys.value = Object.keys(translations.value.en_us)
+}
 
-  requestAnimationFrame(async () => {
-    const keys = Object.keys((translations.value.en_us as Record<string, string>) || {})
-    const batchSize = 100
-    const totalBatches = Math.ceil(keys.length / batchSize)
-
-    const processBatch = (batchIndex: number) => {
-      const start = batchIndex * batchSize
-      const end = Math.min(start + batchSize, keys.length)
-      const batchKeys = keys.slice(start, end)
-
-      const batchData = batchKeys.map((key) => {
-        const row: TableRow = { key }
-        languages.forEach((lang) => {
-          const langData = translations.value[lang as keyof typeof translations.value]
-          row[lang] = (langData as Record<string, string>)[key] || '?'
-        })
-        return row
-      })
-
-      tableData.value = [...tableData.value, ...batchData]
-
-      if (batchIndex + 1 < totalBatches) {
-        requestAnimationFrame(() => processBatch(batchIndex + 1))
-      } else {
-        loading.value = false
-      }
-    }
-
-    tableData.value = []
-    processBatch(0)
-  })
-
+onMounted(async () => {
+  await ensureLanguages(['en_us', ...selectedLanguages.value])
+  loading.value = false
 })
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang))
 })
 
-const filteredTableData = computed(() => {
-  const searchLower = searchQuery.value.toLowerCase()
-  if (!searchLower) return tableData.value
-
-  return tableData.value.filter((row) => {
-    return Object.entries(row).some(([key, value]) => {
-      if (key === 'key') {
-        return value.toLowerCase().includes(searchLower)
-      }
-      if (selectedLanguages.value.includes(key as LanguageCode)) {
-        return value.toLowerCase().includes(searchLower)
-      }
-      return false
-    })
-  })
-})
+const filteredKeys = computed(() => filterTranslationKeys(orderedKeys.value, translations.value, displayLanguages.value, searchQuery.value))
+const filteredTableData = computed(() => filteredKeys.value.map(createRow))
 
 const currentPage = ref(1)
-const itemsPerPage = 50
+const itemsPerPage = TABLE_PAGE_SIZE
+
+function createRow(key: string): TableRow {
+  return { key, ...Object.fromEntries(displayLanguages.value.map((language) => [language, translations.value[language]?.[key] ?? '?'])) }
+}
 
 const displayData = computed(() => {
   if (!usePagination.value) {
-    return filteredTableData.value
+    return filteredKeys.value.map(createRow)
   }
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredTableData.value.slice(start, end)
+  return pageKeys(filteredKeys.value, currentPage.value, itemsPerPage).map(createRow)
 })
 
-watch(filteredTableData, () => {
-  if (usePagination.value) {
-    currentPage.value = 1
-  }
-})
+watch([filteredKeys, usePagination], () => { currentPage.value = usePagination.value ? clampPage(currentPage.value, filteredKeys.value.length, itemsPerPage) : 1 })
 
 const {
   downloadTsv,
@@ -192,7 +153,7 @@ const {
   downloadAllJson,
   downloadAllXml,
   downloadAllXlsx,
-} = useDownload(displayLanguages, displayData, filteredTableData)
+} = useDownload(displayLanguages, displayData, filteredTableData, minecraftVersion.value)
 
 function handleDownload({ type, all }: { type: string; all: boolean }) {
   if (all) {
@@ -214,6 +175,7 @@ watch(
   selectedLanguages,
   (newValue) => {
     writeStoredValue('verdigloss:table:selectedLanguages:v1', newValue)
+    void ensureLanguages(['en_us', ...newValue])
   },
   { deep: true },
 )
