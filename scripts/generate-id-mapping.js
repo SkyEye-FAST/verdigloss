@@ -39,7 +39,9 @@ export function buildIdMap(keys, createId = sha256ToBase62) {
   if (Object.keys(ids).length !== keys.length) {
     throw new Error('Quiz ID map does not contain every English translation key.')
   }
-  return Object.fromEntries(Object.entries(ids).sort(([left], [right]) => left.localeCompare(right)))
+  return Object.fromEntries(
+    Object.entries(ids).sort(([left], [right]) => left.localeCompare(right)),
+  )
 }
 
 async function generateIdMap() {
@@ -49,7 +51,9 @@ async function generateIdMap() {
   const ids = buildIdMap(Object.keys(english))
   const payload = { version: QUIZ_CODE_VERSION, idWidth: QUIZ_ID_WIDTH, ids }
   await fs.writeFile(outputPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8')
-  console.log(`Generated ${Object.keys(ids).length} ${QUIZ_CODE_VERSION} quiz IDs without collisions.`)
+  console.log(
+    `Generated ${Object.keys(ids).length} ${QUIZ_CODE_VERSION} quiz IDs without collisions.`,
+  )
 }
 
 generateIdMap().catch((error) => {
