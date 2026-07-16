@@ -38,8 +38,6 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --control-height: 44px;
-  --motion-fast: 160ms;
-  --motion-base: 240ms;
   --content-max: 1440px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -140,20 +138,38 @@ a {
   justify-content: flex-end;
 }
 .primary-nav__link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   min-height: 64px;
   padding: 0 var(--space-4);
-  border-bottom: 3px solid transparent;
   color: var(--text-secondary);
   font-weight: 600;
   text-decoration: none;
 }
+.primary-nav__link::after {
+  position: absolute;
+  right: var(--space-4);
+  bottom: 0;
+  left: var(--space-4);
+  height: 3px;
+  background: var(--accent);
+  content: '';
+  opacity: 0;
+  transform: scaleX(0.6);
+  transition:
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-base) var(--ease-standard);
+}
 .primary-nav__link.router-link-exact-active,
 .primary-nav__link.is-active {
-  border-color: var(--accent);
   color: var(--accent-strong);
+}
+.primary-nav__link.router-link-exact-active::after,
+.primary-nav__link.is-active::after {
+  opacity: 1;
+  transform: scaleX(1);
 }
 .primary-nav__link svg,
 .mobile-nav svg {
@@ -253,6 +269,29 @@ body.translation-font-sans
   ) {
   font-family: var(--sans-font);
 }
+body.translation-font-changing
+  :is(
+    .en-us,
+    .de-de,
+    .es-es,
+    .fr-fr,
+    .it-it,
+    .nl-nl,
+    .pt-br,
+    .ru-ru,
+    .uk-ua,
+    .vi-vn,
+    .zh-cn,
+    .zh-hk,
+    .zh-tw,
+    .lzh,
+    .ja-jp,
+    .ko-kr,
+    .th-th
+  ) {
+  opacity: 0.8;
+  transition: opacity var(--motion-fast) var(--ease-standard);
+}
 
 @media (max-width: 800px) {
   .app-bar {
@@ -283,6 +322,7 @@ body.translation-font-sans
     box-shadow: 0 -8px 24px rgb(24 33 28 / 7%);
   }
   .mobile-nav__link {
+    position: relative;
     display: grid;
     place-items: center;
     gap: 1px;
@@ -291,10 +331,30 @@ body.translation-font-sans
     font-size: 0.7rem;
     text-decoration: none;
   }
+  .mobile-nav__link::after {
+    position: absolute;
+    right: 28%;
+    bottom: 0.25rem;
+    left: 28%;
+    height: 2px;
+    border-radius: 99px;
+    background: var(--accent);
+    content: '';
+    opacity: 0;
+    transform: scaleX(0.5);
+    transition:
+      opacity var(--motion-fast) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
+  }
   .mobile-nav__link.router-link-exact-active,
   .mobile-nav__link.is-active {
     color: var(--accent-strong);
     font-weight: 700;
+  }
+  .mobile-nav__link.router-link-exact-active::after,
+  .mobile-nav__link.is-active::after {
+    opacity: 1;
+    transform: scaleX(1);
   }
   .app-main {
     padding-bottom: calc(70px + var(--safe-bottom));

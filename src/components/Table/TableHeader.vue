@@ -33,7 +33,7 @@
         }}</span></label
       >
       <details class="export-menu">
-        <summary>
+        <summary class="interactive-control">
           <i-material-symbols-download aria-hidden="true" /> {{ $t('table.export.label') }}
         </summary>
         <div class="export-menu__content">
@@ -43,7 +43,13 @@
             }}</span></label
           >
           <div class="export-menu__formats">
-            <button v-for="type in formats" :key="type" type="button" @click="emitDownload(type)">
+            <button
+              v-for="type in formats"
+              :key="type"
+              class="interactive-control"
+              type="button"
+              @click="emitDownload(type)"
+            >
               {{ type.toUpperCase() }}
             </button>
           </div>

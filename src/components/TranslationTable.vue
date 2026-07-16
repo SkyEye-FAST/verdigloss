@@ -11,11 +11,13 @@
     />
     <TableSectionNav />
 
-    <div v-if="loading" class="loading-container">
-      <div class="loading-spinner"></div>
-      <p>{{ $t('table.loading') }}</p>
-    </div>
-    <template v-else>
+    <Transition name="motion-fade">
+      <div v-if="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>{{ $t('table.loading') }}</p>
+      </div>
+    </Transition>
+    <template v-if="!loading">
       <Pagination
         v-if="usePagination"
         v-model:current-page="currentPage"
@@ -74,10 +76,14 @@
           </tbody>
         </table>
       </div>
-      <p v-if="filteredTableData.length === 0" class="empty-results" role="status">
-        {{ $t('table.empty') }}
-      </p>
-      <p class="export-feedback" aria-live="polite">{{ exportFeedback }}</p>
+      <Transition name="motion-status">
+        <p v-if="filteredTableData.length === 0" class="empty-results" role="status">
+          {{ $t('table.empty') }}
+        </p>
+      </Transition>
+      <Transition name="motion-status">
+        <p v-if="exportFeedback" class="export-feedback" aria-live="polite">{{ exportFeedback }}</p>
+      </Transition>
 
       <Pagination
         v-if="usePagination"
@@ -298,7 +304,7 @@ watch(
   border: 3px solid var(--border);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 700ms linear infinite;
+  animation: spin var(--motion-spinner) linear infinite;
 }
 
 .table-wrapper {

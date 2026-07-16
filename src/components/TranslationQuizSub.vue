@@ -1,7 +1,7 @@
 <template>
   <div class="translation-quiz-sub">
     <div class="progress-bar" v-if="isTimerMode">
-      <div class="progress-fill" :style="{ width: progressWidth + '%' }"></div>
+      <div class="progress-fill" :style="{ transform: `scaleX(${progressScale})` }"></div>
     </div>
     <div class="quiz-container">
       <p v-if="loadingQuestions" class="quiz-loading" role="status" aria-live="polite">
@@ -13,51 +13,57 @@
           <span class="quiz-progress">{{ progressDisplay }}</span>
           <span v-if="isTimerMode" class="timer">{{ formatTime(remainingTime) }}</span>
         </div>
-        <div class="info">
-          <div class="source">{{ currentQuestion?.source }}</div>
-          <div class="key">{{ currentQuestion?.key }}</div>
-          <div class="key rating" v-if="currentQuestion?.rating !== undefined">
-            <span style="font-size: smaller; margin-right: 20px">
-              <span v-for="i in fullStars" :key="i">
-                <i-material-symbols-star />
-              </span>
-              <span v-if="hasHalfStar">
-                <i-material-symbols-star-half />
-              </span>
-            </span>
-            <span>{{ currentQuestion?.rating.toFixed(2) }}</span>
+        <Transition :name="shouldAnimateQuestion ? 'motion-replace' : ''" mode="out-in">
+          <div :key="currentQuestion?.key" class="quiz-question-content">
+            <div class="info">
+              <div class="source">{{ currentQuestion?.source }}</div>
+              <div class="key">{{ currentQuestion?.key }}</div>
+              <div class="key rating" v-if="currentQuestion?.rating !== undefined">
+                <span style="font-size: smaller; margin-right: 20px">
+                  <span v-for="i in fullStars" :key="i">
+                    <i-material-symbols-star />
+                  </span>
+                  <span v-if="hasHalfStar">
+                    <i-material-symbols-star-half />
+                  </span>
+                </span>
+                <span>{{ currentQuestion?.rating.toFixed(2) }}</span>
+              </div>
+            </div>
+            <div
+              class="quiz-boxes"
+              :class="queryLang"
+              role="group"
+              :aria-label="$t('quiz.active.character_states')"
+            >
+              <div
+                v-for="(box, index) in boxes"
+                :key="index"
+                class="translation-character"
+                :class="[queryLang.replace(/_/, '-'), box.state, { dark: isDarkMode }]"
+                role="img"
+                :aria-label="$t(`quiz.character_state.${box.state}`)"
+              >
+                {{ box.char }}
+              </div>
+            </div>
+            <ul class="state-legend" :aria-label="$t('quiz.active.state_legend')">
+              <li>
+                <span class="state-swatch correct"></span>{{ $t('quiz.character_state.correct') }}
+              </li>
+              <li>
+                <span class="state-swatch present"></span>{{ $t('quiz.character_state.present') }}
+              </li>
+              <li>
+                <span class="state-swatch hinted"></span>{{ $t('quiz.character_state.hinted') }}
+              </li>
+              <li>
+                <span class="state-swatch hinted-correct"></span
+                >{{ $t('quiz.character_state.hinted-correct') }}
+              </li>
+            </ul>
           </div>
-        </div>
-        <div
-          class="quiz-boxes"
-          :class="queryLang"
-          role="group"
-          :aria-label="$t('quiz.active.character_states')"
-        >
-          <div
-            v-for="(box, index) in boxes"
-            :key="index"
-            class="translation-character"
-            :class="[queryLang.replace(/_/, '-'), box.state, { dark: isDarkMode }]"
-            role="img"
-            :aria-label="$t(`quiz.character_state.${box.state}`)"
-          >
-            {{ box.char }}
-          </div>
-        </div>
-        <ul class="state-legend" :aria-label="$t('quiz.active.state_legend')">
-          <li>
-            <span class="state-swatch correct"></span>{{ $t('quiz.character_state.correct') }}
-          </li>
-          <li>
-            <span class="state-swatch present"></span>{{ $t('quiz.character_state.present') }}
-          </li>
-          <li><span class="state-swatch hinted"></span>{{ $t('quiz.character_state.hinted') }}</li>
-          <li>
-            <span class="state-swatch hinted-correct"></span
-            >{{ $t('quiz.character_state.hinted-correct') }}
-          </li>
-        </ul>
+        </Transition>
       </div>
 
       <input
@@ -75,10 +81,15 @@
       />
 
       <div class="quiz-controls" v-if="!loadingQuestions && !showSummary && !routeError">
-        <button v-if="canHint" class="quiz-hint-btn" @click="showHint">
+        <button v-if="canHint" class="quiz-hint-btn interactive-control" @click="showHint">
           {{ $t('quiz.hint') }}
         </button>
-        <button v-if="canSkip" class="quiz-skip-btn" @click="skipQuestion" :disabled="isLocked">
+        <button
+          v-if="canSkip"
+          class="quiz-skip-btn interactive-control"
+          @click="skipQuestion"
+          :disabled="isLocked"
+        >
           {{ $t('quiz.skip') }}
         </button>
       </div>
@@ -155,19 +166,21 @@
           <div class="quiz-code">{{ quizCode }}</div>
           <span class="quiz-code-actions">
             <button
+              class="interactive-control"
               type="button"
               :aria-label="
                 isCopied ? $t('quiz.feedback.code_copied') : $t('quiz.actions.copy_code')
               "
               @click="copyCode"
             >
-              <i-material-symbols-check
-                v-if="isCopied"
-                aria-hidden="true"
-              /><i-material-symbols-content-copy v-else aria-hidden="true" />
+              <Transition name="motion-icon" mode="out-in">
+                <i-material-symbols-check v-if="isCopied" key="check" aria-hidden="true" />
+                <i-material-symbols-content-copy v-else key="copy" aria-hidden="true" />
+              </Transition>
             </button>
             <button
               v-if="canShare"
+              class="interactive-control"
               type="button"
               :aria-label="$t('quiz.actions.share_result')"
               @click="shareResult"
@@ -181,10 +194,10 @@
         </p>
         <p v-if="actionError" role="alert" class="quiz-route-error">{{ actionError }}</p>
         <div class="quiz-summary-buttons">
-          <button class="button" @click="restartQuiz">
+          <button class="button interactive-control" @click="restartQuiz">
             {{ $t('quiz.restart') }}
           </button>
-          <button class="button" @click="returnToPortal">
+          <button class="button interactive-control" @click="returnToPortal">
             {{ $t('quiz.return') }}
           </button>
         </div>
@@ -261,6 +274,7 @@ const inputText = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 const summaryRef = ref<HTMLElement | null>(null)
 const showSummary = ref(false)
+const shouldAnimateQuestion = ref(false)
 const isComposing = ref(false)
 const isLocked = ref(false)
 const isCopied = ref(false)
@@ -295,8 +309,8 @@ const usedTime = computed(() =>
       )
     : 0,
 )
-const progressWidth = computed(() =>
-  timer.value ? timerProgressPercent(timer.value, now.value) : 0,
+const progressScale = computed(() =>
+  timer.value ? timerProgressPercent(timer.value, now.value) / 100 : 0,
 )
 const progressDisplay = computed(() => `${currentIndex.value + 1} / ${questions.value.length}`)
 
@@ -369,13 +383,15 @@ const onInput = () => {
   }
 }
 
+const ANSWER_FEEDBACK_DURATION_MS = 420
+
 const handleCorrectAnswer = async () => {
   isLocked.value = true
   const cq = currentQuestion.value
   if (!cq) return
   recordCurrentResult('correct')
 
-  await new Promise((resolve) => setTimeout(resolve, 800))
+  await new Promise((resolve) => window.setTimeout(resolve, ANSWER_FEEDBACK_DURATION_MS))
   if (showSummary.value) {
     isLocked.value = false
     return
@@ -431,6 +447,7 @@ const advanceQuestion = () => {
     void nextTick(() => summaryRef.value?.scrollIntoView({ block: 'start' }))
     return
   }
+  shouldAnimateQuestion.value = true
   currentIndex.value += 1
   inputText.value = ''
   void nextTick(() => inputRef.value?.focus())
@@ -518,6 +535,7 @@ const resetQuizState = () => {
   questionResults.value = {}
   hintsByQuestion.value = {}
   timer.value = null
+  shouldAnimateQuestion.value = false
 }
 
 const loadQuestions = async () => {
@@ -607,7 +625,8 @@ onUnmounted(() => {
 .progress-fill {
   height: 100%;
   background: var(--accent);
-  transition: width 250ms linear;
+  transform-origin: left;
+  transition: transform 250ms linear;
 }
 
 .quiz-container {
@@ -643,6 +662,13 @@ onUnmounted(() => {
   gap: var(--space-3);
   width: 100%;
   text-align: center;
+}
+
+.quiz-question-content {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  width: 100%;
 }
 
 .quiz-status {
@@ -710,6 +736,11 @@ onUnmounted(() => {
   background: var(--surface-subtle);
   color: var(--text);
   font-size: clamp(1.25rem, 3vw, 2.2rem);
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-emphasized);
 }
 
 .translation-character.correct,
@@ -717,6 +748,10 @@ onUnmounted(() => {
 .state-swatch.correct {
   border-color: var(--success);
   background: color-mix(in srgb, var(--success) 24%, var(--surface));
+}
+
+.translation-character.correct {
+  transform: scale(1.03);
 }
 
 .translation-character.present,
@@ -1016,6 +1051,12 @@ onUnmounted(() => {
 
   .quiz-summary-table-wrapper {
     max-height: 65dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .translation-character.correct {
+    transform: none;
   }
 }
 </style>

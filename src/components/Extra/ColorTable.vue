@@ -9,11 +9,11 @@
     <TableSectionNav />
     <fieldset class="color-variants">
       <legend>{{ $t('table.colors.variants') }}</legend>
-      <label>
+      <label class="interactive-control">
         <input type="checkbox" v-model="showKoreanMixed" />
         {{ $t('table.colors.show_korean_mixed') }}
       </label>
-      <label>
+      <label class="interactive-control">
         <input type="checkbox" v-model="showChuNom" />
         {{ $t('table.colors.show_chu_nom') }}
       </label>

@@ -9,7 +9,7 @@
     </p>
     <div class="pagination-buttons">
       <button
-        class="page-button"
+        class="page-button interactive-control"
         type="button"
         :disabled="currentPage <= 1 || !totalItems"
         :aria-label="$t('table.pagination.previous')"
@@ -24,7 +24,7 @@
           <span v-if="page === 'ellipsis'" class="ellipsis" aria-hidden="true">…</span>
           <button
             v-else
-            class="page-number"
+            class="page-number interactive-control"
             :class="{ active: currentPage === page }"
             type="button"
             :aria-current="currentPage === page ? 'page' : undefined"
@@ -48,7 +48,7 @@
           @change="jump"
       /></label>
       <button
-        class="page-button"
+        class="page-button interactive-control"
         type="button"
         :disabled="currentPage >= totalPages || !totalItems"
         :aria-label="$t('table.pagination.next')"

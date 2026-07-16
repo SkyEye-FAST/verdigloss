@@ -28,30 +28,33 @@
           <input type="checkbox" id="timer-mode" v-model="timerMode" />
           <span>{{ $t('quiz.timer_mode') }}</span>
         </label>
-        <p
-          class="quiz-eligibility"
-          :class="`quiz-eligibility--${eligibility.status}`"
-          :role="eligibility.status === 'error' ? 'alert' : 'status'"
-          aria-live="polite"
-        >
-          <template v-if="eligibility.status === 'loading'">
-            {{ $t('quiz.eligibility.loading') }}
-          </template>
-          <template v-else-if="eligibility.status === 'available'">
-            {{ $t('quiz.eligibility.available', { count: eligibility.count }) }}
-          </template>
-          <template v-else-if="eligibility.status === 'unavailable'">
-            {{
-              $t('quiz.eligibility.unavailable', {
-                count: eligibility.count,
-                minimum: quizQuestionCount,
-              })
-            }}
-          </template>
-          <template v-else>{{ $t('quiz.eligibility.failure') }}</template>
-        </p>
+        <Transition name="motion-status" mode="out-in">
+          <p
+            :key="eligibility.status"
+            class="quiz-eligibility"
+            :class="`quiz-eligibility--${eligibility.status}`"
+            :role="eligibility.status === 'error' ? 'alert' : 'status'"
+            aria-live="polite"
+          >
+            <template v-if="eligibility.status === 'loading'">
+              {{ $t('quiz.eligibility.loading') }}
+            </template>
+            <template v-else-if="eligibility.status === 'available'">
+              {{ $t('quiz.eligibility.available', { count: eligibility.count }) }}
+            </template>
+            <template v-else-if="eligibility.status === 'unavailable'">
+              {{
+                $t('quiz.eligibility.unavailable', {
+                  count: eligibility.count,
+                  minimum: quizQuestionCount,
+                })
+              }}
+            </template>
+            <template v-else>{{ $t('quiz.eligibility.failure') }}</template>
+          </p>
+        </Transition>
         <button
-          class="quiz-btn-primary"
+          class="quiz-btn-primary interactive-control"
           type="button"
           :disabled="eligibility.status !== 'available' || isStartingQuiz"
           @click="startRandomQuiz"
@@ -75,11 +78,13 @@
             :placeholder="$t('quiz.code_placeholder')"
             @keyup.enter="startQuiz"
           />
-          <button class="quiz-enter-button" type="button" @click="startQuiz">
+          <button class="quiz-enter-button interactive-control" type="button" @click="startQuiz">
             {{ $t('quiz.nav.enter') }}
           </button>
         </div>
-        <p v-if="quizError" role="alert" class="quiz-error">{{ quizError }}</p>
+        <Transition name="motion-status">
+          <p v-if="quizError" role="alert" class="quiz-error">{{ quizError }}</p>
+        </Transition>
       </section>
     </main>
   </div>

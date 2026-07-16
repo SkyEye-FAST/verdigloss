@@ -2,7 +2,7 @@
   <div ref="root" class="language-selector">
     <button
       ref="trigger"
-      class="language-selector__trigger"
+      class="language-selector__trigger interactive-control"
       type="button"
       :aria-expanded="isOpen"
       :aria-controls="popupId"
@@ -13,33 +13,39 @@
       <span class="language-selector__summary">{{ selectedSummary }}</span>
       <i-material-symbols-expand-more aria-hidden="true" :class="{ 'is-rotated': isOpen }" />
     </button>
-    <div
-      v-if="isOpen"
-      :id="popupId"
-      class="language-selector__popover"
-      role="group"
-      :aria-label="resolvedLabel"
-      @keydown.esc.stop.prevent="closeAndRestoreFocus"
-    >
-      <div class="language-selector__actions">
-        <button type="button" @click="selectAll">{{ $t('language_selector.select_all') }}</button>
-        <button type="button" @click="clearAll">{{ $t('language_selector.clear') }}</button>
+    <Transition name="motion-popover">
+      <div
+        v-if="isOpen"
+        :id="popupId"
+        class="language-selector__popover"
+        role="group"
+        :aria-label="resolvedLabel"
+        @keydown.esc.stop.prevent="closeAndRestoreFocus"
+      >
+        <div class="language-selector__actions">
+          <button class="interactive-control" type="button" @click="selectAll">
+            {{ $t('language_selector.select_all') }}
+          </button>
+          <button class="interactive-control" type="button" @click="clearAll">
+            {{ $t('language_selector.clear') }}
+          </button>
+        </div>
+        <div class="language-selector__options">
+          <label v-for="option in options" :key="option.value" class="language-selector__option">
+            <input
+              type="checkbox"
+              :value="option.value"
+              :checked="modelValue.includes(option.value)"
+              @change="toggleOption(option.value)"
+            />
+            <span :lang="option.htmlLang" :class="[option.value.replace(/_/, '-'), 'sans']">{{
+              option.label
+            }}</span>
+            <code>{{ option.value }}</code>
+          </label>
+        </div>
       </div>
-      <div class="language-selector__options">
-        <label v-for="option in options" :key="option.value" class="language-selector__option">
-          <input
-            type="checkbox"
-            :value="option.value"
-            :checked="modelValue.includes(option.value)"
-            @change="toggleOption(option.value)"
-          />
-          <span :lang="option.htmlLang" :class="[option.value.replace(/_/, '-'), 'sans']">{{
-            option.label
-          }}</span>
-          <code>{{ option.value }}</code>
-        </label>
-      </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -142,7 +148,7 @@ onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown)
 }
 .language-selector__trigger svg {
   flex: none;
-  transition: transform var(--motion-fast);
+  transition: transform var(--motion-fast) var(--ease-standard);
 }
 .is-rotated {
   transform: rotate(180deg);

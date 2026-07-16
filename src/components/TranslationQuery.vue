@@ -3,7 +3,7 @@
     <div class="sidebar-layout" :class="{ 'sidebar-collapsed': !isSidebarOpen }">
       <div class="sidebar">
         <button
-          class="toggle-button"
+          class="toggle-button interactive-control"
           type="button"
           :class="{ 'is-collapsed': !isSidebarOpen }"
           :aria-expanded="isSidebarOpen"
@@ -13,7 +13,14 @@
         >
           <i-material-symbols-chevron-left class="toggle-button__icon" aria-hidden="true" />
         </button>
-        <Transition name="settings">
+        <Transition
+          @before-enter="beforeSettingsEnter"
+          @enter="enterSettings"
+          @after-enter="afterSettingsEnter"
+          @before-leave="beforeSettingsLeave"
+          @leave="leaveSettings"
+          @after-leave="afterSettingsLeave"
+        >
           <div
             v-if="isSidebarOpen"
             id="query-settings"
@@ -68,9 +75,11 @@
                   autocomplete="off"
                   @input="onQueryInput"
                 />
-                <p v-if="resultAnnouncement" class="result-count" aria-live="polite">
-                  {{ resultAnnouncement }}
-                </p>
+                <Transition name="motion-status">
+                  <p v-if="resultAnnouncement" class="result-count" aria-live="polite">
+                    {{ resultAnnouncement }}
+                  </p>
+                </Transition>
               </div>
 
               <div class="input-group" v-show="availableKeys.length">
@@ -93,24 +102,26 @@
                     @focus="isKeyListOpen = true"
                     @keydown="handleKeyListKeydown"
                   />
-                  <ul
-                    v-if="isKeyListOpen"
-                    id="query-key-results"
-                    class="query-key-results"
-                    role="listbox"
-                  >
-                    <li
-                      v-for="(key, index) in availableKeys"
-                      :id="`query-key-${index}`"
-                      :key="key"
-                      role="option"
-                      :aria-selected="index === activeKeyIndex"
-                      :class="{ active: index === activeKeyIndex }"
-                      @mousedown.prevent="selectKey(key)"
+                  <Transition name="motion-popover">
+                    <ul
+                      v-if="isKeyListOpen"
+                      id="query-key-results"
+                      class="query-key-results"
+                      role="listbox"
                     >
-                      {{ key }}
-                    </li>
-                  </ul>
+                      <li
+                        v-for="(key, index) in availableKeys"
+                        :id="`query-key-${index}`"
+                        :key="key"
+                        role="option"
+                        :aria-selected="index === activeKeyIndex"
+                        :class="{ active: index === activeKeyIndex }"
+                        @mousedown.prevent="selectKey(key)"
+                      >
+                        {{ key }}
+                      </li>
+                    </ul>
+                  </Transition>
                 </div>
               </div>
 
@@ -137,7 +148,9 @@
         </Transition>
       </div>
       <div class="main-content" tabindex="0">
-        <div v-if="error" class="error" role="alert">{{ error }}</div>
+        <Transition name="motion-status">
+          <div v-if="error" class="error" role="alert">{{ error }}</div>
+        </Transition>
         <div v-if="selectedTranslation" class="result-section" tabindex="0">
           <div class="title">{{ selectedTranslation.source }}</div>
           <p class="subtitle">{{ selectedTranslation.key }}</p>
@@ -226,6 +239,87 @@ interface SelectedTranslation {
 const languages = languageRegistry.filter((language) => language.availableInQuery)
 
 const isSidebarOpen = ref(true)
+let settingsTimer: number | undefined
+
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const clearSettingsTimer = () => {
+  if (settingsTimer !== undefined) window.clearTimeout(settingsTimer)
+  settingsTimer = undefined
+}
+
+const beforeSettingsEnter = (element: Element) => {
+  const panel = element as HTMLElement
+  clearSettingsTimer()
+  panel.style.height = '0'
+  panel.style.opacity = '0'
+  panel.style.transform = 'translateY(-4px)'
+  panel.style.overflow = 'hidden'
+}
+
+const enterSettings = (element: Element, done: () => void) => {
+  const panel = element as HTMLElement
+  if (prefersReducedMotion()) {
+    panel.style.height = 'auto'
+    panel.style.opacity = '1'
+    panel.style.transform = 'none'
+    done()
+    return
+  }
+  const height = panel.scrollHeight
+  panel.style.transition =
+    'height var(--motion-slow) var(--ease-enter), opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter)'
+  window.requestAnimationFrame(() => {
+    panel.style.height = `${height}px`
+    panel.style.opacity = '1'
+    panel.style.transform = 'translateY(0)'
+  })
+  settingsTimer = window.setTimeout(done, 240)
+}
+
+const afterSettingsEnter = (element: Element) => {
+  const panel = element as HTMLElement
+  clearSettingsTimer()
+  panel.style.height = 'auto'
+  panel.style.overflow = ''
+  panel.style.transition = ''
+  panel.style.transform = ''
+}
+
+const beforeSettingsLeave = (element: Element) => {
+  const panel = element as HTMLElement
+  clearSettingsTimer()
+  panel.style.height = `${panel.scrollHeight}px`
+  panel.style.opacity = '1'
+  panel.style.transform = 'translateY(0)'
+  panel.style.overflow = 'hidden'
+}
+
+const leaveSettings = (element: Element, done: () => void) => {
+  const panel = element as HTMLElement
+  if (prefersReducedMotion()) {
+    done()
+    return
+  }
+  panel.style.transition =
+    'height var(--motion-base) var(--ease-exit), opacity var(--motion-fast) var(--ease-exit), transform var(--motion-fast) var(--ease-exit)'
+  window.requestAnimationFrame(() => {
+    panel.style.height = '0'
+    panel.style.opacity = '0'
+    panel.style.transform = 'translateY(-2px)'
+  })
+  settingsTimer = window.setTimeout(done, 200)
+}
+
+const afterSettingsLeave = (element: Element) => {
+  const panel = element as HTMLElement
+  clearSettingsTimer()
+  panel.style.height = ''
+  panel.style.opacity = ''
+  panel.style.transform = ''
+  panel.style.overflow = ''
+  panel.style.transition = ''
+}
 const queryMode = ref<QueryMode>(readStringPreference('queryMode', 'source') as QueryMode)
 const queryLang = ref(readStringPreference('queryLang', 'zh_cn'))
 const queryContent = ref(readStringPreference('queryContent', 'The End'))
@@ -530,18 +624,19 @@ onMounted(async () => {
 }
 
 .sidebar-layout {
+  --sidebar-track: 21rem;
   display: grid;
-  grid-template-columns: minmax(17rem, 21rem) minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-track) minmax(0, 1fr);
   gap: var(--space-8);
   width: min(100%, var(--content-max));
   margin: 0 auto;
   transition:
-    grid-template-columns var(--motion-base) ease,
-    gap var(--motion-base) ease;
+    grid-template-columns var(--motion-base) var(--ease-standard),
+    gap var(--motion-base) var(--ease-standard);
 }
 
 .sidebar-layout.sidebar-collapsed {
-  grid-template-columns: var(--control-height) minmax(0, 1fr);
+  --sidebar-track: var(--control-height);
 }
 
 .sidebar {
@@ -557,19 +652,7 @@ onMounted(async () => {
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
-}
-
-.settings-enter-active,
-.settings-leave-active {
-  transition:
-    opacity var(--motion-base) ease,
-    transform var(--motion-base) ease;
-}
-
-.settings-enter-from,
-.settings-leave-to {
-  opacity: 0;
-  transform: translateX(-0.5rem);
+  overflow: hidden;
 }
 
 .form-container {
@@ -634,7 +717,7 @@ onMounted(async () => {
 
 .toggle-button__icon {
   font-size: 1.5em;
-  transition: transform var(--motion-base) ease;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 
 .sidebar-collapsed .toggle-button__icon {
@@ -802,7 +885,7 @@ onMounted(async () => {
 
 @media (max-width: 900px) {
   .sidebar-layout {
-    grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
+    --sidebar-track: 18rem;
     gap: var(--space-4);
   }
 }
@@ -842,18 +925,6 @@ onMounted(async () => {
     transform: rotate(-90deg);
   }
 
-  .settings-enter-active,
-  .settings-leave-active {
-    transition:
-      opacity var(--motion-base) ease,
-      transform var(--motion-base) ease;
-  }
-
-  .settings-enter-from,
-  .settings-leave-to {
-    transform: translateY(-0.5rem);
-  }
-
   .result-section {
     padding: var(--space-4);
   }
@@ -878,15 +949,6 @@ onMounted(async () => {
 
   .subtitle {
     font-size: clamp(0.98rem, 4vw, 1.08rem);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sidebar-layout,
-  .toggle-button__icon,
-  .settings-enter-active,
-  .settings-leave-active {
-    transition: none;
   }
 }
 

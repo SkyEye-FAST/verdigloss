@@ -1,0 +1,152 @@
+:root {
+  --motion-instant: 90ms;
+  --motion-fast: 140ms;
+  --motion-base: 200ms;
+  --motion-slow: 240ms;
+  --motion-spinner: 700ms;
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-distance-xs: 2px;
+  --motion-distance-sm: 4px;
+  --motion-distance-md: 8px;
+}
+
+.interactive-control {
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-instant) var(--ease-standard);
+}
+.interactive-control:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+}
+
+.motion-fade-enter-active {
+  transition: opacity var(--motion-base) var(--ease-enter);
+}
+.motion-fade-leave-active {
+  transition: opacity var(--motion-fast) var(--ease-exit);
+}
+.motion-fade-enter-from,
+.motion-fade-leave-to {
+  opacity: 0;
+}
+
+.motion-rise-enter-active,
+.motion-replace-enter-active,
+.motion-status-enter-active,
+.route-enter-active,
+.motion-summary-enter-active {
+  transition:
+    opacity var(--motion-base) var(--ease-enter),
+    transform var(--motion-base) var(--ease-enter);
+}
+.motion-rise-leave-active,
+.motion-replace-leave-active,
+.motion-status-leave-active,
+.route-leave-active,
+.motion-summary-leave-active {
+  transition:
+    opacity var(--motion-fast) var(--ease-exit),
+    transform var(--motion-fast) var(--ease-exit);
+}
+.motion-rise-enter-from,
+.motion-replace-enter-from,
+.motion-summary-enter-from {
+  opacity: 0;
+  transform: translateY(var(--motion-distance-sm));
+}
+.motion-rise-leave-to,
+.motion-replace-leave-to,
+.motion-summary-leave-to {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--motion-distance-xs)));
+}
+.route-enter-from {
+  transform: translateY(var(--motion-distance-sm));
+}
+.route-leave-to {
+  transform: translateY(calc(-1 * var(--motion-distance-xs)));
+}
+.motion-status-enter-from {
+  transform: translateY(var(--motion-distance-xs));
+}
+.route-enter-active {
+  transition-duration: 180ms;
+}
+.route-leave-active {
+  transition-duration: 100ms;
+}
+.motion-summary-enter-from {
+  transform: translateY(6px);
+}
+
+.motion-popover-enter-active {
+  transition:
+    opacity 170ms var(--ease-enter),
+    transform 170ms var(--ease-enter);
+}
+.motion-popover-leave-active {
+  pointer-events: none;
+  transition:
+    opacity 110ms var(--ease-exit),
+    transform 110ms var(--ease-exit);
+}
+.motion-popover-enter-from,
+.motion-popover-leave-to {
+  opacity: 0;
+  transform: translateY(calc(-1 * var(--motion-distance-sm))) scale(0.985);
+}
+
+.motion-icon-enter-active,
+.motion-icon-leave-active {
+  transition:
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+.motion-icon-enter-from,
+.motion-icon-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-bar,
+  .mobile-nav,
+  .settings,
+  .result-section,
+  .table-wrapper,
+  .quiz-input,
+  .quiz-summary-table-wrapper,
+  .language-selector__popover {
+    transition:
+      background-color var(--motion-base) var(--ease-standard),
+      border-color var(--motion-base) var(--ease-standard),
+      color var(--motion-base) var(--ease-standard),
+      box-shadow var(--motion-base) var(--ease-standard);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-rise-enter-from,
+  .motion-rise-leave-to,
+  .motion-replace-enter-from,
+  .motion-replace-leave-to,
+  .motion-status-enter-from,
+  .route-enter-from,
+  .route-leave-to,
+  .motion-summary-enter-from,
+  .motion-summary-leave-to,
+  .motion-popover-enter-from,
+  .motion-popover-leave-to,
+  .motion-icon-enter-from,
+  .motion-icon-leave-to,
+  .interactive-control:active:not(:disabled) {
+    transform: none;
+  }
+}
