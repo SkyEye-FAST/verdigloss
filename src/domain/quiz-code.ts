@@ -53,9 +53,7 @@ export function buildQuizIdMap(
       throw new QuizIdMapInvariantError(`Invalid quiz ID for ${key}: ${id}`)
     }
     if (mapping[id] !== undefined) {
-      throw new QuizIdMapInvariantError(
-        `Quiz ID collision for ${id}: ${mapping[id]} and ${key}`,
-      )
+      throw new QuizIdMapInvariantError(`Quiz ID collision for ${id}: ${mapping[id]} and ${key}`)
     }
     mapping[id] = key
   }
@@ -64,10 +62,15 @@ export function buildQuizIdMap(
     throw new QuizIdMapInvariantError('Quiz ID map does not contain every translation key.')
   }
 
-  return Object.fromEntries(Object.entries(mapping).sort(([left], [right]) => left.localeCompare(right)))
+  return Object.fromEntries(
+    Object.entries(mapping).sort(([left], [right]) => left.localeCompare(right)),
+  )
 }
 
-export function encodeQuizCode(keys: readonly string[], idMap: QuizIdMap): Result<string, QuizCodeError> {
+export function encodeQuizCode(
+  keys: readonly string[],
+  idMap: QuizIdMap,
+): Result<string, QuizCodeError> {
   const keyToId = new Map<string, string>()
   for (const [id, key] of Object.entries(idMap)) {
     if (keyToId.has(key)) {
@@ -85,7 +88,9 @@ export function encodeQuizCode(keys: readonly string[], idMap: QuizIdMap): Resul
   }
 
   if (ids.length === 0) return err({ kind: 'malformed-code', code: '' })
-  return ok(`${QUIZ_CODE_VERSION}.${[...ids].sort((left, right) => left.localeCompare(right)).join('.')}`)
+  return ok(
+    `${QUIZ_CODE_VERSION}.${[...ids].sort((left, right) => left.localeCompare(right)).join('.')}`,
+  )
 }
 
 function decodeIds(
@@ -118,9 +123,8 @@ export function decodeLegacyQuizCode(
     return err({ kind: 'malformed-code', code })
   }
 
-  const ids = Array.from(
-    { length: LEGACY_QUESTION_COUNT },
-    (_, index) => code.slice(index * LEGACY_SEGMENT_WIDTH, (index + 1) * LEGACY_SEGMENT_WIDTH),
+  const ids = Array.from({ length: LEGACY_QUESTION_COUNT }, (_, index) =>
+    code.slice(index * LEGACY_SEGMENT_WIDTH, (index + 1) * LEGACY_SEGMENT_WIDTH),
   )
   return decodeIds('legacy', ids, legacyIdMap)
 }
@@ -135,7 +139,11 @@ export function decodeQuizCode(
   if (code.startsWith(`${QUIZ_CODE_VERSION}.`)) {
     const segments = code.split('.')
     const ids = segments.slice(1)
-    if (segments[0] !== QUIZ_CODE_VERSION || ids.length === 0 || ids.some((id) => !isBase62Id(id, QUIZ_ID_WIDTH))) {
+    if (
+      segments[0] !== QUIZ_CODE_VERSION ||
+      ids.length === 0 ||
+      ids.some((id) => !isBase62Id(id, QUIZ_ID_WIDTH))
+    ) {
       return err({ kind: 'malformed-code', code })
     }
     return decodeIds(QUIZ_CODE_VERSION, ids, idMap)

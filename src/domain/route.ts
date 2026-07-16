@@ -6,8 +6,7 @@ export type QueryValue = string | Array<string | null> | null | undefined
 export type TimerMode = 'timed' | 'untimed'
 
 export type RouteQueryError =
-  | { kind: 'unsupported-language'; language: string }
-  | { kind: 'invalid-timer-mode'; value: string }
+  { kind: 'unsupported-language'; language: string } | { kind: 'invalid-timer-mode'; value: string }
 
 function singleValue(value: QueryValue): string | undefined {
   return Array.isArray(value) || value === null ? undefined : value
@@ -20,7 +19,8 @@ export function parseTargetLanguage(
 ): Result<LanguageCode, RouteQueryError> {
   const language = singleValue(value)
   if (language === undefined) return ok(fallback)
-  if ((supportedLanguages as readonly string[]).includes(language)) return ok(language as LanguageCode)
+  if ((supportedLanguages as readonly string[]).includes(language))
+    return ok(language as LanguageCode)
   return err({ kind: 'unsupported-language', language })
 }
 

@@ -15,9 +15,16 @@
         {{ $t('table.colors.show_chu_nom') }}
       </label>
     </fieldset>
-    <div class="table-wrapper">
+    <div
+      class="table-wrapper"
+      role="region"
+      tabindex="0"
+      aria-label="Colour translation table; scroll horizontally to see all languages"
+    >
       <table>
-        <caption>Colour names and identifiers across Minecraft translations</caption>
+        <caption>
+          Colour names and identifiers across Minecraft translations
+        </caption>
         <thead>
           <tr>
             <th scope="col">Color / ID</th>
@@ -85,8 +92,6 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
   'ko_kr',
   'vi_vn',
 ]
-
-
 </script>
 
 <style scoped>
@@ -266,20 +271,102 @@ body.dark-mode .page-title {
   }
 }
 
-.page-content { width: min(100% - 2rem, var(--content-max)); min-height: auto; margin: 0 auto; padding: var(--space-6) 0; justify-content: start; }
-.page-title { margin: 0; color: var(--text); font: 700 clamp(1.6rem, 3vw, 2.25rem)/1.15 var(--serif-font); text-align: left; }
-.updated-at { margin: .35rem 0 var(--space-4); color: var(--muted); font-size: .9rem; }
-.color-variants { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: 0 0 var(--space-4); padding: var(--space-3) 0; border: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.color-variants legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
-.color-variants label { display: flex; align-items: center; gap: .5rem; min-height: var(--control-height); color: var(--text-secondary); }
-.color-variants input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
-.table-wrapper { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); overscroll-behavior-inline: contain; }
-.table-wrapper table { min-width: 900px; max-width: none; margin: 0; border: 0; background: var(--surface); color: var(--text); box-shadow: none; }
-.table-wrapper table td, .table-wrapper table th { border-color: var(--border); }
-.table-wrapper table thead th { top: 64px; background: var(--surface-subtle); color: var(--text); border-color: var(--border); }
-.table-wrapper .key-column { position: sticky; left: 0; z-index: 1; background: var(--surface-raised); }
-.table-wrapper table thead .key-column { z-index: 2; }
-.table-wrapper table tr:nth-child(even), .table-wrapper table tr:nth-child(even) .key-column { background: var(--surface); }
-.table-wrapper table tr:hover, .table-wrapper table tr:hover .key-column { background: var(--accent-soft); }
-@media (max-width: 767px) { .page-content { width: min(100% - 1rem, var(--content-max)); padding-top: var(--space-4); } .table-wrapper table thead th { top: 56px; } }
+.page-content {
+  width: min(100% - 2rem, var(--content-max));
+  min-height: auto;
+  margin: 0 auto;
+  padding: var(--space-6) 0;
+  justify-content: start;
+}
+.page-title {
+  margin: 0;
+  color: var(--text);
+  font: 700 clamp(1.6rem, 3vw, 2.25rem)/1.15 var(--serif-font);
+  text-align: left;
+}
+.updated-at {
+  margin: 0.35rem 0 var(--space-4);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.color-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.color-variants legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.color-variants label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--control-height);
+  color: var(--text-secondary);
+}
+.color-variants input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--accent);
+}
+.table-wrapper {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overscroll-behavior-inline: contain;
+}
+.table-wrapper table {
+  min-width: 900px;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: none;
+}
+.table-wrapper table td,
+.table-wrapper table th {
+  border-color: var(--border);
+}
+.table-wrapper table thead th {
+  top: 64px;
+  background: var(--surface-subtle);
+  color: var(--text);
+  border-color: var(--border);
+}
+.table-wrapper .key-column {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-raised);
+}
+.table-wrapper table thead .key-column {
+  z-index: 2;
+}
+.table-wrapper table tr:nth-child(even),
+.table-wrapper table tr:nth-child(even) .key-column {
+  background: var(--surface);
+}
+.table-wrapper table tr:hover,
+.table-wrapper table tr:hover .key-column {
+  background: var(--accent-soft);
+}
+@media (max-width: 767px) {
+  .page-content {
+    width: min(100% - 1rem, var(--content-max));
+    padding-top: var(--space-4);
+  }
+  .table-wrapper table thead th {
+    top: 56px;
+  }
+}
 </style>

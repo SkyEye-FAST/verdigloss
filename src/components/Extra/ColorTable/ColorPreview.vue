@@ -1,5 +1,11 @@
 <template>
-  <span class="color-preview" :style="{ backgroundColor: color }" :aria-label="`Colour value ${color}`" role="img" :title="color"></span>
+  <span
+    class="color-preview"
+    :style="{ backgroundColor: color }"
+    :aria-label="`Colour value ${color}`"
+    role="img"
+    :title="color"
+  ></span>
 </template>
 
 <script setup lang="ts">

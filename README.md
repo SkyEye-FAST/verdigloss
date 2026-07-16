@@ -1,102 +1,109 @@
-<div align="center">
-<img src="https://raw.githubusercontent.com/SkyEye-FAST/verdigloss/master/src/assets/images/icon.png">
-
----
-
 # Verdigloss
 
-![GitHub License](https://img.shields.io/github/license/SkyEye-FAST/verdigloss)
-[![GitHub stars](https://img.shields.io/github/stars/SkyEye-FAST/verdigloss)](https://github.com/SkyEye-FAST/verdigloss/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/SkyEye-FAST/verdigloss)](https://github.com/SkyEye-FAST/verdigloss/issues)
+Verdigloss is a Vue 3 single-page application for searching, comparing, exporting, and practising the standard Minecraft Java Edition translations. It is the frontend successor to [minecraft_translation_flask](https://github.com/SkyEye-FAST/minecraft_translation_flask).
 
-</div>
+Live deployments: <https://mcst.teahouse.team/> and <https://verdigloss.vercel.app/>.
 
-A simple web project for querying standard Minecraft translations, built with [Vue 3](https://vuejs.org/) + [Vite](https://vite.dev/).
+## Features
 
-This project is a successor to [SkyEye-FAST/minecraft_translation_flask](https://github.com/SkyEye-FAST/minecraft_translation_flask), written entirely in the frontend.
+- Search by English source text, translation key, or a selected target language.
+- Compare selected language columns, filter results, paginate, and export CSV, TSV, JSON, XML, or XLSX.
+- Shareable, versioned quiz codes with legacy-code compatibility.
+- Quiz hints, timer mode, summaries, and resilient browser preference storage.
+- Colour translation reference with Korean mixed-script and Vietnamese Chữ Nôm variants.
+- Responsive navigation, dark mode, semantic tables, keyboard-friendly controls, and automated accessibility checks.
 
-The project name **"Verdigloss"** comes from **"verdant + glossary + glossostigma"**. "Verdant" symbolizes vitality, "glossary" implies translation, and glossostigma is one of the smallest aquatic plants.
+## Prerequisites
 
-## Demostration
+- Node.js **24.9.x** (the supported range is recorded in `package.json`).
+- Corepack with **pnpm 11.10.0**. The repository pins this in `packageManager`.
+- Git with submodule support.
 
-You can try the demo at the following links:
+## Install and develop
 
-- <https://mcst.teahouse.team/>
-- <https://verdigloss.vercel.app/>
-
-## Usage
-
-To use this project, you need to have Node.js installed on your computer. Then, follow these steps:
-
-1. Install pnpm (if not already installed). See <https://pnpm.io/installation> for more information.
-
-   You can use another package manager instead.
-
-2. Clone this repository:
-
-   ```shell
-   git clone https://github.com/SkyEye-FAST/verdigloss.git
-   ```
-
-3. Install dependencies:
-
-   ```shell
-   cd verdigloss
-   pnpm install
-   ```
-
-4. Start the development server:
-
-   ```shell
-   pnpm dev
-   ```
-
-5. Open your browser and go to `http://localhost:5173/`.
-
-### Production Build
-
-To build for production:
-
-```shell
-pnpm build
+```sh
+git clone --recurse-submodules https://github.com/SkyEye-FAST/verdigloss.git
+cd verdigloss
+corepack enable
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-The built files will be in the `dist` directory.
+If the repository was cloned without its data submodule, run:
 
-### Quiz codes and tests
+```sh
+git submodule update --init --recursive
+```
 
-New quiz links use the versioned `v1.<7-character-id>.<7-character-id>...` format. The mapping is generated deterministically with `pnpm generate-id-mapping`; it fails if an ID collision or a missing English key is detected. Existing 30-character links continue to use the preserved legacy mapping where their original IDs still exist.
+## Commands
 
-Quiz eligibility is evaluated per target language: a question must have a non-empty translation that differs from English. Timed quizzes use real elapsed time, including while the page is hidden.
+All default validation commands are read-only. Their corresponding `:fix` or generation commands are explicit.
 
-Run the unit suite with:
+| Command                       | Purpose                                                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `pnpm format`                 | Format tracked project files (mutating).                                                  |
+| `pnpm format:check`           | Verify Prettier formatting without writing.                                               |
+| `pnpm lint` / `pnpm lint:fix` | Check ESLint / apply ESLint fixes.                                                        |
+| `pnpm type-check`             | Run Vue and TypeScript checks.                                                            |
+| `pnpm test`                   | Run the Vitest unit suite.                                                                |
+| `pnpm build`                  | Type-check and produce the production bundle.                                             |
+| `pnpm test:e2e`               | Run Playwright at desktop, 390px mobile, and 844×390 landscape sizes.                     |
+| `pnpm generate-data`          | Regenerate the deterministic quiz ID mapping (mutating).                                  |
+| `pnpm validate-data`          | Validate data integrity, quiz mappings, language registry, ratings, and UI locale parity. |
+| `pnpm check-generated`        | CI-safe alias for generated-data validation.                                              |
+| `pnpm bundle:check`           | Enforce production bundle and remote-font budgets after `pnpm build`.                     |
 
-```shell
+Install Playwright's local Chromium browser once before the first end-to-end run:
+
+```sh
+pnpm exec playwright install chromium
+```
+
+## Translation data and quiz codes
+
+The `src/assets/mc_lang` submodule downloads Minecraft language assets and derives the `valid/` language files used by the application. `src/assets/data/quiz-id-map.json` maps every English translation key to a deterministic, collision-checked seven-character base-62 ID.
+
+New links use `v1.<id>.<id>...`. They can be decoded without random state; legacy 30-character links continue to use the preserved legacy map where available. A quiz question is eligible only when its target-language value is non-empty and differs from English.
+
+After updating language data, run:
+
+```sh
+pnpm generate-data
+pnpm validate-data
+pnpm format:generated
+pnpm lint
+pnpm type-check
 pnpm test
+pnpm build
+pnpm bundle:check
+pnpm test:e2e
 ```
 
-## Feedback
+## Architecture
 
-Please feel free to raise issues for any problems encountered or feature suggestions.
+- `src/app/` configures application bootstrap, route titles, router, and interface i18n.
+- `src/components/` contains the query, table, quiz, colour reference, and shared shell.
+- `src/domain/` contains quiz-code, scoring, matching, and timing logic.
+- `src/features/` holds query indexes, table pagination, and colour data.
+- `src/services/` lazily imports language JSON and manages browser exports.
+- `scripts/` owns deterministic generated-data validation, language-update summaries, and bundle budgets.
 
-Pull requests are welcome.
+Language JSON is loaded only when a page needs it. XLSX is dynamically imported only for an XLSX export, so it is outside the initial query route bundle.
+
+## CI, updates, and deployment
+
+`CI` runs for every push and pull request with read-only permissions. It checks the submodule checkout, frozen install, generated data, formatting, lint, types, unit tests, production bundle, bundle budgets, and Playwright tests. Failed browser tests retain their trace, screenshot, video, and HTML report.
+
+The scheduled **Update language data** workflow can also be run manually. It updates the submodule, regenerates and formats only the quiz map, runs the complete validation sequence, then opens a PR rather than committing to the default branch. Its PR body records the submodule revision, Minecraft version, changed language files, key delta, quiz-map delta, and validation status.
+
+Vercel serves the Vite SPA via `vercel.json`; application routes such as `/table`, `/table/color`, `/quiz`, and `/quiz/:code` are safe to open directly or refresh. Static assets remain emitted from Vite's `public/` and built asset paths. No service worker is installed because offline behavior is not implemented or tested.
+
+## Accessibility and contribution checks
+
+Playwright runs axe checks on core routes and verifies responsive page overflow. Before a release, also manually check complete keyboard navigation, focus return from language popovers, visible focus, screen-reader labels and live messages, reduced-motion behavior, and colour-independent quiz states.
+
+Keep generated changes focused. Do not commit a language-data update or snapshot change until it has been reviewed with the commands above. Pull requests should include tests for behavioural changes and must not weaken TypeScript, lint, or validation rules simply to make CI pass.
 
 ## License
 
-This project is released under the [Apache 2.0 license](LICENSE).
-
-```text
-  Copyright 2025 SkyEye_FAST
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-```
+Copyright 2025 SkyEye_FAST. Licensed under the [Apache License 2.0](LICENSE).

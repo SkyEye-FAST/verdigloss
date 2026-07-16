@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    ApplicationErrorBoundary: typeof import('./src/components/ApplicationErrorBoundary.vue')['default']
     ApplicationShell: typeof import('./src/components/ApplicationShell.vue')['default']
     ColorIcon: typeof import('./src/components/Extra/ColorTable/ColorIcon.vue')['default']
     ColorPreview: typeof import('./src/components/Extra/ColorTable/ColorPreview.vue')['default']
@@ -26,7 +27,6 @@ declare module 'vue' {
     IMaterialSymbolsDarkMode: typeof import('~icons/material-symbols/dark-mode')['default']
     IMaterialSymbolsDownload: typeof import('~icons/material-symbols/download')['default']
     IMaterialSymbolsExpandMore: typeof import('~icons/material-symbols/expand-more')['default']
-    IMaterialSymbolsFontDownloadOutline: typeof import('~icons/material-symbols/font-download-outline')['default']
     IMaterialSymbolsKey: typeof import('~icons/material-symbols/key')['default']
     IMaterialSymbolsLanguage: typeof import('~icons/material-symbols/language')['default']
     IMaterialSymbolsLightMode: typeof import('~icons/material-symbols/light-mode')['default']
@@ -38,7 +38,6 @@ declare module 'vue' {
     IMaterialSymbolsStar: typeof import('~icons/material-symbols/star')['default']
     IMaterialSymbolsStarHalf: typeof import('~icons/material-symbols/star-half')['default']
     IMaterialSymbolsStars: typeof import('~icons/material-symbols/stars')['default']
-    IMaterialSymbolsTable: typeof import('~icons/material-symbols/table')['default']
     IMaterialSymbolsTableViewOutline: typeof import('~icons/material-symbols/table-view-outline')['default']
     IMaterialSymbolsTimer: typeof import('~icons/material-symbols/timer')['default']
     LanguageSelector: typeof import('./src/components/Query/LanguageSelector.vue')['default']

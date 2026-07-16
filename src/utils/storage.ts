@@ -77,7 +77,8 @@ export function readLanguageList(
     parse(raw) {
       try {
         const parsed: unknown = JSON.parse(raw)
-        if (!Array.isArray(parsed) || !parsed.every((item) => typeof item === 'string')) return undefined
+        if (!Array.isArray(parsed) || !parsed.every((item) => typeof item === 'string'))
+          return undefined
         const filtered = parsed.filter((item): item is LanguageCode =>
           (allowedLanguages as readonly string[]).includes(item),
         )
@@ -89,7 +90,11 @@ export function readLanguageList(
   })
 }
 
-export function readBooleanPreference(key: string, fallback: boolean, storage = browserStorage()): boolean {
+export function readBooleanPreference(
+  key: string,
+  fallback: boolean,
+  storage = browserStorage(),
+): boolean {
   return readStoredValue({
     key,
     fallback,
@@ -117,7 +122,11 @@ export function readStringPreference(key: string, fallback: string): string {
   })
 }
 
-export function writeStringPreference(key: string, value: string, storage = browserStorage()): boolean {
+export function writeStringPreference(
+  key: string,
+  value: string,
+  storage = browserStorage(),
+): boolean {
   if (!storage) return false
   try {
     storage.setItem(key, value)

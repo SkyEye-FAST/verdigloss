@@ -3,6 +3,11 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": "11.10.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
@@ -11,9 +16,18 @@
     "type-check": "vue-tsc --build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --fix",
-    "format": "prettier --write src/",
-    "generate-id-mapping": "node scripts/generate-id-mapping.js"
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:generated": "prettier --write src/assets/data/quiz-id-map.json",
+    "generate-id-mapping": "node scripts/generate-id-mapping.js",
+    "generate-data": "pnpm generate-id-mapping",
+    "validate-data": "node scripts/validate-generated-data.js",
+    "check-generated": "pnpm validate-data",
+    "bundle:check": "node scripts/check-bundle-budget.js"
   },
   "dependencies": {
     "@vueuse/core": "^14.3.0",
@@ -23,10 +37,12 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.0",
     "@iconify-json/fa6-brands": "^1.2.6",
     "@iconify-json/material-symbols": "^1.2.84",
     "@iconify/vue": "^5.0.1",
     "@intlify/unplugin-vue-i18n": "^11.2.4",
+    "@playwright/test": "1.57.0",
     "@tsconfig/node22": "^22.0.5",
     "@types/intl": "^1.2.2",
     "@types/node": "^26.1.1",

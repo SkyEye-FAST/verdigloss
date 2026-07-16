@@ -11,7 +11,13 @@ export function filterTranslationKeys(
 ) {
   const normalized = query.trim().toLocaleLowerCase()
   if (!normalized) return keys
-  return keys.filter((key) => key.toLocaleLowerCase().includes(normalized) || languages.some((language) => dictionaries[language]?.[key]?.toLocaleLowerCase().includes(normalized)))
+  return keys.filter(
+    (key) =>
+      key.toLocaleLowerCase().includes(normalized) ||
+      languages.some((language) =>
+        dictionaries[language]?.[key]?.toLocaleLowerCase().includes(normalized),
+      ),
+  )
 }
 
 export function clampPage(currentPage: number, totalItems: number, pageSize = TABLE_PAGE_SIZE) {

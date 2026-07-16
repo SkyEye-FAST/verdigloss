@@ -15,8 +15,14 @@ import {
 describe('quiz-code integrity', () => {
   it('generates deterministic mappings without losing English keys', async () => {
     const keys = ['z.key', 'a.key', 'm.key']
-    const first = buildQuizIdMap(keys, (key) => ({ 'a.key': 'AAAAAAA', 'm.key': 'BBBBBBB', 'z.key': 'CCCCCCC' })[key] as string)
-    const second = buildQuizIdMap([...keys].reverse(), (key) => ({ 'a.key': 'AAAAAAA', 'm.key': 'BBBBBBB', 'z.key': 'CCCCCCC' })[key] as string)
+    const first = buildQuizIdMap(
+      keys,
+      (key) => ({ 'a.key': 'AAAAAAA', 'm.key': 'BBBBBBB', 'z.key': 'CCCCCCC' })[key] as string,
+    )
+    const second = buildQuizIdMap(
+      [...keys].reverse(),
+      (key) => ({ 'a.key': 'AAAAAAA', 'm.key': 'BBBBBBB', 'z.key': 'CCCCCCC' })[key] as string,
+    )
     expect(first).toEqual(second)
     const english = await loadLanguage('en_us')
     expect(Object.keys(generatedIdData.ids)).toHaveLength(Object.keys(english).length)
@@ -24,7 +30,9 @@ describe('quiz-code integrity', () => {
   })
 
   it('fails generation clearly on an ID collision', () => {
-    expect(() => buildQuizIdMap(['first', 'second'], () => 'AAAAAAA')).toThrow(QuizIdMapInvariantError)
+    expect(() => buildQuizIdMap(['first', 'second'], () => 'AAAAAAA')).toThrow(
+      QuizIdMapInvariantError,
+    )
   })
 
   it('round-trips versioned quiz codes', () => {
@@ -40,19 +48,40 @@ describe('quiz-code integrity', () => {
 
   it('rejects malformed, unknown, duplicate, and unsupported codes', () => {
     const map = { AAAAAAA: 'first' }
-    expect(decodeQuizCode(undefined, map, {})).toEqual({ ok: false, error: { kind: 'missing-code' } })
-    expect(decodeQuizCode('v1.BAD', map, {})).toMatchObject({ ok: false, error: { kind: 'malformed-code' } })
-    expect(decodeQuizCode('v1.BBBBBBB', map, {})).toMatchObject({ ok: false, error: { kind: 'unknown-id', id: 'BBBBBBB' } })
-    expect(decodeQuizCode('v1.AAAAAAA.AAAAAAA', map, {})).toMatchObject({ ok: false, error: { kind: 'duplicate-id' } })
-    expect(decodeQuizCode('v2.AAAAAAA', map, {})).toEqual({ ok: false, error: { kind: 'unsupported-version', version: 'v2' } })
+    expect(decodeQuizCode(undefined, map, {})).toEqual({
+      ok: false,
+      error: { kind: 'missing-code' },
+    })
+    expect(decodeQuizCode('v1.BAD', map, {})).toMatchObject({
+      ok: false,
+      error: { kind: 'malformed-code' },
+    })
+    expect(decodeQuizCode('v1.BBBBBBB', map, {})).toMatchObject({
+      ok: false,
+      error: { kind: 'unknown-id', id: 'BBBBBBB' },
+    })
+    expect(decodeQuizCode('v1.AAAAAAA.AAAAAAA', map, {})).toMatchObject({
+      ok: false,
+      error: { kind: 'duplicate-id' },
+    })
+    expect(decodeQuizCode('v2.AAAAAAA', map, {})).toEqual({
+      ok: false,
+      error: { kind: 'unsupported-version', version: 'v2' },
+    })
   })
 
   it('isolates and preserves legacy 30-character parsing', () => {
     const ids = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF', 'GGG', 'HHH', 'III', 'JJJ']
     const legacyMap = Object.fromEntries(ids.map((id, index) => [id, `key-${index}`]))
     const code = ids.join('')
-    expect(decodeLegacyQuizCode(code, legacyMap)).toMatchObject({ ok: true, value: { version: 'legacy', keys: ids.map((_, index) => `key-${index}`) } })
-    expect(decodeLegacyQuizCode(code.slice(1), legacyMap)).toMatchObject({ ok: false, error: { kind: 'malformed-code' } })
+    expect(decodeLegacyQuizCode(code, legacyMap)).toMatchObject({
+      ok: true,
+      value: { version: 'legacy', keys: ids.map((_, index) => `key-${index}`) },
+    })
+    expect(decodeLegacyQuizCode(code.slice(1), legacyMap)).toMatchObject({
+      ok: false,
+      error: { kind: 'malformed-code' },
+    })
     expect(Object.keys(legacyIdMap)).toHaveLength(2336)
   })
 })

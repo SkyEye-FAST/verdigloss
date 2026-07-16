@@ -1,4 +1,7 @@
-export function downloadBlob(blob: Blob, filename: string): { ok: true } | { ok: false; error: Error } {
+export function downloadBlob(
+  blob: Blob,
+  filename: string,
+): { ok: true } | { ok: false; error: Error } {
   try {
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
@@ -10,5 +13,10 @@ export function downloadBlob(blob: Blob, filename: string): { ok: true } | { ok:
     anchor.remove()
     window.setTimeout(() => URL.revokeObjectURL(url), 0)
     return { ok: true }
-  } catch (cause) { return { ok: false, error: cause instanceof Error ? cause : new Error('Browser download failed') } }
+  } catch (cause) {
+    return {
+      ok: false,
+      error: cause instanceof Error ? cause : new Error('Browser download failed'),
+    }
+  }
 }

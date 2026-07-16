@@ -26,8 +26,15 @@ describe('quiz business logic', () => {
   })
 
   it('filters eligible translations and reports insufficient selected questions', () => {
-    expect(buildEligibleQuestionPool('zh_cn', files, map).map((question) => question.key)).toEqual(['one', 'two'])
-    expect(getQuizLanguageAvailability('zh_cn', files, map, 3)).toEqual({ language: 'zh_cn', eligibleCount: 2, available: false })
+    expect(buildEligibleQuestionPool('zh_cn', files, map).map((question) => question.key)).toEqual([
+      'one',
+      'two',
+    ])
+    expect(getQuizLanguageAvailability('zh_cn', files, map, 3)).toEqual({
+      language: 'zh_cn',
+      eligibleCount: 2,
+      available: false,
+    })
     expect(buildQuizQuestions(['one', 'same', 'missing'], 'zh_cn', files, map, 3)).toEqual({
       ok: false,
       error: { kind: 'too-few-questions', language: 'zh_cn', eligibleCount: 1, requiredCount: 3 },
@@ -35,10 +42,26 @@ describe('quiz business logic', () => {
   })
 
   it('consumes duplicate characters exactly once and supports grapheme segmentation and hints', () => {
-    expect(matchCharacters('abc', 'abc').map((match) => match.state)).toEqual(['correct', 'correct', 'correct'])
-    expect(matchCharacters('abc', 'xyz').map((match) => match.state)).toEqual(['absent', 'absent', 'absent'])
-    expect(matchCharacters('aab', 'aaa').map((match) => match.state)).toEqual(['correct', 'correct', 'absent'])
-    expect(matchCharacters('aab', 'baa').map((match) => match.state)).toEqual(['present', 'correct', 'present'])
+    expect(matchCharacters('abc', 'abc').map((match) => match.state)).toEqual([
+      'correct',
+      'correct',
+      'correct',
+    ])
+    expect(matchCharacters('abc', 'xyz').map((match) => match.state)).toEqual([
+      'absent',
+      'absent',
+      'absent',
+    ])
+    expect(matchCharacters('aab', 'aaa').map((match) => match.state)).toEqual([
+      'correct',
+      'correct',
+      'absent',
+    ])
+    expect(matchCharacters('aab', 'baa').map((match) => match.state)).toEqual([
+      'present',
+      'correct',
+      'present',
+    ])
     expect(matchCharacters('你好', '您好', new Set([1]))).toEqual([
       { char: '您', state: 'absent' },
       { char: '好', state: 'hinted-correct' },
@@ -48,10 +71,22 @@ describe('quiz business logic', () => {
   })
 
   it('scores from stored outcomes with rounding and zero skip or timeout scores', () => {
-    expect(calculateQuestionScore({ completion: 'correct', hintCount: 1, segmentCount: 3 })).toEqual({ completion: 'correct', score: 6.67 })
-    expect(calculateQuestionScore({ completion: 'skipped', hintCount: 0, segmentCount: 2 }).score).toBe(0)
-    expect(calculateQuestionScore({ completion: 'timed-out', hintCount: 0, segmentCount: 2 }).score).toBe(0)
-    expect(aggregateScores([{ completion: 'correct', score: 6.67 }, { completion: 'skipped', score: 0 }, { completion: 'correct', score: 3.33 }])).toBe(10)
+    expect(
+      calculateQuestionScore({ completion: 'correct', hintCount: 1, segmentCount: 3 }),
+    ).toEqual({ completion: 'correct', score: 6.67 })
+    expect(
+      calculateQuestionScore({ completion: 'skipped', hintCount: 0, segmentCount: 2 }).score,
+    ).toBe(0)
+    expect(
+      calculateQuestionScore({ completion: 'timed-out', hintCount: 0, segmentCount: 2 }).score,
+    ).toBe(0)
+    expect(
+      aggregateScores([
+        { completion: 'correct', score: 6.67 },
+        { completion: 'skipped', score: 0 },
+        { completion: 'correct', score: 3.33 },
+      ]),
+    ).toBe(10)
   })
 
   it('uses deadline-based timer calculations despite delayed callbacks', () => {
@@ -62,9 +97,18 @@ describe('quiz business logic', () => {
   })
 
   it('parses valid and invalid route query values explicitly', () => {
-    expect(parseTargetLanguage('zh_cn', ['zh_cn'] as LanguageCode[], 'zh_cn')).toEqual({ ok: true, value: 'zh_cn' })
-    expect(parseTargetLanguage('xx_yy', ['zh_cn'] as LanguageCode[], 'zh_cn')).toEqual({ ok: false, error: { kind: 'unsupported-language', language: 'xx_yy' } })
+    expect(parseTargetLanguage('zh_cn', ['zh_cn'] as LanguageCode[], 'zh_cn')).toEqual({
+      ok: true,
+      value: 'zh_cn',
+    })
+    expect(parseTargetLanguage('xx_yy', ['zh_cn'] as LanguageCode[], 'zh_cn')).toEqual({
+      ok: false,
+      error: { kind: 'unsupported-language', language: 'xx_yy' },
+    })
     expect(parseTimerMode('1')).toEqual({ ok: true, value: 'timed' })
-    expect(parseTimerMode('2')).toEqual({ ok: false, error: { kind: 'invalid-timer-mode', value: '2' } })
+    expect(parseTimerMode('2')).toEqual({
+      ok: false,
+      error: { kind: 'invalid-timer-mode', value: '2' },
+    })
   })
 })

@@ -27,13 +27,25 @@
         :show-info="true"
       />
 
-      <div class="table-wrapper">
+      <div
+        class="table-wrapper"
+        role="region"
+        tabindex="0"
+        aria-label="Translation comparison table; scroll horizontally to see all languages"
+      >
         <table>
-          <caption>Filtered Minecraft translation comparison</caption>
+          <caption>
+            Filtered Minecraft translation comparison
+          </caption>
           <thead>
             <tr v-memo="[displayLanguages, useSansFont]">
               <th scope="col" class="key-column">keys</th>
-              <th v-for="lang in displayLanguages" :key="lang" scope="col" :class="{ selected: selectedLanguages.includes(lang) }">
+              <th
+                v-for="lang in displayLanguages"
+                :key="lang"
+                scope="col"
+                :class="{ selected: selectedLanguages.includes(lang) }"
+              >
                 {{ lang }}
               </th>
             </tr>
@@ -56,6 +68,9 @@
           </tbody>
         </table>
       </div>
+      <p v-if="filteredTableData.length === 0" class="empty-results" role="status">
+        No translation keys match the current filters.
+      </p>
       <p class="export-feedback" aria-live="polite">{{ exportFeedback }}</p>
 
       <Pagination
@@ -75,7 +90,12 @@ import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useDownload } from '@/composables/useDownload'
 import { type LanguageCode, languageList } from '@/data/languages'
-import { clampPage, filterTranslationKeys, pageKeys, TABLE_PAGE_SIZE } from '@/features/table/table-data'
+import {
+  clampPage,
+  filterTranslationKeys,
+  pageKeys,
+  TABLE_PAGE_SIZE,
+} from '@/features/table/table-data'
 import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import { readBooleanPreference, readLanguageList, writeStoredValue } from '@/utils/storage'
 
@@ -126,14 +146,29 @@ const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang))
 })
 
-const filteredKeys = computed(() => filterTranslationKeys(orderedKeys.value, translations.value, displayLanguages.value, searchQuery.value))
+const filteredKeys = computed(() =>
+  filterTranslationKeys(
+    orderedKeys.value,
+    translations.value,
+    displayLanguages.value,
+    searchQuery.value,
+  ),
+)
 const filteredTableData = computed(() => filteredKeys.value.map(createRow))
 
 const currentPage = ref(1)
 const itemsPerPage = TABLE_PAGE_SIZE
 
 function createRow(key: string): TableRow {
-  return { key, ...Object.fromEntries(displayLanguages.value.map((language) => [language, translations.value[language]?.[key] ?? '?'])) }
+  return {
+    key,
+    ...Object.fromEntries(
+      displayLanguages.value.map((language) => [
+        language,
+        translations.value[language]?.[key] ?? '?',
+      ]),
+    ),
+  }
 }
 
 const displayData = computed(() => {
@@ -143,7 +178,11 @@ const displayData = computed(() => {
   return pageKeys(filteredKeys.value, currentPage.value, itemsPerPage).map(createRow)
 })
 
-watch([filteredKeys, usePagination], () => { currentPage.value = usePagination.value ? clampPage(currentPage.value, filteredKeys.value.length, itemsPerPage) : 1 })
+watch([filteredKeys, usePagination], () => {
+  currentPage.value = usePagination.value
+    ? clampPage(currentPage.value, filteredKeys.value.length, itemsPerPage)
+    : 1
+})
 
 const {
   downloadTsv,
@@ -398,17 +437,115 @@ body.dark-mode table tr:hover td.key-column {
 }
 
 /* Dense comparison stays a table; this wrapper owns horizontal touch scrolling. */
-.translation-table { min-height: calc(100dvh - 64px); padding: 0 0 var(--space-4); background: var(--page); }
-.table-wrapper { position: relative; width: min(100%, var(--content-max)); margin: 0 auto; overflow: auto; overscroll-behavior-inline: contain; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); }
-.table-wrapper::after { content: ""; position: sticky; right: 0; display: block; width: 16px; height: 1px; box-shadow: -12px 0 12px -12px rgb(0 0 0 / 45%); pointer-events: none; }
-.translation-table table { width: max-content; min-width: 100%; margin: 0; border: 0; border-collapse: separate; border-spacing: 0; background: var(--surface); box-shadow: none; color: var(--text); font-size: .875rem; }
-.translation-table caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
-.translation-table table td, .translation-table table th { min-width: 12rem; max-width: 22rem; padding: .65rem .75rem; border: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: visible; text-align: start; text-overflow: initial; white-space: normal; }
-.translation-table table thead th { position: sticky; top: 64px; z-index: 2; background: var(--surface-subtle); color: var(--text); box-shadow: 0 1px var(--border); }
-.translation-table table .key-column { position: sticky; left: 0; z-index: 1; min-width: 15rem; max-width: 15rem; background: var(--surface-raised); color: var(--text-secondary); font-family: var(--monospace-font); font-size: .78rem; font-weight: 700; }
-.translation-table table thead .key-column { z-index: 3; }
-.translation-table tbody tr:hover td, .translation-table tbody tr:hover .key-column { background: var(--accent-soft); }
-.translation-table thead th.selected { color: var(--accent-strong); box-shadow: inset 0 -3px var(--accent); }
-.export-feedback { min-height: 1.5rem; margin: var(--space-3) auto 0; color: var(--muted); font-size: .875rem; }
-@media (max-width: 767px) { .translation-table table thead th { top: 56px; } .translation-table table td, .translation-table table th { min-width: 10rem; } .translation-table table .key-column { min-width: 10.5rem; max-width: 10.5rem; } }
+.translation-table {
+  min-height: calc(100dvh - 64px);
+  padding: 0 0 var(--space-4);
+  background: var(--page);
+}
+.table-wrapper {
+  position: relative;
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  overflow: auto;
+  overscroll-behavior-inline: contain;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.table-wrapper::after {
+  content: '';
+  position: sticky;
+  right: 0;
+  display: block;
+  width: 16px;
+  height: 1px;
+  box-shadow: -12px 0 12px -12px rgb(0 0 0 / 45%);
+  pointer-events: none;
+}
+.translation-table table {
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  box-shadow: none;
+  color: var(--text);
+  font-size: 0.875rem;
+}
+.translation-table caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.translation-table table td,
+.translation-table table th {
+  min-width: 12rem;
+  max-width: 22rem;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: visible;
+  text-align: start;
+  text-overflow: initial;
+  white-space: normal;
+}
+.translation-table table thead th {
+  position: sticky;
+  top: 64px;
+  z-index: 2;
+  background: var(--surface-subtle);
+  color: var(--text);
+  box-shadow: 0 1px var(--border);
+}
+.translation-table table .key-column {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 15rem;
+  max-width: 15rem;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-family: var(--monospace-font);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.translation-table table thead .key-column {
+  z-index: 3;
+}
+.translation-table tbody tr:hover td,
+.translation-table tbody tr:hover .key-column {
+  background: var(--accent-soft);
+}
+.translation-table thead th.selected {
+  color: var(--accent-strong);
+  box-shadow: inset 0 -3px var(--accent);
+}
+.export-feedback {
+  min-height: 1.5rem;
+  margin: var(--space-3) auto 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.empty-results {
+  margin: var(--space-4) auto 0;
+  color: var(--muted);
+}
+@media (max-width: 767px) {
+  .translation-table table thead th {
+    top: 56px;
+  }
+  .translation-table table td,
+  .translation-table table th {
+    min-width: 10rem;
+  }
+  .translation-table table .key-column {
+    min-width: 10.5rem;
+    max-width: 10.5rem;
+  }
+}
 </style>

@@ -2,13 +2,21 @@ import type { LanguageFile } from '@/services/translation-data'
 import type { LanguageCode } from '@/data/languages'
 
 export type QueryMode = 'key' | 'source' | 'translation'
-export interface SearchResult { key: string; matchedValue: string; mode: QueryMode; language: LanguageCode }
+export interface SearchResult {
+  key: string
+  matchedValue: string
+  mode: QueryMode
+  language: LanguageCode
+}
 export const normalizeSearchText = (value: string) => value.trim().toLocaleLowerCase()
 
 export class SearchIndex {
   private readonly keys: readonly [string, string][]
   private readonly values: readonly [string, string][]
-  constructor(public readonly language: LanguageCode, data: LanguageFile) {
+  constructor(
+    public readonly language: LanguageCode,
+    data: LanguageFile,
+  ) {
     this.keys = Object.keys(data).map((key) => [key, normalizeSearchText(key)])
     this.values = Object.entries(data).map(([key, value]) => [key, normalizeSearchText(value)])
   }
@@ -16,7 +24,15 @@ export class SearchIndex {
     const normalized = normalizeSearchText(query)
     if (!normalized) return []
     const source = mode === 'key' ? this.keys : this.values
-    return source.filter(([, value]) => value.includes(normalized)).slice(0, limit).map(([key]) => ({ key, matchedValue: mode === 'key' ? key : '', mode, language: this.language }))
+    return source
+      .filter(([, value]) => value.includes(normalized))
+      .slice(0, limit)
+      .map(([key]) => ({
+        key,
+        matchedValue: mode === 'key' ? key : '',
+        mode,
+        language: this.language,
+      }))
   }
 }
 
@@ -29,4 +45,6 @@ export function getSearchIndex(language: LanguageCode, data: LanguageFile) {
   return index
 }
 
-export function clearSearchIndexesForTests() { indexes.clear() }
+export function clearSearchIndexesForTests() {
+  indexes.clear()
+}

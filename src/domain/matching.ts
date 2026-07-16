@@ -1,12 +1,7 @@
 import { getSegmentedText } from '@/utils/text'
 
 export type CharacterState =
-  | 'empty'
-  | 'correct'
-  | 'present'
-  | 'absent'
-  | 'hinted'
-  | 'hinted-correct'
+  'empty' | 'correct' | 'present' | 'absent' | 'hinted' | 'hinted-correct'
 
 export interface CharacterMatch {
   char: string
@@ -29,10 +24,7 @@ export function matchCharacters(
     if (entered[index] === expectedCharacter) {
       states[index] = 'correct'
     } else {
-      unmatchedExpected.set(
-        expectedCharacter,
-        (unmatchedExpected.get(expectedCharacter) ?? 0) + 1,
-      )
+      unmatchedExpected.set(expectedCharacter, (unmatchedExpected.get(expectedCharacter) ?? 0) + 1)
     }
   }
 

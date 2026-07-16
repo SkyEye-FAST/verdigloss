@@ -13,16 +13,30 @@ const stored = readStoredValue({
     try {
       const value: unknown = JSON.parse(raw)
       return value === 'system' || value === 'light' || value === 'dark' ? value : undefined
-    } catch { return undefined }
+    } catch {
+      return undefined
+    }
   },
 })
 const mode = ref<DarkModePreference>(stored)
-const isDarkMode = computed(() => mode.value === 'dark' || (mode.value === 'system' && preferredDark.value))
+const isDarkMode = computed(
+  () => mode.value === 'dark' || (mode.value === 'system' && preferredDark.value),
+)
 
-function applyDarkMode() { document.body.classList.toggle('dark-mode', isDarkMode.value) }
+function applyDarkMode() {
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
+}
 watch([mode, preferredDark], applyDarkMode, { immediate: true })
 
 export function useDarkMode() {
-  const setMode = (value: DarkModePreference) => { mode.value = value; writeStoredValue('darkMode', value) }
-  return { mode, isDarkMode, setMode, toggleDarkMode: () => setMode(isDarkMode.value ? 'light' : 'dark') }
+  const setMode = (value: DarkModePreference) => {
+    mode.value = value
+    writeStoredValue('darkMode', value)
+  }
+  return {
+    mode,
+    isDarkMode,
+    setMode,
+    toggleDarkMode: () => setMode(isDarkMode.value ? 'light' : 'dark'),
+  }
 }

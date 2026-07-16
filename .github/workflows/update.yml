@@ -1,46 +1,81 @@
-name: Update language files
-permissions:
-  contents: write
+name: Update language data
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '30 16 * * *'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  build:
+  update:
+    name: Update language data and open a pull request
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Checkout
+      - name: Check out source and current language data
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
+          fetch-depth: 0
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Setup pnpm
+      - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 11.10.0
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Update language files
-        run: |
-          git submodule sync
-          git submodule update --remote --recursive --force
-
-      - name: Generate ID mapping
-        run: pnpm generate-id-mapping
-
-      - name: Prettify code
-        run: pnpm exec prettier --write **/*.{js,ts,css,json}
-
-      - name: Commit
-        uses: EndBug/add-and-commit@v9
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          default_author: github_actions
-          message: 'chore: update language files'
+          node-version: 24.9.0
+          cache: pnpm
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update the language-data submodule deliberately
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --remote --recursive
+
+      - name: Regenerate derived data
+        run: pnpm generate-data
+
+      - name: Format generated data only
+        run: pnpm format:generated
+
+      - name: Validate generated translation data
+        run: pnpm validate-data
+
+      - name: Check the release candidate
+        run: |
+          pnpm format:check
+          pnpm lint
+          pnpm type-check
+          pnpm test
+          pnpm build
+          pnpm bundle:check
+
+      - name: Install Chromium for browser tests
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run essential end-to-end tests
+        run: pnpm test:e2e
+
+      - name: Summarize the update
+        run: node scripts/write-language-update-summary.js .github/language-update-pr.md
+
+      - name: Create update pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore(data): update Minecraft language data'
+          branch: automation/language-data-update
+          delete-branch: true
+          title: 'chore(data): update Minecraft language data'
+          body-path: .github/language-update-pr.md
+          labels: automated, language-data
+          add-paths: |
+            src/assets/mc_lang
+            src/assets/data/quiz-id-map.json

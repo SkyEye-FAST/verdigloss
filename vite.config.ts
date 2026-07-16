@@ -12,6 +12,14 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 
 export default defineConfig({
+  build: {
+    manifest: true,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => (id.includes('/node_modules/xlsx/') ? 'xlsx' : undefined),
+      },
+    },
+  },
   plugins: [
     vue(),
     vueDevTools(),

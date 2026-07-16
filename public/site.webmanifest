@@ -1,0 +1,12 @@
+{
+  "name": "Verdigloss",
+  "short_name": "Verdigloss",
+  "description": "Search, compare, export, and practise standard Minecraft translations.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#f8fafc",
+  "theme_color": "#f8fafc",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

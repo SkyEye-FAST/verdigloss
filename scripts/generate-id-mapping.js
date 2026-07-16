@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const BASE62 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-const QUIZ_CODE_VERSION = 'v1'
-const QUIZ_ID_WIDTH = 7
+export const QUIZ_CODE_VERSION = 'v1'
+export const QUIZ_ID_WIDTH = 7
 
 export function sha256ToBase62(input, length = QUIZ_ID_WIDTH) {
   const hash = crypto.createHash('sha256').update(input).digest()
@@ -44,9 +44,10 @@ export function buildIdMap(keys, createId = sha256ToBase62) {
   )
 }
 
-async function generateIdMap() {
+export async function generateIdMap(
+  outputPath = path.join(__dirname, '..', 'src', 'assets', 'data', 'quiz-id-map.json'),
+) {
   const englishPath = path.join(__dirname, '..', 'src', 'assets', 'mc_lang', 'valid', 'en_us.json')
-  const outputPath = path.join(__dirname, '..', 'src', 'assets', 'data', 'quiz-id-map.json')
   const english = JSON.parse(await fs.readFile(englishPath, 'utf8'))
   const ids = buildIdMap(Object.keys(english))
   const payload = { version: QUIZ_CODE_VERSION, idWidth: QUIZ_ID_WIDTH, ids }
@@ -56,7 +57,9 @@ async function generateIdMap() {
   )
 }
 
-generateIdMap().catch((error) => {
-  console.error(`Unable to generate quiz ID mapping: ${error.message}`)
-  process.exitCode = 1
-})
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  generateIdMap().catch((error) => {
+    console.error(`Unable to generate quiz ID mapping: ${error.message}`)
+    process.exitCode = 1
+  })
+}

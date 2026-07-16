@@ -4,8 +4,9 @@ export type ShareError = { kind: 'unavailable' | 'rejected'; cause?: unknown }
 
 export async function copyText(
   text: string,
-  clipboard: Pick<Clipboard, 'writeText'> | undefined =
-    typeof navigator === 'undefined' ? undefined : navigator.clipboard,
+  clipboard: Pick<Clipboard, 'writeText'> | undefined = typeof navigator === 'undefined'
+    ? undefined
+    : navigator.clipboard,
 ): Promise<Result<void, ShareError>> {
   if (!clipboard?.writeText) return err({ kind: 'unavailable' })
   try {
@@ -18,8 +19,9 @@ export async function copyText(
 
 export async function shareContent(
   data: ShareData,
-  share: ((data: ShareData) => Promise<void>) | undefined =
-    typeof navigator === 'undefined' ? undefined : navigator.share?.bind(navigator),
+  share: ((data: ShareData) => Promise<void>) | undefined = typeof navigator === 'undefined'
+    ? undefined
+    : navigator.share?.bind(navigator),
 ): Promise<Result<void, ShareError>> {
   if (!share) return err({ kind: 'unavailable' })
   try {

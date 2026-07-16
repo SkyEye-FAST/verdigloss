@@ -6,7 +6,10 @@
     <div class="quiz-container">
       <p v-if="routeError" role="alert" class="quiz-route-error">{{ routeError }}</p>
       <div class="quiz-info" v-show="!showSummary && !routeError">
-        <p class="quiz-progress" aria-live="polite">Question {{ currentIndex + 1 }} of {{ questions.length }}. {{ isTimerMode ? `${formatTime(remainingTime)} remaining.` : 'Untimed quiz.' }}</p>
+        <p class="quiz-progress" aria-live="polite">
+          Question {{ currentIndex + 1 }} of {{ questions.length }}.
+          {{ isTimerMode ? `${formatTime(remainingTime)} remaining.` : 'Untimed quiz.' }}
+        </p>
         <div class="info">
           <div v-if="isTimerMode" class="timer">
             {{ formatTime(remainingTime) }}
@@ -25,7 +28,12 @@
             <span>{{ currentQuestion?.rating.toFixed(2) }}</span>
           </div>
         </div>
-        <div class="quiz-boxes" :class="queryLang" aria-label="Answer character states: green correct, yellow present, red hint, blue hinted correct">
+        <div
+          class="quiz-boxes"
+          :class="queryLang"
+          role="group"
+          aria-label="Answer character states: green correct, yellow present, red hint, blue hinted correct"
+        >
           <div
             v-for="(box, index) in boxes"
             :key="index"
@@ -74,36 +82,64 @@
           <i-material-symbols-stars style="font-size: smaller" />
           <span class="summary-label">{{ totalScore.toFixed(2) }} pts</span>
         </div>
-        <div class="quiz-summary-table-wrapper"><table class="quiz-summary-table">
-          <caption class="sr-only">Question results</caption>
-          <thead :class="currentLang.toLowerCase()">
-            <tr>
-              <th scope="col">{{ $t('quiz.source') }}</th>
-              <th scope="col">{{ $t('quiz.translation') }}</th>
-              <th scope="col">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="question in questions" :key="question.key">
-              <td class="en-us">{{ question.source }}</td>
-              <td :class="currentLang.toLowerCase()">
-                <span
-                  v-for="(char, i) in question.translationChars"
-                  :key="i"
-                  class="transl"
-                  :class="[questionResults[question.key]?.states[i] || 'empty', { dark: isDarkMode }]"
-                  >{{ char }}</span
-                >
-              </td>
-              <td>{{ questionResults[question.key]?.completion || 'unanswered' }}</td>
-            </tr>
-          </tbody>
-        </table></div>
+        <div
+          class="quiz-summary-table-wrapper"
+          role="region"
+          tabindex="0"
+          aria-label="Quiz results table; scroll horizontally to see all columns"
+        >
+          <table class="quiz-summary-table">
+            <caption class="sr-only">
+              Question results
+            </caption>
+            <thead :class="currentLang.toLowerCase()">
+              <tr>
+                <th scope="col">{{ $t('quiz.source') }}</th>
+                <th scope="col">{{ $t('quiz.translation') }}</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="question in questions" :key="question.key">
+                <td class="en-us">{{ question.source }}</td>
+                <td :class="currentLang.toLowerCase()">
+                  <span
+                    v-for="(char, i) in question.translationChars"
+                    :key="i"
+                    class="transl"
+                    :class="[
+                      questionResults[question.key]?.states[i] || 'empty',
+                      { dark: isDarkMode },
+                    ]"
+                    >{{ char }}</span
+                  >
+                </td>
+                <td>{{ questionResults[question.key]?.completion || 'unanswered' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div class="quiz-code-container">
           <div class="quiz-code">{{ quizCode }}</div>
           <span class="quiz-code-actions">
-            <button type="button" :aria-label="isCopied ? 'Quiz code copied' : 'Copy quiz code'" @click="copyCode"><i-material-symbols-check v-if="isCopied" aria-hidden="true" /><i-material-symbols-content-copy v-else aria-hidden="true" /></button>
-            <button v-if="canShare" type="button" aria-label="Share quiz result" @click="shareResult"><i-material-symbols-share aria-hidden="true" /></button>
+            <button
+              type="button"
+              :aria-label="isCopied ? 'Quiz code copied' : 'Copy quiz code'"
+              @click="copyCode"
+            >
+              <i-material-symbols-check
+                v-if="isCopied"
+                aria-hidden="true"
+              /><i-material-symbols-content-copy v-else aria-hidden="true" />
+            </button>
+            <button
+              v-if="canShare"
+              type="button"
+              aria-label="Share quiz result"
+              @click="shareResult"
+            >
+              <i-material-symbols-share aria-hidden="true" />
+            </button>
           </span>
         </div>
         <p class="quiz-feedback" aria-live="polite">{{ isCopied ? 'Quiz code copied.' : '' }}</p>
@@ -134,12 +170,24 @@ import { useDarkMode } from '@/composables/useDarkMode'
 import { useLocale } from '@/composables/useLocale'
 import { languageRegistry, type LanguageCode } from '@/data/languages'
 import { matchCharacters, type CharacterState } from '@/domain/matching'
-import { QUIZ_QUESTION_COUNT, buildEligibleQuestionPool, buildQuizQuestions, questionSegmentCount } from '@/domain/quiz'
+import {
+  QUIZ_QUESTION_COUNT,
+  buildEligibleQuestionPool,
+  buildQuizQuestions,
+  questionSegmentCount,
+} from '@/domain/quiz'
 import { decodeQuizCode, encodeQuizCode } from '@/domain/quiz-code'
 import { parseTargetLanguage, parseTimerMode, type TimerMode } from '@/domain/route'
 import { aggregateScores, calculateQuestionScore, type QuestionCompletion } from '@/domain/scoring'
 import { shuffle } from '@/domain/shuffle'
-import { createQuizTimer, elapsedMilliseconds, isTimerExpired, remainingSeconds, timerProgressPercent, type QuizTimer } from '@/domain/timer'
+import {
+  createQuizTimer,
+  elapsedMilliseconds,
+  isTimerExpired,
+  remainingSeconds,
+  timerProgressPercent,
+  type QuizTimer,
+} from '@/domain/timer'
 import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import { copyText, shareContent } from '@/utils/sharing'
 import { getSegmentedText } from '@/utils/text'
@@ -202,9 +250,16 @@ let timerInterval: number | null = null
 
 const remainingTime = computed(() => (timer.value ? remainingSeconds(timer.value, now.value) : 0))
 const usedTime = computed(() =>
-  timer.value ? Math.min(QUIZ_DURATION_SECONDS, Math.floor(elapsedMilliseconds(timer.value, now.value) / 1000)) : 0,
+  timer.value
+    ? Math.min(
+        QUIZ_DURATION_SECONDS,
+        Math.floor(elapsedMilliseconds(timer.value, now.value) / 1000),
+      )
+    : 0,
 )
-const progressWidth = computed(() => (timer.value ? timerProgressPercent(timer.value, now.value) : 0))
+const progressWidth = computed(() =>
+  timer.value ? timerProgressPercent(timer.value, now.value) : 0,
+)
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
@@ -236,8 +291,9 @@ const boxes = computed(() => getBoxes())
 const canHint = computed(
   () =>
     !showSummary.value &&
-    boxes.value.filter((box) => box.state !== 'correct' && box.state !== 'hinted' && box.state !== 'hinted-correct').length >
-      1,
+    boxes.value.filter(
+      (box) => box.state !== 'correct' && box.state !== 'hinted' && box.state !== 'hinted-correct',
+    ).length > 1,
 )
 const canSkip = computed(() => !showSummary.value && !canHint.value)
 const canShare = computed(() => typeof navigator !== 'undefined' && !!navigator.share)
@@ -250,7 +306,11 @@ const totalScore = computed(() => aggregateScores(Object.values(questionResults.
 const getBoxes = (): Box[] => {
   const cq = currentQuestion.value
   if (!cq) return []
-  return matchCharacters(cq.translation, inputText.value, new Set(hintsByQuestion.value[cq.key] ?? []))
+  return matchCharacters(
+    cq.translation,
+    inputText.value,
+    new Set(hintsByQuestion.value[cq.key] ?? []),
+  )
 }
 
 const onInput = () => {
@@ -289,8 +349,8 @@ const showHint = () => {
 
   const currentBoxes = boxes.value
 
-  const hintIndex = currentBoxes.findIndex((box) =>
-    box.state !== 'correct' && box.state !== 'hinted' && box.state !== 'hinted-correct',
+  const hintIndex = currentBoxes.findIndex(
+    (box) => box.state !== 'correct' && box.state !== 'hinted' && box.state !== 'hinted-correct',
   )
 
   if (hintIndex !== -1) {
@@ -378,7 +438,11 @@ const shareResult = async () => {
 }
 
 const restartQuiz = () => {
-  const eligible = buildEligibleQuestionPool(queryLang.value, languageFiles.value as Record<LanguageCode, LanguageFile>, quizIdData.ids)
+  const eligible = buildEligibleQuestionPool(
+    queryLang.value,
+    languageFiles.value as Record<LanguageCode, LanguageFile>,
+    quizIdData.ids,
+  )
   const code = encodeQuizCode(
     shuffle(eligible.map((question) => question.key)).slice(0, QUIZ_QUESTION_COUNT),
     quizIdData.ids,
@@ -417,11 +481,14 @@ const loadQuestions = async () => {
   routeError.value = null
   const decoded = decodeQuizCode(quizCode.value, quizIdData.ids, legacyQuizIdMap)
   if (!decoded.ok) {
-    routeError.value = 'This quiz code is missing, malformed, unsupported, or contains an unknown question.'
+    routeError.value =
+      'This quiz code is missing, malformed, unsupported, or contains an unknown question.'
     questions.value = []
     return
   }
-  const quizLanguages = languageRegistry.filter((language) => language.quiz.enabled).map((language) => language.code)
+  const quizLanguages = languageRegistry
+    .filter((language) => language.quiz.enabled)
+    .map((language) => language.code)
   const language = parseTargetLanguage(route.query.l, quizLanguages, 'zh_cn')
   const timerResult = parseTimerMode(route.query.t)
   if (!language.ok || !timerResult.ok) {
@@ -431,8 +498,16 @@ const loadQuestions = async () => {
   }
   queryLang.value = language.value
   timerMode.value = timerResult.value
-  languageFiles.value = { ...languageFiles.value, ...(await loadLanguages(['en_us', queryLang.value])) }
-  const selected = buildQuizQuestions(decoded.value.keys, queryLang.value, languageFiles.value as Record<LanguageCode, LanguageFile>, quizIdData.ids)
+  languageFiles.value = {
+    ...languageFiles.value,
+    ...(await loadLanguages(['en_us', queryLang.value])),
+  }
+  const selected = buildQuizQuestions(
+    decoded.value.keys,
+    queryLang.value,
+    languageFiles.value as Record<LanguageCode, LanguageFile>,
+    quizIdData.ids,
+  )
   if (!selected.ok) {
     routeError.value = `This valid code provides fewer than ${QUIZ_QUESTION_COUNT} usable questions for the selected language.`
     questions.value = []
@@ -440,7 +515,8 @@ const loadQuestions = async () => {
   }
   questions.value = shuffle(selected.value).map((question) => ({
     ...question,
-    rating: queryLang.value === 'zh_cn' ? ratingData[question.key as keyof typeof ratingData] : undefined,
+    rating:
+      queryLang.value === 'zh_cn' ? ratingData[question.key as keyof typeof ratingData] : undefined,
     translationChars: getSegmentedText(question.translation),
   }))
   startTimer()
@@ -643,7 +719,7 @@ onUnmounted(() => {
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  background: #5b9bd5 !important;
+  background: #1d5848 !important;
   color: white;
   text-decoration: none;
   transition: background-color 0.2s;
@@ -652,7 +728,7 @@ onUnmounted(() => {
 }
 
 .button:hover {
-  background: #4a8ac4 !important;
+  background: #174739 !important;
 }
 
 .quiz-code-container {
@@ -1082,20 +1158,179 @@ body.dark-mode .timer {
   }
 }
 
-.translation-quiz-sub { min-height: calc(100dvh - 64px); background: var(--page); }
-.quiz-container { width: min(100% - 2rem, 880px); min-height: calc(100dvh - 64px); margin: 0 auto; padding: clamp(1rem, 4vw, 3rem) 0; color: var(--text); }
-.quiz-info { width: 100%; }
-.quiz-progress { margin: 0 0 var(--space-4); color: var(--muted); font-size: .9rem; }
-.source { color: var(--text); font-size: clamp(1.8rem, 6vw, 4.2rem); overflow-wrap: anywhere; }
-.key { max-width: 100%; overflow-wrap: anywhere; color: var(--muted); font-size: clamp(.8rem, 2vw, 1.25rem); }
-.timer { color: var(--accent-strong); font-size: clamp(1.2rem, 3vw, 1.8rem); }
-.quiz-boxes { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 100%; margin-top: var(--space-5); }
-.translation-character { display: grid; place-items: center; width: clamp(2.7rem, 8vw, 5.25rem); height: clamp(2.7rem, 8vw, 5.25rem); margin: 0; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-subtle); color: var(--text); font-size: clamp(1.2rem, 4vw, 2.5rem); line-height: 1; }
-.translation-character.correct { background: var(--success); color: #fff; }.translation-character.present { background: var(--warning); color: #241a00; }.translation-character.hinted { background: var(--error); color: #fff; }.translation-character.hinted-correct { background: var(--info); color: #fff; }
-.quiz-input { width: min(100%, 42rem); min-height: var(--control-height); height: auto; margin-top: var(--space-6); padding: .65rem .8rem; border-color: var(--border-strong); background: var(--surface); color: var(--text); font-size: clamp(1rem, 3vw, 1.35rem); }
-.quiz-controls { width: min(100%, 42rem); height: auto; margin-top: var(--space-3); gap: var(--space-3); }.quiz-controls button { min-height: var(--control-height); border-color: var(--border-strong); background: var(--surface); color: var(--text); font-size: 1rem; }.quiz-controls button:hover { border-width: 2px !important; background: var(--accent-soft); }
-.quiz-summary { width: 100%; padding: clamp(1rem, 3vw, 2rem); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text); }.quiz-summary-table-wrapper { max-width: 100%; overflow: auto; overscroll-behavior: contain; }.quiz-summary-table { width: 100%; min-width: 560px; background: var(--surface); color: var(--text); }.quiz-summary-table tr td, .quiz-summary-table thead th { border-color: var(--border); }.quiz-summary-table tr:nth-child(odd), .quiz-summary-table tr:nth-child(even) { background: var(--surface); }.quiz-summary-table tr:nth-child(even) { background: var(--surface-subtle); }
-.quiz-code-container { white-space: normal; }.quiz-code-actions { display: inline-flex; gap: .25rem; }.quiz-code-actions button { display: grid; place-items: center; min-width: var(--control-height); min-height: var(--control-height); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }.quiz-feedback { min-height: 1.5rem; margin: .4rem 0 0; color: var(--success); }
-@media (max-width: 767px) { .quiz-container { width: min(100% - 1rem, 880px); min-height: auto; padding: var(--space-4) 0; } .quiz-summary { padding: var(--space-4); } }
-@media (max-height: 500px) and (orientation: landscape) { .quiz-container { min-height: auto; padding: var(--space-3) 0; } .translation-character { width: 2.5rem; height: 2.5rem; } }
+.translation-quiz-sub {
+  min-height: calc(100dvh - 64px);
+  background: var(--page);
+}
+.quiz-container {
+  width: min(100% - 2rem, 880px);
+  min-height: calc(100dvh - 64px);
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 3rem) 0;
+  color: var(--text);
+}
+.quiz-info {
+  width: 100%;
+}
+.quiz-progress {
+  margin: 0 0 var(--space-4);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.source {
+  color: var(--text);
+  font-size: clamp(1.8rem, 6vw, 4.2rem);
+  overflow-wrap: anywhere;
+}
+.key {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: clamp(0.8rem, 2vw, 1.25rem);
+}
+.timer {
+  color: var(--accent-strong);
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+}
+.quiz-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  margin-top: var(--space-5);
+}
+.translation-character {
+  display: grid;
+  place-items: center;
+  width: clamp(2.7rem, 8vw, 5.25rem);
+  height: clamp(2.7rem, 8vw, 5.25rem);
+  margin: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  color: var(--text);
+  font-size: clamp(1.2rem, 4vw, 2.5rem);
+  line-height: 1;
+}
+.translation-character.correct {
+  background: var(--success);
+  color: #fff;
+}
+.translation-character.present {
+  background: var(--warning);
+  color: #241a00;
+}
+.translation-character.hinted {
+  background: var(--error);
+  color: #fff;
+}
+.translation-character.hinted-correct {
+  background: var(--info);
+  color: #fff;
+}
+.quiz-input {
+  width: min(100%, 42rem);
+  min-height: var(--control-height);
+  height: auto;
+  margin-top: var(--space-6);
+  padding: 0.65rem 0.8rem;
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: clamp(1rem, 3vw, 1.35rem);
+}
+.quiz-controls {
+  width: min(100%, 42rem);
+  height: auto;
+  margin-top: var(--space-3);
+  gap: var(--space-3);
+}
+.quiz-controls button {
+  min-height: var(--control-height);
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+}
+.quiz-controls button:hover {
+  border-width: 2px !important;
+  background: var(--accent-soft);
+}
+.quiz-summary {
+  width: 100%;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+}
+.quiz-summary-table-wrapper {
+  max-width: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.quiz-summary-table {
+  width: 100%;
+  min-width: 560px;
+  background: var(--surface);
+  color: var(--text);
+}
+.quiz-summary-table tr td,
+.quiz-summary-table thead th {
+  border-color: var(--border);
+}
+.quiz-summary-table tr:nth-child(odd),
+.quiz-summary-table tr:nth-child(even) {
+  background: var(--surface);
+}
+.quiz-summary-table tr:nth-child(even) {
+  background: var(--surface-subtle);
+}
+.quiz-code-container {
+  white-space: normal;
+}
+.quiz-code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.quiz-code-actions {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+.quiz-code-actions button {
+  display: grid;
+  place-items: center;
+  min-width: var(--control-height);
+  min-height: var(--control-height);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.quiz-feedback {
+  min-height: 1.5rem;
+  margin: 0.4rem 0 0;
+  color: var(--success);
+}
+@media (max-width: 767px) {
+  .quiz-container {
+    width: min(100% - 1rem, 880px);
+    min-height: auto;
+    padding: var(--space-4) 0;
+  }
+  .quiz-summary {
+    padding: var(--space-4);
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .quiz-container {
+    min-height: auto;
+    padding: var(--space-3) 0;
+  }
+  .translation-character {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
 </style>

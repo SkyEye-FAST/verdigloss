@@ -21,7 +21,12 @@ export interface QuizLanguageAvailability {
 
 export type QuizEligibilityError =
   | { kind: 'unsupported-language'; language: string }
-  | { kind: 'too-few-questions'; language: LanguageCode; eligibleCount: number; requiredCount: number }
+  | {
+      kind: 'too-few-questions'
+      language: LanguageCode
+      eligibleCount: number
+      requiredCount: number
+    }
 
 function normalizedMeaning(value: string): string {
   return value.normalize('NFKC').replace(/\s+/g, ' ').trim().toLocaleLowerCase()
@@ -80,7 +85,10 @@ export function buildQuizQuestions(
   }
 
   const eligibleByKey = new Map(
-    buildEligibleQuestionPool(language, languageFiles, idMap).map((question) => [question.key, question]),
+    buildEligibleQuestionPool(language, languageFiles, idMap).map((question) => [
+      question.key,
+      question,
+    ]),
   )
   const questions = keys.flatMap((key) => {
     const question = eligibleByKey.get(key)
