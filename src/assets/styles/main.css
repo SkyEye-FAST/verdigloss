@@ -150,7 +150,8 @@ a {
   font-weight: 600;
   text-decoration: none;
 }
-.primary-nav__link.router-link-exact-active {
+.primary-nav__link.router-link-exact-active,
+.primary-nav__link.is-active {
   border-color: var(--accent);
   color: var(--accent-strong);
 }
@@ -290,7 +291,8 @@ body.translation-font-sans
     font-size: 0.7rem;
     text-decoration: none;
   }
-  .mobile-nav__link.router-link-exact-active {
+  .mobile-nav__link.router-link-exact-active,
+  .mobile-nav__link.is-active {
     color: var(--accent-strong);
     font-weight: 700;
   }

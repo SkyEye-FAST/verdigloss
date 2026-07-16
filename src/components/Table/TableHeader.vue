@@ -25,6 +25,7 @@
         :label="$t('table.displayed_languages')"
         :placeholder="$t('language_selector.choose')"
         :options="languageOptions"
+        summary-mode="codes"
       />
       <label class="toggle-control"
         ><input v-model="usePagination" type="checkbox" /><span>{{

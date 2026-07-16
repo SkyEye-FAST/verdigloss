@@ -9,7 +9,6 @@
     "github": "Verdigloss 的 GitHub 仓库",
     "home": "Verdigloss 首页",
     "nav": {
-      "colors": "颜色",
       "query": "查询",
       "quiz": "测验",
       "table": "表格"
@@ -138,10 +137,6 @@
       "table": "表格页面"
     },
     "portal_description": "选择目标语言，然后生成随机题组或输入他人分享的题组编号。",
-    "progress": {
-      "timed": "第 {current} 题，共 {total} 题。剩余 {time}。",
-      "untimed": "第 {current} 题，共 {total} 题。不计时。"
-    },
     "random_quiz": "生成随机题组",
     "restart": "再来一组",
     "return": "返回测验门户",
@@ -209,6 +204,11 @@
     },
     "search_placeholder": "搜索内容…",
     "selected_languages": "已选择的语言",
+    "sections": {
+      "colors": "颜色",
+      "label": "表格分区",
+      "standard": "标准译名"
+    },
     "title": "Minecraft 标准译名表",
     "use_pagination": "使用分页",
     "version_credit": "Java版 {version} · {author}"

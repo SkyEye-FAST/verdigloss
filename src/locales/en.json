@@ -9,7 +9,6 @@
     "github": "Verdigloss on GitHub",
     "home": "Verdigloss home",
     "nav": {
-      "colors": "Colours",
       "query": "Query",
       "quiz": "Quiz",
       "table": "Table"
@@ -138,10 +137,6 @@
       "table": "Table page"
     },
     "portal_description": "Choose a target language, then start a generated quiz or enter a code shared with you.",
-    "progress": {
-      "timed": "Question {current} of {total}. {time} remaining.",
-      "untimed": "Question {current} of {total}. Untimed quiz."
-    },
     "random_quiz": "Random questions",
     "restart": "One more group",
     "return": "Return to quiz portal",
@@ -209,6 +204,11 @@
     },
     "search_placeholder": "Search content…",
     "selected_languages": "Selected languages",
+    "sections": {
+      "colors": "Colours",
+      "label": "Table sections",
+      "standard": "Standard translations"
+    },
     "title": "Minecraft Standard Translation Table",
     "use_pagination": "Use pagination",
     "version_credit": "Java Edition {version} · {author}"

@@ -10,7 +10,7 @@
       <p v-if="routeError" role="alert" class="quiz-route-error">{{ routeError }}</p>
       <div class="quiz-info" v-show="!loadingQuestions && !showSummary && !routeError">
         <p class="quiz-progress" aria-live="polite">
-          {{ progressAnnouncement }}
+          {{ progressDisplay }}
         </p>
         <div class="info">
           <div v-if="isTimerMode" class="timer">
@@ -293,13 +293,7 @@ const usedTime = computed(() =>
 const progressWidth = computed(() =>
   timer.value ? timerProgressPercent(timer.value, now.value) : 0,
 )
-const progressAnnouncement = computed(() =>
-  t(isTimerMode.value ? 'quiz.progress.timed' : 'quiz.progress.untimed', {
-    current: currentIndex.value + 1,
-    total: questions.value.length,
-    time: formatTime(remainingTime.value),
-  }),
-)
+const progressDisplay = computed(() => `${currentIndex.value + 1} / ${questions.value.length}`)
 
 const completionLabel = (completion: QuestionCompletion | undefined) =>
   t(`quiz.completion.${completion ?? 'unanswered'}`)

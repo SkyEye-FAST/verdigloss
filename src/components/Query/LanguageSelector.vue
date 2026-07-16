@@ -57,6 +57,7 @@ const props = defineProps<{
   options: Option[]
   placeholder?: string
   label?: string
+  summaryMode?: 'codes' | 'labels'
 }>()
 const { t } = useI18n()
 const emit = defineEmits<{
@@ -70,10 +71,11 @@ const popupId = `language-selector-${Math.random().toString(36).slice(2)}`
 const resolvedLabel = computed(() => props.label ?? t('language_selector.selected'))
 const resolvedPlaceholder = computed(() => props.placeholder ?? t('language_selector.choose'))
 const selectedSummary = computed(() => {
-  const labels = props.options
-    .filter((option) => props.modelValue.includes(option.value))
-    .map((option) => option.label)
-  return labels.length ? labels.join(', ') : resolvedPlaceholder.value
+  const selectedOptions = props.options.filter((option) => props.modelValue.includes(option.value))
+  const summary = selectedOptions.map((option) =>
+    props.summaryMode === 'codes' ? option.value : option.label,
+  )
+  return summary.length ? summary.join(', ') : resolvedPlaceholder.value
 })
 function toggleDropdown() {
   isOpen.value = !isOpen.value

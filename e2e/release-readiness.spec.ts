@@ -80,14 +80,13 @@ test('quiz portal and deterministic active quiz handle invalid and completed rou
   const questionKey = (await keyLocator.textContent())?.trim()
   expect(questionKey).toBeTruthy()
   await page.locator('.quiz-input').fill(answerForQuizKey(questionKey!))
-  await expect(page.locator('.quiz-progress')).toContainText('Question 2')
+  await expect(page.locator('.quiz-progress')).toHaveText('2 / 10')
   for (let index = 2; index <= 10; index += 1) {
     while (await page.getByRole('button', { name: 'Hint' }).isVisible()) {
       await page.getByRole('button', { name: 'Hint' }).click()
     }
     await page.getByRole('button', { name: 'Skip' }).click()
-    if (index < 10)
-      await expect(page.locator('.quiz-progress')).toContainText(`Question ${index + 1}`)
+    if (index < 10) await expect(page.locator('.quiz-progress')).toHaveText(`${index + 1} / 10`)
   }
   await expect(page.getByText(/All questions completed/i)).toBeVisible()
   await expect(page.getByRole('button', { name: /Copy quiz code/i })).toBeVisible()

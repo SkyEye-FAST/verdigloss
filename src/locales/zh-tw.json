@@ -9,7 +9,6 @@
     "github": "Verdigloss 的 GitHub 儲存庫",
     "home": "Verdigloss 首頁",
     "nav": {
-      "colors": "顏色",
       "query": "查詢",
       "quiz": "測驗",
       "table": "表格"
@@ -138,10 +137,6 @@
       "table": "表格頁面"
     },
     "portal_description": "選擇目標語言，然後產生隨機題組或輸入他人分享的題組編號。",
-    "progress": {
-      "timed": "第 {current} 題，共 {total} 題。剩餘 {time}。",
-      "untimed": "第 {current} 題，共 {total} 題。不計時。"
-    },
     "random_quiz": "產生隨機題組",
     "restart": "再來一組",
     "return": "返回測驗入口",
@@ -209,6 +204,11 @@
     },
     "search_placeholder": "搜尋內容…",
     "selected_languages": "已選擇的語言",
+    "sections": {
+      "colors": "顏色",
+      "label": "表格分區",
+      "standard": "標準譯名"
+    },
     "title": "Minecraft 標準譯名表",
     "use_pagination": "使用分頁",
     "version_credit": "Java版 {version} · {author}"

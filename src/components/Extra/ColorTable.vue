@@ -6,6 +6,7 @@
     <p class="updated-at">
       {{ $t('table.colors.updated', { date: colorDataset.updatedAt }) }}
     </p>
+    <TableSectionNav />
     <fieldset class="color-variants">
       <legend>{{ $t('table.colors.variants') }}</legend>
       <label>
@@ -69,6 +70,7 @@ import { colorDataset } from '@/features/colors/color-data'
 
 import ColorIcon from './ColorTable/ColorIcon.vue'
 import ColorPreview from './ColorTable/ColorPreview.vue'
+import TableSectionNav from '../Table/TableSectionNav.vue'
 
 const { locale: currentLang } = useLocale()
 
@@ -112,6 +114,11 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
   padding: var(--space-4) 0;
   border: 0;
   border-block: 1px solid var(--border);
+}
+
+.page-content :deep(.table-section-nav) {
+  width: 100%;
+  margin-bottom: var(--space-4);
 }
 
 .color-variants legend {

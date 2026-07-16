@@ -9,6 +9,7 @@
       v-model:download-all-data="downloadAllData"
       @download="handleDownload"
     />
+    <TableSectionNav />
 
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -23,14 +24,28 @@
         :show-info="true"
       />
 
+      <p id="table-description" class="table-description">
+        {{ $t('table.caption') }}
+      </p>
       <div
+        v-show="hasHorizontalOverflow"
+        ref="topScrollbar"
+        class="table-horizontal-scrollbar"
+        aria-hidden="true"
+        @scroll="syncFromTop"
+      >
+        <div ref="topScrollbarSpacer" class="table-horizontal-scrollbar__spacer"></div>
+      </div>
+      <div
+        ref="tableWrapper"
         class="table-wrapper"
         role="region"
         tabindex="0"
-        :aria-label="$t('table.comparison_region')"
+        :aria-labelledby="'table-description'"
+        @scroll="syncFromTable"
       >
-        <table>
-          <caption>
+        <table ref="tableElement">
+          <caption class="sr-only">
             {{
               $t('table.caption')
             }}
@@ -74,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
@@ -91,6 +106,7 @@ import { readBooleanPreference, readLanguageList, writeStoredValue } from '@/uti
 
 import Header from './Table/TableHeader.vue'
 import Pagination from './Table/TablePagination.vue'
+import TableSectionNav from './Table/TableSectionNav.vue'
 
 const minecraftVersion = ref(mcVersion)
 const { t } = useI18n()
@@ -118,6 +134,40 @@ const loading = ref(true)
 const usePagination = ref(true)
 const downloadAllData = ref(readBooleanPreference('table:downloadAllData', true))
 const exportFeedback = ref('')
+const tableWrapper = ref<HTMLElement | null>(null)
+const tableElement = ref<HTMLTableElement | null>(null)
+const topScrollbar = ref<HTMLElement | null>(null)
+const topScrollbarSpacer = ref<HTMLElement | null>(null)
+const hasHorizontalOverflow = ref(false)
+let resizeObserver: ResizeObserver | undefined
+let syncingScrollbar = false
+
+function updateHorizontalScrollbar() {
+  const wrapper = tableWrapper.value
+  const table = tableElement.value
+  const spacer = topScrollbarSpacer.value
+  if (!wrapper || !table || !spacer) return
+  spacer.style.width = `${table.scrollWidth}px`
+  hasHorizontalOverflow.value = wrapper.scrollWidth > wrapper.clientWidth + 1
+  if (topScrollbar.value) topScrollbar.value.scrollLeft = wrapper.scrollLeft
+}
+
+function syncScroll(target: HTMLElement | null, scrollLeft: number) {
+  if (!target || syncingScrollbar) return
+  syncingScrollbar = true
+  target.scrollLeft = scrollLeft
+  requestAnimationFrame(() => {
+    syncingScrollbar = false
+  })
+}
+
+function syncFromTop() {
+  syncScroll(tableWrapper.value, topScrollbar.value?.scrollLeft ?? 0)
+}
+
+function syncFromTable() {
+  syncScroll(topScrollbar.value, tableWrapper.value?.scrollLeft ?? 0)
+}
 
 async function ensureLanguages(codes: readonly LanguageCode[]) {
   const missing = codes.filter((code) => !translations.value[code])
@@ -129,7 +179,14 @@ async function ensureLanguages(codes: readonly LanguageCode[]) {
 onMounted(async () => {
   await ensureLanguages(['en_us', ...selectedLanguages.value])
   loading.value = false
+  await nextTick()
+  updateHorizontalScrollbar()
+  resizeObserver = new ResizeObserver(updateHorizontalScrollbar)
+  if (tableWrapper.value) resizeObserver.observe(tableWrapper.value)
+  if (tableElement.value) resizeObserver.observe(tableElement.value)
 })
+
+onBeforeUnmount(() => resizeObserver?.disconnect())
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang))
@@ -172,6 +229,8 @@ watch([filteredKeys, usePagination], () => {
     ? clampPage(currentPage.value, filteredKeys.value.length, itemsPerPage)
     : 1
 })
+
+watch([displayData, displayLanguages], () => void nextTick(updateHorizontalScrollbar))
 
 const {
   downloadTsv,
@@ -253,6 +312,30 @@ watch(
   scroll-margin-top: var(--app-bar-offset);
 }
 
+.table-description,
+.table-horizontal-scrollbar {
+  width: min(calc(100% - 2rem), var(--content-max));
+  margin-inline: auto;
+}
+
+.table-description {
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.table-horizontal-scrollbar {
+  height: 1.1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+
+.table-horizontal-scrollbar__spacer {
+  height: 1px;
+}
+
 .table-wrapper table {
   width: max-content;
   min-width: 100%;
@@ -262,15 +345,9 @@ watch(
   font-size: 0.88rem;
 }
 
-.table-wrapper caption {
-  padding: var(--space-2) var(--space-3);
-  color: var(--muted);
-  text-align: left;
-}
-
 .table-wrapper th,
 .table-wrapper td {
-  min-width: 15rem;
+  min-width: clamp(12rem, 14vw, 14rem);
   padding: 0.6rem 0.75rem;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -303,9 +380,11 @@ watch(
   position: sticky;
   z-index: 2;
   left: 0;
-  min-width: 21rem;
-  max-width: 28rem;
-  border-right: 2px solid var(--border-strong);
+  inline-size: clamp(12rem, 17vw, 17rem);
+  min-inline-size: 12rem;
+  max-inline-size: 17rem;
+  border-right: 1px solid var(--border-strong);
+  box-shadow: 5px 0 8px color-mix(in srgb, var(--text) 9%, transparent);
   background: var(--surface);
   font: 0.76rem/1.45 var(--monospace-font);
   overflow-wrap: anywhere;
@@ -345,6 +424,15 @@ watch(
   font-size: 0.9rem;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -361,6 +449,15 @@ watch(
     max-height: calc(100dvh - var(--app-bar-offset) - 78px);
   }
 
+  .table-description,
+  .table-horizontal-scrollbar {
+    width: 100%;
+  }
+
+  .table-horizontal-scrollbar {
+    display: none !important;
+  }
+
   .table-wrapper th,
   .table-wrapper td {
     min-width: 12rem;
@@ -368,8 +465,9 @@ watch(
   }
 
   .table-wrapper .key-column {
-    min-width: 12rem;
-    max-width: 15rem;
+    inline-size: clamp(9rem, 31vw, 12rem);
+    min-inline-size: 9rem;
+    max-inline-size: 12rem;
     font-size: 0.7rem;
   }
 }

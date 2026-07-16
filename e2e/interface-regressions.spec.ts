@@ -17,12 +17,30 @@ test('captures every repaired surface without layout regressions', async ({ page
   await expect(page.locator('.result-section')).toBeVisible()
   await expect(page.locator('.lang-name').first()).toHaveText('简体中文（中国大陆）')
   await expect(page.locator('.result-section')).not.toContainText('Simplified Chinese')
+  await expect(page.locator('.minecraft-title')).toHaveCSS('font-weight', '900')
+  expect(
+    await page
+      .locator('.lang-name')
+      .first()
+      .evaluate((element) => {
+        return Number.parseFloat(getComputedStyle(element).fontSize)
+      }),
+  ).toBeGreaterThanOrEqual(16)
+  await expect(page.locator('.main-content > .result-count')).toHaveCount(0)
+  await expect(page.locator('.input-group .result-count')).toBeVisible()
   await expectNoPageOverflow(page)
   await capture(page, screenshot('query'))
 
   await page.goto('/table')
   await expect(page.locator('tbody tr').first()).toBeVisible()
   const wrapper = page.locator('.table-wrapper')
+  const topScrollbar = page.locator('.table-horizontal-scrollbar')
+  await expect(page.locator('#table-description')).toBeVisible()
+  expect(
+    await page
+      .locator('#table-description')
+      .evaluate((element) => !document.querySelector('.table-wrapper')?.contains(element)),
+  ).toBe(true)
   const header = page.locator('thead th').first()
   const firstRowCell = page.locator('tbody tr').first().locator('.key-column')
   const [headerBox, firstRowBox] = await Promise.all([
@@ -35,6 +53,12 @@ test('captures every repaired surface without layout regressions', async ({ page
   await wrapper.evaluate((element) => {
     element.scrollLeft = Math.min(500, element.scrollWidth - element.clientWidth)
   })
+  if ((await page.viewportSize())!.width > 800) {
+    await expect(topScrollbar).toHaveJSProperty(
+      'scrollLeft',
+      await wrapper.evaluate((element) => element.scrollLeft),
+    )
+  }
   const stickyStyle = await firstRowCell.evaluate((element) => {
     const style = getComputedStyle(element)
     return { backgroundColor: style.backgroundColor, zIndex: style.zIndex }
@@ -42,9 +66,19 @@ test('captures every repaired surface without layout regressions', async ({ page
   expect(stickyStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
   expect(stickyStyle.backgroundColor).not.toBe('transparent')
   expect(Number(stickyStyle.zIndex)).toBeGreaterThan(0)
-  await wrapper.evaluate((element) => {
-    element.scrollLeft = 0
-  })
+  if ((await page.viewportSize())!.width > 800) {
+    await wrapper.evaluate((element) => {
+      element.scrollLeft = 0
+    })
+    await topScrollbar.evaluate((element) => {
+      element.scrollLeft = Math.min(300, element.scrollWidth - element.clientWidth)
+      element.dispatchEvent(new Event('scroll'))
+    })
+    await expect(wrapper).toHaveJSProperty(
+      'scrollLeft',
+      await topScrollbar.evaluate((element) => element.scrollLeft),
+    )
+  }
   await expectNoPageOverflow(page)
   await capture(page, screenshot('table'))
 
@@ -58,6 +92,9 @@ test('captures every repaired surface without layout regressions', async ({ page
 
   await page.goto(`/quiz/${deterministicQuizCode}?l=zh_cn&t=0`)
   await expect(page.locator('.quiz-input')).toBeVisible()
+  await expect(page.locator('.quiz-progress')).toHaveText('1 / 10')
+  await expect(page.locator('.timer')).toHaveCount(0)
+  await expect(page.locator('.progress-bar')).toHaveCount(0)
   await expectNoPageOverflow(page)
   await capture(page, screenshot('active-quiz'))
 
@@ -76,8 +113,32 @@ test('captures every repaired surface without layout regressions', async ({ page
 
   await page.goto('/table/color')
   await expect(page.locator('.table-wrapper')).toBeVisible()
+  await expect(page.locator('.table-section-nav')).toBeVisible()
+  await expect(page.locator('.primary-nav')).toContainText(/Query.*Table.*Quiz/)
+  await expect(page.locator('.primary-nav')).not.toContainText(/Colours|颜色|顏色/)
+  await expect(page.locator('.primary-nav a[href="/table"]')).toHaveClass(/is-active/)
   await expectNoPageOverflow(page)
   await capture(page, screenshot('colours'))
+})
+
+test('summarizes multi-language selections with technical codes', async ({ page }) => {
+  await page.goto('/table')
+  const selector = page.locator('.table-toolbar .language-selector')
+  const trigger = selector.locator('.language-selector__trigger')
+  await trigger.click()
+  await selector.getByRole('button', { name: 'Clear' }).click()
+  await selector.locator('input[value="en_us"]').check()
+  await selector.locator('input[value="zh_cn"]').check()
+  await trigger.click()
+  await expect(selector.locator('.language-selector__summary')).toHaveText('en_us, zh_cn')
+})
+
+test('keeps quiz progress concise and shows time only for timed quizzes', async ({ page }) => {
+  await page.goto(`/quiz/${deterministicQuizCode}?l=zh_cn&t=1`)
+  await expect(page.locator('.quiz-input')).toBeVisible()
+  await expect(page.locator('.quiz-progress')).toHaveText('1 / 10')
+  await expect(page.locator('.timer')).toHaveText(/^3:[0-5]\d$/)
+  await expect(page.locator('.progress-bar')).toBeVisible()
 })
 
 test('Simplified Chinese interface contains no known hardcoded English controls', async ({

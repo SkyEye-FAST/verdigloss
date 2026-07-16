@@ -63,6 +63,9 @@
                 autocomplete="off"
                 @input="onQueryInput"
               />
+              <p v-if="resultAnnouncement" class="result-count" aria-live="polite">
+                {{ resultAnnouncement }}
+              </p>
             </div>
 
             <div class="input-group" v-show="availableKeys.length">
@@ -113,6 +116,7 @@
               </label>
               <LanguageSelector
                 v-model="selectedLanguages"
+                summary-mode="codes"
                 :options="
                   languages.map((lang) => ({
                     value: lang.code,
@@ -127,7 +131,6 @@
         </div>
       </div>
       <div class="main-content" tabindex="0">
-        <p class="result-count" aria-live="polite">{{ resultAnnouncement }}</p>
         <div v-if="error" class="error" role="alert">{{ error }}</div>
         <div v-if="selectedTranslation" class="result-section" tabindex="0">
           <div class="title">{{ selectedTranslation.source }}</div>
@@ -262,8 +265,8 @@ const availableKeys = computed(() => {
     .map((result) => result.key)
 })
 const resultAnnouncement = computed(() => {
-  if (error.value) return error.value
-  if (!queryContent.value.trim()) return t('query.results.enter_query')
+  if (error.value) return ''
+  if (!queryContent.value.trim()) return ''
   return t(
     'query.results.matching',
     { count: availableKeys.value.length },
@@ -651,10 +654,10 @@ onMounted(async () => {
 }
 
 .result-count {
-  min-height: 1.5rem;
-  margin: 0 0 var(--space-3);
+  margin: 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
 }
 
 .error {
@@ -715,11 +718,12 @@ onMounted(async () => {
 
 .lang-name {
   width: 46%;
-  font-weight: 700;
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  font-weight: 750;
 }
 
 .string {
-  font-size: clamp(1rem, 2vw, 1.45rem);
+  font-size: clamp(1.35rem, 2.25vw, 1.7rem);
 }
 
 .table-advancements {
@@ -752,10 +756,12 @@ onMounted(async () => {
 }
 
 .minecraft-title {
-  margin-top: var(--space-5);
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
+  margin-top: var(--space-6);
+  color: var(--text);
+  font-size: clamp(1.45rem, 2.6vw, 2.25rem);
+  font-weight: 900;
+  line-height: 1.18;
+  text-align: center;
 }
 
 .sr-only {
@@ -811,10 +817,6 @@ onMounted(async () => {
     transform: rotate(90deg);
   }
 
-  .result-count {
-    margin-left: var(--space-1);
-  }
-
   .result-section {
     padding: var(--space-4);
   }
@@ -830,11 +832,11 @@ onMounted(async () => {
 
   .lang-name {
     width: 52%;
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 
   .string {
-    font-size: 1rem;
+    font-size: clamp(1.1rem, 5vw, 1.35rem);
   }
 }
 

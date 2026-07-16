@@ -8,7 +8,10 @@
             $t('app.nav.query')
           }}</span></router-link
         >
-        <router-link to="/table" class="primary-nav__link"
+        <router-link
+          to="/table"
+          class="primary-nav__link"
+          :class="{ 'is-active': route.path.startsWith('/table') }"
           ><i-material-symbols-table-view-outline aria-hidden="true" /><span>{{
             $t('app.nav.table')
           }}</span></router-link
@@ -16,11 +19,6 @@
         <router-link to="/quiz" class="primary-nav__link"
           ><i-material-symbols-quiz aria-hidden="true" /><span>{{
             $t('app.nav.quiz')
-          }}</span></router-link
-        >
-        <router-link to="/table/color" class="primary-nav__link"
-          ><i-material-symbols-colors aria-hidden="true" /><span>{{
-            $t('app.nav.colors')
           }}</span></router-link
         >
       </nav>
@@ -66,7 +64,10 @@
           $t('app.nav.query')
         }}</span></router-link
       >
-      <router-link to="/table" class="mobile-nav__link"
+      <router-link
+        to="/table"
+        class="mobile-nav__link"
+        :class="{ 'is-active': route.path.startsWith('/table') }"
         ><i-material-symbols-table-view-outline aria-hidden="true" /><span>{{
           $t('app.nav.table')
         }}</span></router-link
@@ -76,19 +77,17 @@
           $t('app.nav.quiz')
         }}</span></router-link
       >
-      <router-link to="/table/color" class="mobile-nav__link"
-        ><i-material-symbols-colors aria-hidden="true" /><span>{{
-          $t('app.nav.colors')
-        }}</span></router-link
-      >
     </nav>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useTranslationFont } from '@/composables/useTranslationFont'
 
+const route = useRoute()
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 const { useSansFont, toggleTranslationFont } = useTranslationFont()
 </script>
