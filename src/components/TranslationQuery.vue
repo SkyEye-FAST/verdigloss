@@ -5,130 +5,136 @@
         <button
           class="toggle-button"
           type="button"
+          :class="{ 'is-collapsed': !isSidebarOpen }"
+          :aria-expanded="isSidebarOpen"
+          aria-controls="query-settings"
           :aria-label="isSidebarOpen ? $t('query.controls.collapse') : $t('query.controls.expand')"
           @click="toggleSidebar"
         >
-          <i-material-symbols-chevron-left
-            v-if="isSidebarOpen"
-            style="font-size: 1.5em; color: #fff"
-          />
-          <i-material-symbols-chevron-right v-else style="font-size: 1.5em; color: #fff" />
+          <i-material-symbols-chevron-left class="toggle-button__icon" aria-hidden="true" />
         </button>
-        <div class="settings sans" :class="currentLang.toLowerCase()" v-show="isSidebarOpen">
-          <div class="form-container">
-            <div class="input-group">
-              <label for="queryMode">
-                <i-material-symbols-settings-outline class="label-icon" />
-                {{ $t('query.query_mode') }}
-              </label>
-              <select id="queryMode" v-model="queryMode" @change="onQueryInput">
-                <option value="source">
-                  {{ $t('query.query_modes.source') }}
-                </option>
-                <option value="key">
-                  {{ $t('query.query_modes.key') }}
-                </option>
-                <option value="translation">
-                  {{ $t('query.query_modes.translation') }}
-                </option>
-              </select>
-            </div>
+        <Transition name="settings">
+          <div
+            v-if="isSidebarOpen"
+            id="query-settings"
+            class="settings sans"
+            :class="currentLang.toLowerCase()"
+          >
+            <div class="form-container">
+              <div class="input-group">
+                <label for="queryMode">
+                  <i-material-symbols-settings-outline class="label-icon" />
+                  {{ $t('query.query_mode') }}
+                </label>
+                <select id="queryMode" v-model="queryMode" @change="onQueryInput">
+                  <option value="source">
+                    {{ $t('query.query_modes.source') }}
+                  </option>
+                  <option value="key">
+                    {{ $t('query.query_modes.key') }}
+                  </option>
+                  <option value="translation">
+                    {{ $t('query.query_modes.translation') }}
+                  </option>
+                </select>
+              </div>
 
-            <div class="input-group" v-show="queryMode === 'translation'">
-              <label for="queryLang">
-                <i-material-symbols-language class="label-icon" />
-                {{ $t('query.query_lang') }}
-              </label>
-              <select id="queryLang" v-model="queryLang">
-                <option
-                  v-for="lang in filteredLanguages"
-                  :key="lang.code"
-                  :value="lang.code"
-                  :lang="lang.htmlLang"
-                  :class="lang.typographyClass"
-                >
-                  {{ lang.gameName }}
-                </option>
-              </select>
-            </div>
-
-            <div class="input-group">
-              <label for="queryContent">
-                <i-material-symbols-search class="label-icon" />
-                {{ $t('query.query_content') }}
-              </label>
-              <input
-                id="queryContent"
-                v-model="queryContent"
-                autocomplete="off"
-                @input="onQueryInput"
-              />
-              <p v-if="resultAnnouncement" class="result-count" aria-live="polite">
-                {{ resultAnnouncement }}
-              </p>
-            </div>
-
-            <div class="input-group" v-show="availableKeys.length">
-              <label for="localeKey">
-                <i-material-symbols-key class="label-icon" />
-                {{ $t('query.locale_key') }}
-              </label>
-              <div class="query-combobox">
-                <input
-                  id="localeKey"
-                  ref="keyInput"
-                  v-model="localeKey"
-                  role="combobox"
-                  aria-autocomplete="list"
-                  :aria-expanded="isKeyListOpen"
-                  aria-controls="query-key-results"
-                  :aria-activedescendant="
-                    activeKeyIndex >= 0 ? `query-key-${activeKeyIndex}` : undefined
-                  "
-                  @focus="isKeyListOpen = true"
-                  @keydown="handleKeyListKeydown"
-                />
-                <ul
-                  v-if="isKeyListOpen"
-                  id="query-key-results"
-                  class="query-key-results"
-                  role="listbox"
-                >
-                  <li
-                    v-for="(key, index) in availableKeys"
-                    :id="`query-key-${index}`"
-                    :key="key"
-                    role="option"
-                    :aria-selected="index === activeKeyIndex"
-                    :class="{ active: index === activeKeyIndex }"
-                    @mousedown.prevent="selectKey(key)"
+              <div class="input-group" v-show="queryMode === 'translation'">
+                <label for="queryLang">
+                  <i-material-symbols-language class="label-icon" />
+                  {{ $t('query.query_lang') }}
+                </label>
+                <select id="queryLang" v-model="queryLang">
+                  <option
+                    v-for="lang in filteredLanguages"
+                    :key="lang.code"
+                    :value="lang.code"
+                    :lang="lang.htmlLang"
+                    :class="lang.typographyClass"
                   >
-                    {{ key }}
-                  </li>
-                </ul>
+                    {{ lang.gameName }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label for="queryContent">
+                  <i-material-symbols-search class="label-icon" />
+                  {{ $t('query.query_content') }}
+                </label>
+                <input
+                  id="queryContent"
+                  v-model="queryContent"
+                  autocomplete="off"
+                  @input="onQueryInput"
+                />
+                <p v-if="resultAnnouncement" class="result-count" aria-live="polite">
+                  {{ resultAnnouncement }}
+                </p>
+              </div>
+
+              <div class="input-group" v-show="availableKeys.length">
+                <label for="localeKey">
+                  <i-material-symbols-key class="label-icon" />
+                  {{ $t('query.locale_key') }}
+                </label>
+                <div class="query-combobox">
+                  <input
+                    id="localeKey"
+                    ref="keyInput"
+                    v-model="localeKey"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    :aria-expanded="isKeyListOpen"
+                    aria-controls="query-key-results"
+                    :aria-activedescendant="
+                      activeKeyIndex >= 0 ? `query-key-${activeKeyIndex}` : undefined
+                    "
+                    @focus="isKeyListOpen = true"
+                    @keydown="handleKeyListKeydown"
+                  />
+                  <ul
+                    v-if="isKeyListOpen"
+                    id="query-key-results"
+                    class="query-key-results"
+                    role="listbox"
+                  >
+                    <li
+                      v-for="(key, index) in availableKeys"
+                      :id="`query-key-${index}`"
+                      :key="key"
+                      role="option"
+                      :aria-selected="index === activeKeyIndex"
+                      :class="{ active: index === activeKeyIndex }"
+                      @mousedown.prevent="selectKey(key)"
+                    >
+                      {{ key }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="selectedLanguages">
+                  <i-material-symbols-language class="label-icon" />
+                  {{ $t('query.select_languages') }}
+                </label>
+                <LanguageSelector
+                  v-model="selectedLanguages"
+                  summary-mode="codes"
+                  :options="
+                    languages.map((lang) => ({
+                      value: lang.code,
+                      label: lang.gameName,
+                      htmlLang: lang.htmlLang,
+                    }))
+                  "
+                  @change="search"
+                />
               </div>
             </div>
-
-            <div class="input-group">
-              <label for="selectedLanguages">
-                <i-material-symbols-language class="label-icon" />
-                {{ $t('query.select_languages') }}
-              </label>
-              <LanguageSelector
-                v-model="selectedLanguages"
-                summary-mode="codes"
-                :options="
-                  languages.map((lang) => ({
-                    value: lang.code,
-                    label: lang.gameName,
-                    htmlLang: lang.htmlLang,
-                  }))
-                "
-                @change="search"
-              />
-            </div>
           </div>
-        </div>
+        </Transition>
       </div>
       <div class="main-content" tabindex="0">
         <div v-if="error" class="error" role="alert">{{ error }}</div>
@@ -529,6 +535,9 @@ onMounted(async () => {
   gap: var(--space-8);
   width: min(100%, var(--content-max));
   margin: 0 auto;
+  transition:
+    grid-template-columns var(--motion-base) ease,
+    gap var(--motion-base) ease;
 }
 
 .sidebar-layout.sidebar-collapsed {
@@ -548,6 +557,19 @@ onMounted(async () => {
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
+}
+
+.settings-enter-active,
+.settings-leave-active {
+  transition:
+    opacity var(--motion-base) ease,
+    transform var(--motion-base) ease;
+}
+
+.settings-enter-from,
+.settings-leave-to {
+  opacity: 0;
+  transform: translateX(-0.5rem);
 }
 
 .form-container {
@@ -604,14 +626,19 @@ onMounted(async () => {
   color: #fff;
 }
 
-.sidebar:not(:has(.settings[style*='display: none'])) .toggle-button {
+.toggle-button:not(.is-collapsed) {
   top: var(--space-2);
   right: var(--space-2);
   left: auto;
 }
 
-.sidebar-collapsed .toggle-button {
-  position: static;
+.toggle-button__icon {
+  font-size: 1.5em;
+  transition: transform var(--motion-base) ease;
+}
+
+.sidebar-collapsed .toggle-button__icon {
+  transform: rotate(180deg);
 }
 
 .query-combobox {
@@ -687,7 +714,7 @@ onMounted(async () => {
 .subtitle {
   margin: var(--space-3) 0 var(--space-6);
   color: var(--muted);
-  font: clamp(0.8rem, 1.4vw, 1rem) var(--monospace-font);
+  font: 500 clamp(1.05rem, 1.8vw, 1.35rem) / 1.45 var(--monospace-font);
   text-align: center;
   overflow-wrap: anywhere;
 }
@@ -800,21 +827,31 @@ onMounted(async () => {
     padding: var(--space-4);
   }
 
-  .toggle-button,
-  .sidebar:not(:has(.settings[style*='display: none'])) .toggle-button,
-  .sidebar-collapsed .toggle-button {
+  .toggle-button {
     position: static;
     width: 100%;
     height: 40px;
     margin-bottom: var(--space-2);
   }
 
-  .toggle-button svg {
+  .toggle-button__icon {
+    transform: rotate(90deg);
+  }
+
+  .sidebar-collapsed .toggle-button__icon {
     transform: rotate(-90deg);
   }
 
-  .sidebar-collapsed .toggle-button svg {
-    transform: rotate(90deg);
+  .settings-enter-active,
+  .settings-leave-active {
+    transition:
+      opacity var(--motion-base) ease,
+      transform var(--motion-base) ease;
+  }
+
+  .settings-enter-from,
+  .settings-leave-to {
+    transform: translateY(-0.5rem);
   }
 
   .result-section {
@@ -837,6 +874,19 @@ onMounted(async () => {
 
   .string {
     font-size: clamp(1.1rem, 5vw, 1.35rem);
+  }
+
+  .subtitle {
+    font-size: clamp(0.98rem, 4vw, 1.08rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-layout,
+  .toggle-button__icon,
+  .settings-enter-active,
+  .settings-leave-active {
+    transition: none;
   }
 }
 

@@ -5,69 +5,82 @@
       <p class="quiz-description">
         {{ $t('quiz.portal_description') }}
       </p>
-      <button
-        class="quiz-btn-primary"
-        type="button"
-        :disabled="eligibility.status !== 'available' || isStartingQuiz"
-        @click="startRandomQuiz"
-      >
-        {{
-          eligibility.status === 'loading' || isStartingQuiz
-            ? $t('quiz.eligibility.loading_button')
-            : $t('quiz.random_quiz')
-        }}
-      </button>
-      <div class="quiz-select-group">
-        <label for="query-lang">{{ $t('quiz.language') }}</label>
-        <select :class="`${queryLang.replace('_', '-')} sans`" v-model="queryLang" id="query-lang">
-          <option
-            v-for="language in quizLanguages"
-            :key="language.code"
-            :value="language.code"
-            :class="[language.typographyClass, 'sans']"
-            :lang="language.htmlLang"
+      <section class="quiz-generator">
+        <label class="quiz-field" for="query-lang">
+          <span>{{ $t('quiz.language') }}</span>
+          <select
+            :class="`${queryLang.replace('_', '-')} sans`"
+            v-model="queryLang"
+            id="query-lang"
           >
-            {{ language.gameName }}
-          </option>
-        </select>
-        <input type="checkbox" id="timer-mode" v-model="timerMode" class="timer-checkbox" />
-        <label for="timer-mode" class="timer-label">{{ $t('quiz.timer_mode') }}</label>
-      </div>
-      <p
-        class="quiz-eligibility"
-        :class="`quiz-eligibility--${eligibility.status}`"
-        :role="eligibility.status === 'error' ? 'alert' : 'status'"
-        aria-live="polite"
-      >
-        <template v-if="eligibility.status === 'loading'">
-          {{ $t('quiz.eligibility.loading') }}
-        </template>
-        <template v-else-if="eligibility.status === 'available'">
-          {{ $t('quiz.eligibility.available', { count: eligibility.count }) }}
-        </template>
-        <template v-else-if="eligibility.status === 'unavailable'">
+            <option
+              v-for="language in quizLanguages"
+              :key="language.code"
+              :value="language.code"
+              :class="[language.typographyClass, 'sans']"
+              :lang="language.htmlLang"
+            >
+              {{ language.gameName }}
+            </option>
+          </select>
+        </label>
+        <label for="timer-mode" class="timer-control">
+          <input type="checkbox" id="timer-mode" v-model="timerMode" />
+          <span>{{ $t('quiz.timer_mode') }}</span>
+        </label>
+        <p
+          class="quiz-eligibility"
+          :class="`quiz-eligibility--${eligibility.status}`"
+          :role="eligibility.status === 'error' ? 'alert' : 'status'"
+          aria-live="polite"
+        >
+          <template v-if="eligibility.status === 'loading'">
+            {{ $t('quiz.eligibility.loading') }}
+          </template>
+          <template v-else-if="eligibility.status === 'available'">
+            {{ $t('quiz.eligibility.available', { count: eligibility.count }) }}
+          </template>
+          <template v-else-if="eligibility.status === 'unavailable'">
+            {{
+              $t('quiz.eligibility.unavailable', {
+                count: eligibility.count,
+                minimum: quizQuestionCount,
+              })
+            }}
+          </template>
+          <template v-else>{{ $t('quiz.eligibility.failure') }}</template>
+        </p>
+        <button
+          class="quiz-btn-primary"
+          type="button"
+          :disabled="eligibility.status !== 'available' || isStartingQuiz"
+          @click="startRandomQuiz"
+        >
           {{
-            $t('quiz.eligibility.unavailable', {
-              count: eligibility.count,
-              minimum: quizQuestionCount,
-            })
+            eligibility.status === 'loading' || isStartingQuiz
+              ? $t('quiz.eligibility.loading_button')
+              : $t('quiz.random_quiz')
           }}
-        </template>
-        <template v-else>{{ $t('quiz.eligibility.failure') }}</template>
-      </p>
-      <p v-if="quizError" role="alert" class="quiz-error">{{ quizError }}</p>
-      <div class="quiz-input-group">
-        <input
-          v-model="inputCode"
-          type="text"
-          id="quiz-code"
-          :placeholder="$t('quiz.code_placeholder')"
-          @keyup.enter="startQuiz"
-        />
-        <button class="quiz-enter-button" type="button" @click="startQuiz">
-          {{ $t('quiz.nav.enter') }}
         </button>
+      </section>
+      <div class="quiz-separator" aria-hidden="true">
+        <span>{{ $t('quiz.or') }}</span>
       </div>
+      <section class="quiz-code-entry">
+        <div class="quiz-input-group">
+          <input
+            v-model="inputCode"
+            type="text"
+            id="quiz-code"
+            :placeholder="$t('quiz.code_placeholder')"
+            @keyup.enter="startQuiz"
+          />
+          <button class="quiz-enter-button" type="button" @click="startQuiz">
+            {{ $t('quiz.nav.enter') }}
+          </button>
+        </div>
+        <p v-if="quizError" role="alert" class="quiz-error">{{ quizError }}</p>
+      </section>
     </main>
   </div>
 </template>
@@ -202,9 +215,9 @@ const startQuiz = () => {
 <style scoped>
 .quiz-container {
   display: grid;
-  gap: var(--space-5);
-  width: min(100% - 2rem, 46rem);
-  min-height: calc(100dvh - 64px);
+  gap: var(--space-4);
+  width: min(100% - 2rem, 42rem);
+  min-height: calc(100dvh - 64px - var(--space-6));
   margin: 0 auto;
   padding: clamp(2.5rem, 8vh, 6rem) 0;
   align-content: center;
@@ -215,6 +228,7 @@ const startQuiz = () => {
   color: var(--text);
   font: 700 clamp(2rem, 6vw, 3.4rem)/1.08 var(--serif-font);
   text-align: center;
+  text-wrap: balance;
 }
 
 .quiz-description {
@@ -235,25 +249,26 @@ const startQuiz = () => {
   font-weight: 700;
 }
 
+.quiz-generator,
+.quiz-code-entry {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.quiz-field {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
 .quiz-btn-primary:hover:not(:disabled),
 .quiz-enter-button:hover {
   background: var(--accent-strong);
 }
 
-.quiz-select-group {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: var(--space-3);
-  align-items: center;
-}
-
-.quiz-select-group label:first-child {
-  grid-column: 1 / -1;
-  color: var(--text-secondary);
-  font-weight: 700;
-}
-
-.quiz-select-group select,
+.quiz-field select,
 .quiz-input-group input {
   width: 100%;
   min-width: 0;
@@ -265,15 +280,19 @@ const startQuiz = () => {
   color: var(--text);
 }
 
-.timer-checkbox {
+.timer-control input {
   width: 1.15rem;
   height: 1.15rem;
   accent-color: var(--accent);
 }
 
-.timer-label {
+.timer-control {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: var(--space-2);
   color: var(--text-secondary);
-  white-space: nowrap;
+  font-weight: 700;
 }
 
 .quiz-eligibility,
@@ -303,20 +322,31 @@ const startQuiz = () => {
   gap: var(--space-3);
 }
 
+.quiz-separator {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--muted);
+}
+
+.quiz-separator::before,
+.quiz-separator::after {
+  height: 1px;
+  background: var(--border);
+  content: '';
+}
+
 @media (max-width: 800px) {
   .quiz-container {
-    width: min(100% - 1rem, 46rem);
+    width: min(100% - 1rem, 42rem);
     min-height: calc(100dvh - 126px);
-    padding: var(--space-6) var(--space-2);
+    padding: var(--space-4) var(--space-2) calc(70px + var(--safe-bottom) + var(--space-4));
     align-content: start;
   }
 
-  .quiz-select-group {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .quiz-select-group select {
-    grid-column: 1 / -1;
+  .quiz-title {
+    font-size: clamp(1.9rem, 8vw, 2.4rem);
   }
 
   .quiz-input-group {

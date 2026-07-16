@@ -45,6 +45,10 @@ export default defineConfig({
       },
     },
     {
+      name: 'mobile-reference',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 580, height: 1120 } },
+    },
+    {
       name: 'landscape',
       use: { ...devices['Desktop Chrome'], viewport: { width: 844, height: 390 } },
     },

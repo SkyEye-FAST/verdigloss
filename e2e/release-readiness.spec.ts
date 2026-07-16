@@ -43,7 +43,7 @@ test('translation table supports direct routes, filtering, pagination, and expor
   await page.goto('/table')
   await expect(page.getByRole('heading', { name: /translation table/i })).toBeVisible()
   const search = page.getByRole('searchbox')
-  await page.getByLabel('Next page').first().click()
+  await page.getByLabel('Next page').last().click()
   await search.fill('advancements.end')
   await expect(page.locator('tbody tr').first()).toBeVisible()
   await page.getByRole('button', { name: /Displayed languages/i }).click()

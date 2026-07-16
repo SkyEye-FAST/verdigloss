@@ -136,6 +136,7 @@
       "quiz": "Quiz portal",
       "table": "Table page"
     },
+    "or": "or",
     "portal_description": "Choose a target language, then start a generated quiz or enter a code shared with you.",
     "random_quiz": "Random questions",
     "restart": "One more group",

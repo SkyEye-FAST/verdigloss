@@ -275,7 +275,7 @@ body.translation-font-sans
     bottom: 0;
     left: 0;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     min-height: calc(62px + var(--safe-bottom));
     padding-bottom: var(--safe-bottom);
     border-top: 1px solid var(--border);

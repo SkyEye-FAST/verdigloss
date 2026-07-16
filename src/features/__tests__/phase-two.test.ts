@@ -6,6 +6,7 @@ import { languageList } from '@/data/languages'
 import { splitTrailingAnnotation } from '@/features/colors/color-data'
 import { getSearchIndex, SearchIndex } from '@/features/query/search-index'
 import { clampPage, filterTranslationKeys, pageKeys } from '@/features/table/table-data'
+import { getPageWindow } from '@/features/table/pagination'
 import { loadLanguage, TranslationDataError } from '@/services/translation-data'
 import {
   exportFilename,
@@ -52,6 +53,17 @@ describe('phase-two data boundaries', () => {
     expect(clampPage(4, 0, 50)).toBe(0)
     expect(clampPage(4, 51, 50)).toBe(2)
     expect(pageKeys(['apple'], 0)).toEqual([])
+  })
+
+  it('creates compact page windows without hiding useful neighbours', () => {
+    expect(getPageWindow(0, 1)).toEqual([])
+    expect(getPageWindow(1, 1)).toEqual([1])
+    expect(getPageWindow(6, 3)).toEqual([1, 2, 3, 4, 5, 6])
+    expect(getPageWindow(47, 1)).toEqual([1, 2, 3, 4, 'ellipsis', 47])
+    expect(getPageWindow(47, 2)).toEqual([1, 2, 3, 4, 'ellipsis', 47])
+    expect(getPageWindow(47, 23)).toEqual([1, 'ellipsis', 22, 23, 24, 'ellipsis', 47])
+    expect(getPageWindow(47, 46)).toEqual([1, 'ellipsis', 44, 45, 46, 47])
+    expect(getPageWindow(47, 47)).toEqual([1, 'ellipsis', 44, 45, 46, 47])
   })
 
   it('serializes spreadsheet-safe exports and escapes structured formats', () => {

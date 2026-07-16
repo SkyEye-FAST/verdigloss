@@ -136,6 +136,7 @@
       "quiz": "測驗入口",
       "table": "表格頁面"
     },
+    "or": "或",
     "portal_description": "選擇目標語言，然後產生隨機題組或輸入他人分享的題組編號。",
     "random_quiz": "產生隨機題組",
     "restart": "再來一組",

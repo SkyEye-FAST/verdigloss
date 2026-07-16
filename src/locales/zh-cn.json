@@ -136,6 +136,7 @@
       "quiz": "测验门户",
       "table": "表格页面"
     },
+    "or": "或",
     "portal_description": "选择目标语言，然后生成随机题组或输入他人分享的题组编号。",
     "random_quiz": "生成随机题组",
     "restart": "再来一组",

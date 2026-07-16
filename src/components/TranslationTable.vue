@@ -22,6 +22,7 @@
         :total-items="filteredTableData.length"
         :items-per-page="itemsPerPage"
         :show-info="true"
+        position="top"
       />
 
       <p id="table-description" class="table-description">
@@ -83,6 +84,7 @@
         v-model:current-page="currentPage"
         :total-items="filteredTableData.length"
         :items-per-page="itemsPerPage"
+        position="bottom"
       />
     </template>
   </div>

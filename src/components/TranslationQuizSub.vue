@@ -9,13 +9,11 @@
       </p>
       <p v-if="routeError" role="alert" class="quiz-route-error">{{ routeError }}</p>
       <div class="quiz-info" v-show="!loadingQuestions && !showSummary && !routeError">
-        <p class="quiz-progress" aria-live="polite">
-          {{ progressDisplay }}
-        </p>
+        <div class="quiz-status" aria-live="polite">
+          <span class="quiz-progress">{{ progressDisplay }}</span>
+          <span v-if="isTimerMode" class="timer">{{ formatTime(remainingTime) }}</span>
+        </div>
         <div class="info">
-          <div v-if="isTimerMode" class="timer">
-            {{ formatTime(remainingTime) }}
-          </div>
           <div class="source">{{ currentQuestion?.source }}</div>
           <div class="key">{{ currentQuestion?.key }}</div>
           <div class="key rating" v-if="currentQuestion?.rating !== undefined">
@@ -89,21 +87,23 @@
         <div class="quiz-title" :class="currentLang.toLowerCase()">
           {{ $t('quiz.complete') }}
         </div>
-        <div v-if="isTimerMode" class="summary-info">
-          <i-material-symbols-timer style="font-size: smaller" />
-          <span class="summary-label">{{
-            $t('quiz.summary.used_time', { time: formatTime(usedTime) })
-          }}</span>
-        </div>
-        <div class="summary-info" v-if="queryLang === 'zh_cn'">
-          <i-material-symbols-star style="font-size: smaller" />
-          <span class="summary-label">{{
-            $t('quiz.summary.level', { level: totalLevel.toFixed(2) })
-          }}</span>
-          <i-material-symbols-stars style="font-size: smaller" />
-          <span class="summary-label">{{
-            $t('quiz.summary.score', { score: totalScore.toFixed(2) })
-          }}</span>
+        <div class="summary-statistics">
+          <div v-if="isTimerMode" class="summary-info">
+            <i-material-symbols-timer style="font-size: smaller" />
+            <span class="summary-label">{{
+              $t('quiz.summary.used_time', { time: formatTime(usedTime) })
+            }}</span>
+          </div>
+          <div class="summary-info" v-if="queryLang === 'zh_cn'">
+            <i-material-symbols-star style="font-size: smaller" />
+            <span class="summary-label">{{
+              $t('quiz.summary.level', { level: totalLevel.toFixed(2) })
+            }}</span>
+            <i-material-symbols-stars style="font-size: smaller" />
+            <span class="summary-label">{{
+              $t('quiz.summary.score', { score: totalScore.toFixed(2) })
+            }}</span>
+          </div>
         </div>
         <div
           class="quiz-summary-table-wrapper"
@@ -112,6 +112,11 @@
           :aria-label="$t('quiz.summary.results_region')"
         >
           <table class="quiz-summary-table">
+            <colgroup>
+              <col class="summary-source-column" />
+              <col class="summary-translation-column" />
+              <col class="summary-status-column" />
+            </colgroup>
             <caption class="sr-only">
               {{
                 $t('quiz.summary.caption')
@@ -609,11 +614,11 @@ onUnmounted(() => {
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   width: min(calc(100% - 2rem), 64rem);
   min-height: calc(100dvh - var(--app-bar-offset) - 4px);
   margin: 0 auto;
-  padding: clamp(2rem, 7vh, 5rem) 0 max(3rem, env(keyboard-inset-height, 0px));
+  padding: clamp(1.5rem, 5vh, 3.5rem) 0 max(3rem, env(keyboard-inset-height, 0px));
 }
 
 .quiz-loading,
@@ -635,13 +640,18 @@ onUnmounted(() => {
 .quiz-info {
   display: grid;
   justify-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   width: 100%;
   text-align: center;
 }
 
+.quiz-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
 .quiz-progress {
-  margin: 0;
   color: var(--muted);
 }
 
@@ -816,6 +826,13 @@ onUnmounted(() => {
   scroll-margin-top: calc(var(--app-bar-offset) + var(--space-3));
 }
 
+.summary-statistics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
 .summary-info {
   display: flex;
   align-items: center;
@@ -833,16 +850,14 @@ onUnmounted(() => {
 }
 
 .quiz-summary-table {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .quiz-summary-table th,
 .quiz-summary-table td {
-  min-width: 13rem;
   padding: 0.65rem 0.75rem;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -850,6 +865,16 @@ onUnmounted(() => {
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
+}
+
+.summary-source-column {
+  width: 38%;
+}
+.summary-translation-column {
+  width: 42%;
+}
+.summary-status-column {
+  width: 20%;
 }
 
 .quiz-summary-table th {
@@ -939,7 +964,7 @@ onUnmounted(() => {
   .quiz-container {
     width: min(calc(100% - 1rem), 64rem);
     min-height: calc(100dvh - var(--app-bar-offset) - 70px);
-    padding: var(--space-5) 0 max(6rem, env(keyboard-inset-height, 0px));
+    padding: var(--space-4) 0 max(6rem, env(keyboard-inset-height, 0px));
     align-content: start;
   }
 
@@ -958,7 +983,13 @@ onUnmounted(() => {
 
   .quiz-summary-table th,
   .quiz-summary-table td {
-    min-width: 10rem;
+    padding: 0.5rem;
+    font-size: 0.88rem;
+  }
+
+  .quiz-summary-table .status-cell {
+    padding-inline: 0.3rem;
+    font-size: 0.82rem;
   }
 
   .quiz-code-container {

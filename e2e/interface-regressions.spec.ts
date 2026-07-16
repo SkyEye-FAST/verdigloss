@@ -108,6 +108,9 @@ test('captures every repaired surface without layout regressions', async ({ page
   }
   await expect(page.locator('.quiz-summary')).toBeVisible()
   await expect(page.locator('.status-cell').first()).toHaveText('Skipped')
+  const statusBox = await page.locator('.status-cell').first().boundingBox()
+  expect(statusBox).not.toBeNull()
+  expect(statusBox!.x + statusBox!.width).toBeLessThanOrEqual((await page.viewportSize())!.width)
   await expectNoPageOverflow(page)
   await capture(page, screenshot('quiz-summary'))
 
@@ -139,6 +142,34 @@ test('keeps quiz progress concise and shows time only for timed quizzes', async 
   await expect(page.locator('.quiz-progress')).toHaveText('1 / 10')
   await expect(page.locator('.timer')).toHaveText(/^3:[0-5]\d$/)
   await expect(page.locator('.progress-bar')).toBeVisible()
+})
+
+test('keeps the query toggle persistent and the mobile navigation evenly divided', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const toggle = page.locator('.toggle-button')
+  const icon = toggle.locator('.toggle-button__icon')
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(icon).toHaveCount(1)
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await expect(toggle).toHaveClass(/is-collapsed/)
+  await expect(icon).toHaveCount(1)
+  await expect(page.locator('#query-settings')).toHaveCount(0)
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(page.locator('#query-settings')).toBeVisible()
+
+  const mobileNav = page.locator('.mobile-nav')
+  await expect(mobileNav.locator('a')).toHaveCount(3)
+  if ((await page.viewportSize())!.width <= 800) {
+    expect(
+      (await mobileNav.evaluate((element) => getComputedStyle(element).gridTemplateColumns))
+        .trim()
+        .split(/\s+/),
+    ).toHaveLength(3)
+  }
 })
 
 test('Simplified Chinese interface contains no known hardcoded English controls', async ({

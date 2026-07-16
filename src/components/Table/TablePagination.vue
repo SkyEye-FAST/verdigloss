@@ -1,5 +1,9 @@
 <template>
-  <nav class="pagination-controls" :aria-label="$t('table.pagination.label')">
+  <nav
+    class="pagination-controls"
+    :class="`pagination-controls--${position}`"
+    :aria-label="$t('table.pagination.label')"
+  >
     <p v-if="showInfo" class="pagination-info" aria-live="polite">
       {{ $t('table.pagination.total_rows') }}{{ totalItems }}
     </p>
@@ -59,33 +63,23 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { getPageWindow, type PageWindowEntry } from '@/features/table/pagination'
 const props = defineProps<{
   currentPage: number
   totalItems: number
   itemsPerPage: number
   showInfo?: boolean
+  position?: 'top' | 'bottom'
 }>()
 const emit = defineEmits<{ 'update:currentPage': [page: number] }>()
 const jumpPage = ref('')
 const totalPages = computed(() =>
   props.totalItems ? Math.ceil(props.totalItems / props.itemsPerPage) : 0,
 )
-const displayedPages = computed<Array<number | 'ellipsis'>>(() => {
-  if (totalPages.value <= 1) return totalPages.value ? [1] : []
-  const pages = new Set([
-    1,
-    totalPages.value,
-    props.currentPage - 1,
-    props.currentPage,
-    props.currentPage + 1,
-  ])
-  const ordered = [...pages]
-    .filter((page) => page > 0 && page <= totalPages.value)
-    .sort((a, b) => a - b)
-  return ordered.flatMap((page, index) =>
-    index && page - ordered[index - 1]! > 1 ? ['ellipsis', page] : [page],
-  )
-})
+const position = computed(() => props.position ?? 'bottom')
+const displayedPages = computed<PageWindowEntry[]>(() =>
+  getPageWindow(totalPages.value, props.currentPage),
+)
 function jump() {
   const page = Number(jumpPage.value)
   if (Number.isInteger(page) && page >= 1 && page <= totalPages.value)
@@ -100,7 +94,7 @@ function jump() {
   gap: 0.65rem;
   justify-items: center;
   width: min(100%, var(--content-max));
-  margin: var(--space-6) auto;
+  margin: var(--space-5) auto;
 }
 .pagination-info {
   margin: 0;
@@ -156,17 +150,41 @@ function jump() {
   white-space: nowrap;
 }
 @media (max-width: 560px) {
+  .pagination-controls--top .pagination-buttons {
+    display: none;
+  }
+  .pagination-controls--top {
+    margin-block: var(--space-3);
+  }
+  .pagination-controls--bottom {
+    position: sticky;
+    z-index: 20;
+    bottom: calc(70px + var(--safe-bottom) + var(--space-2));
+    width: fit-content;
+    max-width: calc(100% - 1rem);
+    margin-bottom: var(--space-3);
+    padding: 0.35rem;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    box-shadow: var(--shadow-sm);
+  }
   .pagination-buttons {
     gap: 0.2rem;
   }
   .page-button span,
-  .page-numbers .page-number:not(.active):not(:first-child):not(:last-child),
-  .ellipsis {
+  .page-jump {
     display: none;
   }
   .page-button {
-    min-width: var(--control-height);
-    padding: 0 0.5rem;
+    min-width: 2.4rem;
+    min-height: 2.4rem;
+    padding: 0 0.45rem;
+  }
+  .page-number {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
   }
 }
 </style>
