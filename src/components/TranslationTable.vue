@@ -29,10 +29,11 @@
 
       <div class="table-wrapper">
         <table>
+          <caption>Filtered Minecraft translation comparison</caption>
           <thead>
             <tr v-memo="[displayLanguages, useSansFont]">
-              <th class="key-column">keys</th>
-              <th v-for="lang in displayLanguages" :key="lang">
+              <th scope="col" class="key-column">keys</th>
+              <th v-for="lang in displayLanguages" :key="lang" scope="col" :class="{ selected: selectedLanguages.includes(lang) }">
                 {{ lang }}
               </th>
             </tr>
@@ -43,7 +44,7 @@
               :key="row.key"
               v-memo="[row, displayLanguages, useSansFont]"
             >
-              <td class="key-column">{{ row.key }}</td>
+              <th scope="row" class="key-column">{{ row.key }}</th>
               <td
                 :class="[lang.replace(/_/, '-'), { sans: useSansFont }]"
                 v-for="lang in displayLanguages"
@@ -55,6 +56,7 @@
           </tbody>
         </table>
       </div>
+      <p class="export-feedback" aria-live="polite">{{ exportFeedback }}</p>
 
       <Pagination
         v-if="usePagination"
@@ -104,6 +106,7 @@ const loading = ref(true)
 const usePagination = ref(true)
 const downloadAllData = ref(readBooleanPreference('table:downloadAllData', true))
 const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
+const exportFeedback = ref('')
 
 const { isDarkMode, toggleDarkMode } = useDarkMode()
 
@@ -169,6 +172,7 @@ function handleDownload({ type, all }: { type: string; all: boolean }) {
     else if (type === 'xml') downloadXml()
     else if (type === 'xlsx') downloadXlsx()
   }
+  exportFeedback.value = `${type.toUpperCase()} export started for ${all ? 'all filtered rows' : 'the current page'}.`
 }
 
 watch(
@@ -392,4 +396,19 @@ body.dark-mode table tr:hover td.key-column {
     padding: 6px 8px;
   }
 }
+
+/* Dense comparison stays a table; this wrapper owns horizontal touch scrolling. */
+.translation-table { min-height: calc(100dvh - 64px); padding: 0 0 var(--space-4); background: var(--page); }
+.table-wrapper { position: relative; width: min(100%, var(--content-max)); margin: 0 auto; overflow: auto; overscroll-behavior-inline: contain; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); }
+.table-wrapper::after { content: ""; position: sticky; right: 0; display: block; width: 16px; height: 1px; box-shadow: -12px 0 12px -12px rgb(0 0 0 / 45%); pointer-events: none; }
+.translation-table table { width: max-content; min-width: 100%; margin: 0; border: 0; border-collapse: separate; border-spacing: 0; background: var(--surface); box-shadow: none; color: var(--text); font-size: .875rem; }
+.translation-table caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.translation-table table td, .translation-table table th { min-width: 12rem; max-width: 22rem; padding: .65rem .75rem; border: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: visible; text-align: start; text-overflow: initial; white-space: normal; }
+.translation-table table thead th { position: sticky; top: 64px; z-index: 2; background: var(--surface-subtle); color: var(--text); box-shadow: 0 1px var(--border); }
+.translation-table table .key-column { position: sticky; left: 0; z-index: 1; min-width: 15rem; max-width: 15rem; background: var(--surface-raised); color: var(--text-secondary); font-family: var(--monospace-font); font-size: .78rem; font-weight: 700; }
+.translation-table table thead .key-column { z-index: 3; }
+.translation-table tbody tr:hover td, .translation-table tbody tr:hover .key-column { background: var(--accent-soft); }
+.translation-table thead th.selected { color: var(--accent-strong); box-shadow: inset 0 -3px var(--accent); }
+.export-feedback { min-height: 1.5rem; margin: var(--space-3) auto 0; color: var(--muted); font-size: .875rem; }
+@media (max-width: 767px) { .translation-table table thead th { top: 56px; } .translation-table table td, .translation-table table th { min-width: 10rem; } .translation-table table .key-column { min-width: 10.5rem; max-width: 10.5rem; } }
 </style>

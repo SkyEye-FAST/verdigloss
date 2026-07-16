@@ -1,17 +1,12 @@
 <template>
-  <Nav
-    :is-dark-mode="isDarkMode"
-    :use-sans-font="useSansFont"
-    @toggle-dark-mode="toggleDarkMode"
-    @toggle-sans-font="toggleSansFont"
-  />
   <div class="page-content">
     <h1 class="page-title" :class="currentLang.toLowerCase()">
       {{ $t('table.colors.title') }}
-      <span style="font-size: 75%; color: gray"> ({{ colorDataset.updatedAt }})</span>
     </h1>
-    <div style="text-align: center; margin-bottom: 1rem">
-      <label style="margin-right: 1.5em">
+    <p class="updated-at">Updated {{ colorDataset.updatedAt }}</p>
+    <fieldset class="color-variants">
+      <legend>Translation variants</legend>
+      <label>
         <input type="checkbox" v-model="showKoreanMixed" />
         {{ $t('table.colors.show_korean_mixed') }}
       </label>
@@ -19,18 +14,19 @@
         <input type="checkbox" v-model="showChuNom" />
         {{ $t('table.colors.show_chu_nom') }}
       </label>
-    </div>
+    </fieldset>
     <div class="table-wrapper">
       <table>
+        <caption>Colour names and identifiers across Minecraft translations</caption>
         <thead>
           <tr>
-            <th>Color / ID</th>
-            <th v-for="lang in languages" :key="lang">{{ lang }}</th>
+            <th scope="col">Color / ID</th>
+            <th v-for="lang in languages" :key="lang" scope="col">{{ lang }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="color in colorDataset.colors" :key="color.key">
-            <td class="key-column">
+            <th scope="row" class="key-column">
               <div class="key-cell-content">
                 <ColorIcon :src="color.icon" />
                 <ColorIcon :src="color.iconNew" />
@@ -38,7 +34,7 @@
                 <ColorPreview :color="color.textHex" />
                 {{ color.key }}
               </div>
-            </td>
+            </th>
             <td
               v-for="lang in languages"
               :key="lang"
@@ -64,28 +60,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
-import { useDarkMode } from '@/composables/useDarkMode'
 import { useLocale } from '@/composables/useLocale'
 import { colorDataset } from '@/features/colors/color-data'
 
-import Nav from '../PageNav.vue'
 import ColorIcon from './ColorTable/ColorIcon.vue'
 import ColorPreview from './ColorTable/ColorPreview.vue'
-import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
+import { readBooleanPreference } from '@/utils/storage'
 
-const { isDarkMode, toggleDarkMode } = useDarkMode()
 const { locale: currentLang } = useLocale()
 
 const showKoreanMixed = ref(true)
 const showChuNom = ref(true)
 const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
-
-const toggleSansFont = () => {
-  useSansFont.value = !useSansFont.value
-  writeStoredValue('table:useSansFont', useSansFont.value)
-}
 
 const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = [
   'en_us',
@@ -277,4 +265,21 @@ body.dark-mode .page-title {
     height: 14px;
   }
 }
+
+.page-content { width: min(100% - 2rem, var(--content-max)); min-height: auto; margin: 0 auto; padding: var(--space-6) 0; justify-content: start; }
+.page-title { margin: 0; color: var(--text); font: 700 clamp(1.6rem, 3vw, 2.25rem)/1.15 var(--serif-font); text-align: left; }
+.updated-at { margin: .35rem 0 var(--space-4); color: var(--muted); font-size: .9rem; }
+.color-variants { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: 0 0 var(--space-4); padding: var(--space-3) 0; border: 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.color-variants legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.color-variants label { display: flex; align-items: center; gap: .5rem; min-height: var(--control-height); color: var(--text-secondary); }
+.color-variants input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
+.table-wrapper { border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); overscroll-behavior-inline: contain; }
+.table-wrapper table { min-width: 900px; max-width: none; margin: 0; border: 0; background: var(--surface); color: var(--text); box-shadow: none; }
+.table-wrapper table td, .table-wrapper table th { border-color: var(--border); }
+.table-wrapper table thead th { top: 64px; background: var(--surface-subtle); color: var(--text); border-color: var(--border); }
+.table-wrapper .key-column { position: sticky; left: 0; z-index: 1; background: var(--surface-raised); }
+.table-wrapper table thead .key-column { z-index: 2; }
+.table-wrapper table tr:nth-child(even), .table-wrapper table tr:nth-child(even) .key-column { background: var(--surface); }
+.table-wrapper table tr:hover, .table-wrapper table tr:hover .key-column { background: var(--accent-soft); }
+@media (max-width: 767px) { .page-content { width: min(100% - 1rem, var(--content-max)); padding-top: var(--space-4); } .table-wrapper table thead th { top: 56px; } }
 </style>

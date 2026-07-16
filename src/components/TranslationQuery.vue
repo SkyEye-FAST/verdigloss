@@ -1,11 +1,5 @@
 <template>
   <div class="translation-query">
-    <Nav
-      :is-dark-mode="isDarkMode"
-      :use-sans-font="useSansFont"
-      @toggle-dark-mode="toggleDarkMode"
-      @toggle-sans-font="toggleSansFont"
-    />
     <div class="sidebar-layout" :class="{ 'sidebar-collapsed': !isSidebarOpen }">
       <div class="sidebar">
         <button class="toggle-button" @click="toggleSidebar">
@@ -65,16 +59,23 @@
                 <i-material-symbols-key class="label-icon" />
                 {{ $t('query.locale_key') }}
               </label>
-              <select
-                id="localeKey"
-                style="font-family: var(--monospace-font), monospace"
-                v-model="localeKey"
-                @change="search"
-              >
-                <option v-for="key in availableKeys" :key="key" :value="key">
-                  {{ key }}
-                </option>
-              </select>
+              <div class="query-combobox">
+                <input
+                  id="localeKey"
+                  ref="keyInput"
+                  v-model="localeKey"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  :aria-expanded="isKeyListOpen"
+                  aria-controls="query-key-results"
+                  :aria-activedescendant="activeKeyIndex >= 0 ? `query-key-${activeKeyIndex}` : undefined"
+                  @focus="isKeyListOpen = true"
+                  @keydown="handleKeyListKeydown"
+                />
+                <ul v-if="isKeyListOpen" id="query-key-results" class="query-key-results" role="listbox">
+                  <li v-for="(key, index) in availableKeys" :id="`query-key-${index}`" :key="key" role="option" :aria-selected="index === activeKeyIndex" :class="{ active: index === activeKeyIndex }" @mousedown.prevent="selectKey(key)">{{ key }}</li>
+                </ul>
+              </div>
             </div>
 
             <div class="input-group">
@@ -98,20 +99,22 @@
         </div>
       </div>
       <div class="main-content">
-        <div v-if="error" class="error">{{ error }}</div>
+        <p class="result-count" aria-live="polite">{{ resultAnnouncement }}</p>
+        <div v-if="error" class="error" role="alert">{{ error }}</div>
         <div v-if="selectedTranslation" class="result-section">
           <div class="title" :class="{ sans: useSansFont }">{{ selectedTranslation.source }}</div>
           <p class="subtitle">{{ selectedTranslation.key }}</p>
           <table :class="'table-' + (selectedTranslation?.category || 'block')">
+            <caption class="sr-only">Translations for {{ selectedTranslation.source }}</caption>
             <thead>
               <tr>
-                <th
+                <th scope="col"
                   :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
                   class="table-header"
                 >
                   {{ $t('query.table.langName') }}
                 </th>
-                <th
+                <th scope="col"
                   :class="[currentLang.toLowerCase(), { sans: useSansFont }]"
                   class="table-header"
                 >
@@ -126,9 +129,9 @@
                 :lang="lang.htmlLang"
                 :class="[lang.code.replace(/_/, '-'), { sans: useSansFont }]"
               >
-                <td class="lang-name">{{ lang.displayName }}</td>
+                <th scope="row" class="lang-name">{{ lang.displayName }}</th>
                 <td class="string">
-                  {{ selectedTranslation?.translations.find((t) => t.code === lang.code)?.text }}
+                  {{ selectedTranslation?.translations.find((t) => t.code === lang.code)?.text || '—' }}
                 </td>
               </tr>
             </tbody>
@@ -159,7 +162,6 @@ import { getSearchIndex, type QueryMode } from '@/features/query/search-index'
 import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import { readLanguageList, readStringPreference, writeStoredValue, writeStringPreference, readBooleanPreference } from '@/utils/storage'
 
-import Nav from './PageNav.vue'
 import LanguageSelector from './Query/LanguageSelector.vue'
 
 const { t } = useI18n()
@@ -200,7 +202,7 @@ const selectedLanguages = ref<LanguageCode[]>(
 const translations = ref<Translation[]>([])
 const error = ref('')
 const selectedTranslation = ref<SelectedTranslation | null>(null)
-const { isDarkMode, toggleDarkMode } = useDarkMode()
+const { isDarkMode } = useDarkMode()
 
 onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
@@ -216,6 +218,9 @@ async function ensureLanguages(codes: readonly LanguageCode[]) {
   langFiles.value = { ...langFiles.value, ...(await loadLanguages(missing)) }
 }
 
+const keyInput = ref<HTMLInputElement | null>(null)
+const isKeyListOpen = ref(false)
+const activeKeyIndex = ref(-1)
 const availableKeys = computed(() => {
   if (!queryContent.value) return []
   const language = queryMode.value === 'translation' ? getLanguageCode(queryLang.value) : 'en_us'
@@ -224,6 +229,26 @@ const availableKeys = computed(() => {
   const mode = queryMode.value === 'source' ? 'source' : queryMode.value
   return getSearchIndex(language, data).search(mode, queryContent.value, 100).map((result) => result.key)
 })
+const resultAnnouncement = computed(() => {
+  if (error.value) return error.value
+  if (!queryContent.value.trim()) return 'Enter a query to search translation keys.'
+  return `${availableKeys.value.length} matching translation ${availableKeys.value.length === 1 ? 'key' : 'keys'} available.`
+})
+
+function selectKey(key: string) {
+  localeKey.value = key
+  isKeyListOpen.value = false
+  activeKeyIndex.value = -1
+  void search()
+  keyInput.value?.focus()
+}
+
+function handleKeyListKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') { isKeyListOpen.value = false; activeKeyIndex.value = -1; return }
+  if (event.key === 'ArrowDown') { event.preventDefault(); isKeyListOpen.value = true; activeKeyIndex.value = Math.min(activeKeyIndex.value + 1, availableKeys.value.length - 1); return }
+  if (event.key === 'ArrowUp') { event.preventDefault(); activeKeyIndex.value = Math.max(activeKeyIndex.value - 1, 0); return }
+  if (event.key === 'Enter' && activeKeyIndex.value >= 0) { event.preventDefault(); const key = availableKeys.value[activeKeyIndex.value]; if (key) selectKey(key) }
+}
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang.code))
@@ -430,10 +455,6 @@ onMounted(async () => {
 
 const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
 
-const toggleSansFont = () => {
-  useSansFont.value = !useSansFont.value
-  writeStoredValue('table:useSansFont', useSansFont.value)
-}
 </script>
 
 <style scoped>
@@ -1071,4 +1092,30 @@ body.dark-mode .toggle-button:hover {
     transition: margin-left 0.3s ease;
   }
 }
+
+/* Phase three task layout overrides the former fixed-width sidebar. */
+.translation-query { min-height: calc(100dvh - 64px); }
+.sidebar-layout { display: grid; grid-template-columns: minmax(250px, 320px) minmax(0, 1fr); min-height: auto; align-items: start; max-width: var(--content-max); margin: 0 auto; padding: var(--space-6); gap: var(--space-8); }
+.sidebar, .sidebar-collapsed .sidebar { position: sticky; top: calc(64px + var(--space-4)); width: auto; height: auto; padding: 0; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-sm); }
+.sidebar-collapsed .sidebar { width: auto; }
+.toggle-button { position: static; width: 100%; min-height: var(--control-height); border-radius: var(--radius-md) var(--radius-md) 0 0; background: var(--accent); }
+.settings { padding: var(--space-5); }
+.main-content, .sidebar-collapsed .main-content { min-height: 0; margin: 0; padding: 0; align-items: start; justify-content: stretch; }
+.result-count { min-height: 1.5rem; margin: 0 0 var(--space-3); color: var(--muted); font-size: .9rem; }
+.result-section { width: min(100%, 960px); margin: 0; padding: clamp(1rem, 3vw, 2.5rem); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-sm); }
+.title { color: var(--text); font-size: clamp(1.6rem, 4vw, 3rem); line-height: 1.15; }
+.subtitle { overflow-wrap: anywhere; color: var(--muted); font-family: var(--monospace-font); }
+.result-section table { width: 100%; border-color: var(--border-strong); background: var(--surface); color: var(--text); }
+.result-section th, .result-section td { border-color: var(--border); }
+.result-section .table-header { background: var(--surface-subtle); color: var(--text); }
+.result-section .lang-name { color: var(--text-secondary); font-family: var(--font-ui); font-size: .9rem; font-weight: 700; }
+.result-section .string { overflow-wrap: anywhere; }
+.minecraft-title { margin-top: var(--space-5); color: var(--muted); font-size: .82rem; text-align: left; }
+.query-combobox { position: relative; }
+.query-key-results { position: absolute; z-index: 20; top: calc(100% + .25rem); right: 0; left: 0; max-height: 14rem; margin: 0; padding: 0; overflow: auto; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-raised); box-shadow: var(--shadow-md); list-style: none; }
+.query-key-results li { padding: .5rem .7rem; overflow: hidden; font: .8rem var(--monospace-font); text-overflow: ellipsis; white-space: nowrap; }
+.query-key-results li.active, .query-key-results li:hover { background: var(--accent-soft); color: var(--accent-strong); }
+@media (max-width: 1023px) { .sidebar-layout { grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); padding: var(--space-4); gap: var(--space-4); } .sidebar { top: calc(64px + var(--space-2)); } }
+@media (max-width: 767px) { .sidebar-layout { display: block; padding: var(--space-3); } .sidebar, .sidebar-collapsed .sidebar { position: static; margin-bottom: var(--space-4); } .sidebar-collapsed .settings { display: none; } .result-section { padding: var(--space-4); } .result-section table, .result-section tbody, .result-section tr, .result-section th, .result-section td { display: block; } .result-section thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .result-section tr { padding: .75rem 0; border-bottom: 1px solid var(--border); } .result-section th, .result-section td { padding: 0; border: 0; text-align: start; } .result-section .string { margin-top: .25rem; font-size: 1.05rem; } }
+@media (max-height: 500px) and (orientation: landscape) { .sidebar-layout { grid-template-columns: 220px minmax(0, 1fr); } .sidebar { position: static; } }
 </style>

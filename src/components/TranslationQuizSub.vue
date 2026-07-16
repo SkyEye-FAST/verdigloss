@@ -3,15 +3,10 @@
     <div class="progress-bar" v-if="isTimerMode">
       <div class="progress-fill" :style="{ width: progressWidth + '%' }"></div>
     </div>
-    <div class="nav-buttons">
-      <button class="nav-button" @click="toggleDarkMode">
-        <i-material-symbols-light-mode v-if="isDarkMode" style="font-size: 1.5em" />
-        <i-material-symbols-dark-mode v-else style="font-size: 1.5em" />
-      </button>
-    </div>
     <div class="quiz-container">
       <p v-if="routeError" role="alert" class="quiz-route-error">{{ routeError }}</p>
       <div class="quiz-info" v-show="!showSummary && !routeError">
+        <p class="quiz-progress" aria-live="polite">Question {{ currentIndex + 1 }} of {{ questions.length }}. {{ isTimerMode ? `${formatTime(remainingTime)} remaining.` : 'Untimed quiz.' }}</p>
         <div class="info">
           <div v-if="isTimerMode" class="timer">
             {{ formatTime(remainingTime) }}
@@ -30,7 +25,7 @@
             <span>{{ currentQuestion?.rating.toFixed(2) }}</span>
           </div>
         </div>
-        <div class="quiz-boxes" :class="queryLang">
+        <div class="quiz-boxes" :class="queryLang" aria-label="Answer character states: green correct, yellow present, red hint, blue hinted correct">
           <div
             v-for="(box, index) in boxes"
             :key="index"
@@ -79,11 +74,13 @@
           <i-material-symbols-stars style="font-size: smaller" />
           <span class="summary-label">{{ totalScore.toFixed(2) }} pts</span>
         </div>
-        <table class="quiz-summary-table">
+        <div class="quiz-summary-table-wrapper"><table class="quiz-summary-table">
+          <caption class="sr-only">Question results</caption>
           <thead :class="currentLang.toLowerCase()">
             <tr>
-              <th>{{ $t('quiz.source') }}</th>
-              <th>{{ $t('quiz.translation') }}</th>
+              <th scope="col">{{ $t('quiz.source') }}</th>
+              <th scope="col">{{ $t('quiz.translation') }}</th>
+              <th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -98,17 +95,18 @@
                   >{{ char }}</span
                 >
               </td>
+              <td>{{ questionResults[question.key]?.completion || 'unanswered' }}</td>
             </tr>
           </tbody>
-        </table>
+        </table></div>
         <div class="quiz-code-container">
           <div class="quiz-code">{{ quizCode }}</div>
-          <span style="font-size: 1.2em">
-            <i-material-symbols-content-copy v-if="!isCopied" class="btn" @click="copyCode" />
-            <i-material-symbols-check v-else class="btn" />
-            <i-material-symbols-share class="btn" v-if="canShare" @click="shareResult" />
+          <span class="quiz-code-actions">
+            <button type="button" :aria-label="isCopied ? 'Quiz code copied' : 'Copy quiz code'" @click="copyCode"><i-material-symbols-check v-if="isCopied" aria-hidden="true" /><i-material-symbols-content-copy v-else aria-hidden="true" /></button>
+            <button v-if="canShare" type="button" aria-label="Share quiz result" @click="shareResult"><i-material-symbols-share aria-hidden="true" /></button>
           </span>
         </div>
+        <p class="quiz-feedback" aria-live="polite">{{ isCopied ? 'Quiz code copied.' : '' }}</p>
         <p v-if="actionError" role="alert" class="quiz-route-error">{{ actionError }}</p>
         <div class="quiz-summary-buttons">
           <button class="button" @click="restartQuiz">
@@ -124,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, shallowRef, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -172,10 +170,11 @@ interface StoredQuestionResult {
 const route = useRoute()
 const router = useRouter()
 
-const { isDarkMode, toggleDarkMode } = useDarkMode()
+const { isDarkMode } = useDarkMode()
 
 const currentIndex = ref(0)
 const inputText = ref('')
+const inputRef = ref<HTMLInputElement | null>(null)
 const showSummary = ref(false)
 const isComposing = ref(false)
 const isLocked = ref(false)
@@ -331,6 +330,7 @@ const advanceQuestion = () => {
   }
   currentIndex.value += 1
   inputText.value = ''
+  void nextTick(() => inputRef.value?.focus())
 }
 
 const finishTimedQuiz = () => {
@@ -567,17 +567,6 @@ onUnmounted(() => {
 
 .quiz-controls button[disabled] {
   opacity: 0.5 !important;
-}
-
-button {
-  background-color: transparent !important;
-}
-
-select:hover,
-input:hover,
-button:hover {
-  border-width: 3px !important;
-  border-color: inherit;
 }
 
 /* Info & Typography */
@@ -1092,4 +1081,21 @@ body.dark-mode .timer {
     font-size: 1.2em;
   }
 }
+
+.translation-quiz-sub { min-height: calc(100dvh - 64px); background: var(--page); }
+.quiz-container { width: min(100% - 2rem, 880px); min-height: calc(100dvh - 64px); margin: 0 auto; padding: clamp(1rem, 4vw, 3rem) 0; color: var(--text); }
+.quiz-info { width: 100%; }
+.quiz-progress { margin: 0 0 var(--space-4); color: var(--muted); font-size: .9rem; }
+.source { color: var(--text); font-size: clamp(1.8rem, 6vw, 4.2rem); overflow-wrap: anywhere; }
+.key { max-width: 100%; overflow-wrap: anywhere; color: var(--muted); font-size: clamp(.8rem, 2vw, 1.25rem); }
+.timer { color: var(--accent-strong); font-size: clamp(1.2rem, 3vw, 1.8rem); }
+.quiz-boxes { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; max-width: 100%; margin-top: var(--space-5); }
+.translation-character { display: grid; place-items: center; width: clamp(2.7rem, 8vw, 5.25rem); height: clamp(2.7rem, 8vw, 5.25rem); margin: 0; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-subtle); color: var(--text); font-size: clamp(1.2rem, 4vw, 2.5rem); line-height: 1; }
+.translation-character.correct { background: var(--success); color: #fff; }.translation-character.present { background: var(--warning); color: #241a00; }.translation-character.hinted { background: var(--error); color: #fff; }.translation-character.hinted-correct { background: var(--info); color: #fff; }
+.quiz-input { width: min(100%, 42rem); min-height: var(--control-height); height: auto; margin-top: var(--space-6); padding: .65rem .8rem; border-color: var(--border-strong); background: var(--surface); color: var(--text); font-size: clamp(1rem, 3vw, 1.35rem); }
+.quiz-controls { width: min(100%, 42rem); height: auto; margin-top: var(--space-3); gap: var(--space-3); }.quiz-controls button { min-height: var(--control-height); border-color: var(--border-strong); background: var(--surface); color: var(--text); font-size: 1rem; }.quiz-controls button:hover { border-width: 2px !important; background: var(--accent-soft); }
+.quiz-summary { width: 100%; padding: clamp(1rem, 3vw, 2rem); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text); }.quiz-summary-table-wrapper { max-width: 100%; overflow: auto; overscroll-behavior: contain; }.quiz-summary-table { width: 100%; min-width: 560px; background: var(--surface); color: var(--text); }.quiz-summary-table tr td, .quiz-summary-table thead th { border-color: var(--border); }.quiz-summary-table tr:nth-child(odd), .quiz-summary-table tr:nth-child(even) { background: var(--surface); }.quiz-summary-table tr:nth-child(even) { background: var(--surface-subtle); }
+.quiz-code-container { white-space: normal; }.quiz-code-actions { display: inline-flex; gap: .25rem; }.quiz-code-actions button { display: grid; place-items: center; min-width: var(--control-height); min-height: var(--control-height); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }.quiz-feedback { min-height: 1.5rem; margin: .4rem 0 0; color: var(--success); }
+@media (max-width: 767px) { .quiz-container { width: min(100% - 1rem, 880px); min-height: auto; padding: var(--space-4) 0; } .quiz-summary { padding: var(--space-4); } }
+@media (max-height: 500px) and (orientation: landscape) { .quiz-container { min-height: auto; padding: var(--space-3) 0; } .translation-character { width: 2.5rem; height: 2.5rem; } }
 </style>

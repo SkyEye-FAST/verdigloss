@@ -1,267 +1,47 @@
 <template>
-  <div class="pagination-controls">
-    <div v-if="showInfo" class="pagination-info">
-      {{ $t('table.pagination.total_rows') }}{{ totalItems }}
-    </div>
+  <nav class="pagination-controls" aria-label="Table pagination">
+    <p v-if="showInfo" class="pagination-info" aria-live="polite">{{ $t('table.pagination.total_rows') }}{{ totalItems }}</p>
     <div class="pagination-buttons">
-      <button
-        v-if="currentPage > 1"
-        @click="$emit('update:currentPage', currentPage - 1)"
-        class="page-button prev"
-      >
-        <i-material-symbols-arrow-back class="icon" />
-        {{ $t('table.pagination.previous') }}
+      <button class="page-button" type="button" :disabled="currentPage <= 1 || !totalItems" aria-label="Previous page" @click="emit('update:currentPage', currentPage - 1)">
+        <i-material-symbols-arrow-back aria-hidden="true" /><span>Previous</span>
       </button>
-
       <div class="page-numbers">
-        <template v-for="(pageNum, index) in displayedPages" :key="index">
-          <input
-            v-if="typeof pageNum === 'object'"
-            type="text"
-            class="page-input"
-            :placeholder="'...'"
-            @change="handlePageInputChange"
-          />
-          <button
-            v-else
-            @click="typeof pageNum === 'number' && $emit('update:currentPage', pageNum)"
-            :class="['page-number', { active: currentPage === pageNum }]"
-          >
-            {{ pageNum }}
-          </button>
+        <template v-for="(page, index) in displayedPages" :key="`${page}-${index}`">
+          <span v-if="page === 'ellipsis'" class="ellipsis" aria-hidden="true">…</span>
+          <button v-else class="page-number" :class="{ active: currentPage === page }" type="button" :aria-current="currentPage === page ? 'page' : undefined" :aria-label="`Page ${page}`" @click="emit('update:currentPage', page)">{{ page }}</button>
         </template>
       </div>
-
-      <button
-        v-if="currentPage < totalPages"
-        @click="$emit('update:currentPage', currentPage + 1)"
-        class="page-button next"
-      >
-        {{ $t('table.pagination.next') }}
-        <i-material-symbols-arrow-forward class="icon" />
-      </button>
+      <label class="page-jump"><span class="sr-only">Jump to page</span><input v-model="jumpPage" type="number" min="1" :max="totalPages || 1" inputmode="numeric" placeholder="#" aria-label="Jump to page" @change="jump" /></label>
+      <button class="page-button" type="button" :disabled="currentPage >= totalPages || !totalItems" aria-label="Next page" @click="emit('update:currentPage', currentPage + 1)"><span>Next</span><i-material-symbols-arrow-forward aria-hidden="true" /></button>
     </div>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
-const props = defineProps<{
-  currentPage: number
-  totalItems: number
-  itemsPerPage: number
-  showInfo?: boolean
-}>()
-
-const emit = defineEmits<{
-  'update:currentPage': [page: number]
-}>()
-
-const totalPages = computed(() => {
-  return Math.ceil(props.totalItems / props.itemsPerPage)
+import { computed, ref } from 'vue'
+const props = defineProps<{ currentPage: number; totalItems: number; itemsPerPage: number; showInfo?: boolean }>()
+const emit = defineEmits<{ 'update:currentPage': [page: number] }>()
+const jumpPage = ref('')
+const totalPages = computed(() => props.totalItems ? Math.ceil(props.totalItems / props.itemsPerPage) : 0)
+const displayedPages = computed<Array<number | 'ellipsis'>>(() => {
+  if (totalPages.value <= 1) return totalPages.value ? [1] : []
+  const pages = new Set([1, totalPages.value, props.currentPage - 1, props.currentPage, props.currentPage + 1])
+  const ordered = [...pages].filter((page) => page > 0 && page <= totalPages.value).sort((a, b) => a - b)
+  return ordered.flatMap((page, index) => index && page - ordered[index - 1]! > 1 ? ['ellipsis', page] : [page])
 })
-
-const handlePageInputChange = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const value = parseInt(input.value)
-  if (!isNaN(value) && value > 0 && value <= totalPages.value) {
-    emit('update:currentPage', value)
-  }
-  input.value = ''
-}
-
-const displayedPages = computed(() => {
-  const delta = 2
-  const range: number[] = []
-  const rangeWithDots: Array<number | string | { type: string; position: number }> = []
-  let l: number | undefined
-
-  range.push(1)
-
-  for (let i = props.currentPage - delta; i <= props.currentPage + delta; i++) {
-    if (i < totalPages.value && i > 1) {
-      range.push(i)
-    }
-  }
-
-  if (!range.includes(totalPages.value)) {
-    range.push(totalPages.value)
-  }
-
-  for (let i = 0; i < range.length; i++) {
-    const current = range[i]
-    if (l !== undefined && current !== undefined) {
-      const diff = current - l
-      if (i === range.length - 1 && diff > 2) {
-        rangeWithDots.push({ type: 'input', position: l + 1 })
-      } else if (diff === 2) {
-        rangeWithDots.push(l + 1)
-      } else if (diff !== 1) {
-        rangeWithDots.push('...')
-      }
-    }
-    if (current !== undefined) {
-      rangeWithDots.push(current)
-      l = current
-    }
-  }
-
-  return rangeWithDots
-})
+function jump() { const page = Number(jumpPage.value); if (Number.isInteger(page) && page >= 1 && page <= totalPages.value) emit('update:currentPage', page); jumpPage.value = '' }
 </script>
 
 <style scoped>
-.pagination-controls {
-  margin: 1.5rem auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  max-width: 1600px;
-  width: calc(100% - 20px);
-}
-
-.pagination-info {
-  color: #70757a;
-  font-size: 0.9rem;
-}
-
-.pagination-buttons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.page-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  background: none;
-  color: #1a73e8;
-  font-size: 0.9rem;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.page-button:hover {
-  background: #f8f9fa;
-}
-
-.page-button .icon {
-  font-size: 1.2rem;
-}
-
-.page-numbers {
-  display: flex;
-  gap: 0.3rem;
-}
-
-.page-number {
-  min-width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: none;
-  color: #4d5156;
-  font-size: 0.9rem;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.page-number.active {
-  background: #1a73e8;
-  color: white;
-}
-
-.page-number:not(.active):hover {
-  background: #f8f9fa;
-}
-
-.page-input {
-  width: 50px;
-  height: 40px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: none;
-  color: #4d5156;
-  font-size: 0.9rem;
-  padding: 0 8px;
-  margin: 0 4px;
-  transition: all 0.3s ease;
-}
-
-.page-input:focus {
-  outline: none;
-  border-color: #1a73e8;
-  background: #f8f9fa;
-}
-
-.page-input::placeholder {
-  color: #70757a;
-}
-
-@media (max-width: 768px) {
-  .pagination-controls {
-    flex-direction: column;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .page-button {
-    padding: 0.2rem 0.6rem;
-  }
-
-  .page-input {
-    width: 32px;
-    height: 32px;
-    font-size: 0.8rem;
-  }
-}
-
-body.dark-mode .pagination-info {
-  color: #9aa0a6;
-}
-
-body.dark-mode .page-button {
-  color: #8ab4f8;
-}
-
-body.dark-mode .page-button:hover {
-  background: #303134;
-}
-
-body.dark-mode .page-number {
-  color: #e8eaed;
-}
-
-body.dark-mode .page-number.active {
-  background: #8ab4f8;
-  color: #202124;
-}
-
-body.dark-mode .page-number:not(.active):hover {
-  background: #303134;
-}
-
-body.dark-mode .page-input {
-  background: #2a2a2a;
-  border-color: #444;
-  color: #e0e0e0;
-}
-
-body.dark-mode .page-input:focus {
-  border-color: #7aa2ea;
-  background: #333;
-  box-shadow: 0 0 0 2px rgba(122, 162, 234, 0.2);
-}
-
-body.dark-mode .page-input::placeholder {
-  color: #888;
-}
+.pagination-controls { display: grid; gap: .65rem; justify-items: center; width: min(100%, var(--content-max)); margin: var(--space-6) auto; }
+.pagination-info { margin: 0; color: var(--muted); font-size: .9rem; }
+.pagination-buttons, .page-numbers { display: flex; align-items: center; gap: .35rem; }
+.page-button, .page-number, .page-jump input { min-height: var(--control-height); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); }
+.page-button { display: inline-flex; align-items: center; gap: .35rem; padding: 0 .7rem; }
+.page-number { min-width: var(--control-height); padding: 0 .4rem; }
+.page-number.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+.page-jump input { width: 3.25rem; padding: .25rem .45rem; text-align: center; }
+.ellipsis { min-width: 1.5rem; color: var(--muted); text-align: center; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+@media (max-width: 560px) { .pagination-buttons { gap: .2rem; } .page-button span, .page-numbers .page-number:not(.active):not(:first-child):not(:last-child), .ellipsis { display: none; } .page-button { min-width: var(--control-height); padding: 0 .5rem; } }
 </style>

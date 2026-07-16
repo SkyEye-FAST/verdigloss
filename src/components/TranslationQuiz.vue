@@ -1,9 +1,9 @@
 <template>
   <div class="sans" :class="currentLang.toLowerCase()">
-    <Nav :is-dark-mode="isDarkMode" @toggle-dark-mode="toggleDarkMode" />
-    <div class="quiz-container">
-      <div class="quiz-title" :class="currentLang.toLowerCase()">{{ $t('quiz.title') }}</div>
-      <button class="quiz-btn-primary" @click="startRandomQuiz">
+    <main class="quiz-container">
+      <h1 class="quiz-title" :class="currentLang.toLowerCase()">{{ $t('quiz.title') }}</h1>
+      <p class="quiz-description">Choose a target language, then start a generated quiz or enter a code shared with you.</p>
+      <button class="quiz-btn-primary" type="button" :disabled="!selectedLanguageAvailable" @click="startRandomQuiz">
         {{ $t('quiz.random_quiz') }}
       </button>
       <div class="quiz-select-group">
@@ -32,31 +32,11 @@
           :placeholder="$t('quiz.code_placeholder')"
           @keyup.enter="startQuiz"
         />
-        <button class="quiz-enter-button" @click="startQuiz">
+        <button class="quiz-enter-button" type="button" @click="startQuiz">
           {{ $t('quiz.nav.enter') }}
         </button>
       </div>
-      <div class="quiz-actions">
-        <div class="quiz-actions-buttons">
-          <router-link to="/" class="quiz-actions-button">
-            <i-material-symbols-manage-search class="icon" />
-            {{ $t('quiz.nav.query') }}
-          </router-link>
-          <router-link to="/table" class="quiz-actions-button">
-            <i-material-symbols-table class="icon" />
-            {{ $t('quiz.nav.table') }}
-          </router-link>
-          <a
-            href="https://github.com/SkyEye-FAST/verdigloss"
-            class="quiz-actions-button"
-            target="_blank"
-          >
-            <i-fa6-brands-github class="icon" />
-            GitHub
-          </a>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
 </template>
 
@@ -67,7 +47,6 @@ import { useRouter } from 'vue-router'
 
 import quizIdData from '@/assets/data/quiz-id-map.json'
 import legacyQuizIdMap from '@/assets/data/id.json'
-import { useDarkMode } from '@/composables/useDarkMode'
 import { useLocale } from '@/composables/useLocale'
 import { languageRegistry, type LanguageCode } from '@/data/languages'
 import { QUIZ_QUESTION_COUNT, buildEligibleQuestionPool, getQuizLanguageAvailability } from '@/domain/quiz'
@@ -75,7 +54,6 @@ import { decodeQuizCode, encodeQuizCode } from '@/domain/quiz-code'
 import { shuffle } from '@/domain/shuffle'
 import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 
-import Nav from './PageNav.vue'
 
 const router = useRouter()
 const { locale: currentLang } = useLocale()
@@ -98,6 +76,7 @@ const quizLanguages = computed(() =>
         : { language: language.code, eligibleCount: QUIZ_QUESTION_COUNT, available: true }),
     })),
 )
+const selectedLanguageAvailable = computed(() => quizLanguages.value.find((language) => language.code === queryLang.value)?.available ?? false)
 
 const generateQuizCode = async () => {
   loadedQuizData.value = { ...loadedQuizData.value, ...(await loadLanguages(['en_us', queryLang.value])) }
@@ -133,8 +112,6 @@ const startQuiz = () => {
   }
   router.push({ name: 'quiz-code', params: { code }, query: { l: queryLang.value, t: timerMode.value ? '1' : '0' } })
 }
-
-const { isDarkMode, toggleDarkMode } = useDarkMode()
 
 </script>
 
@@ -440,4 +417,11 @@ body.dark-mode .quiz-container .quiz-actions-button:hover {
     height: 16px;
   }
 }
+
+.quiz-container { position: static; width: min(100% - 2rem, 680px); min-height: calc(100dvh - 64px); margin: 0 auto; padding: clamp(2rem, 8vw, 6rem) 0; transform: none; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--text); text-align: left; }
+.quiz-title { margin: 0; color: var(--text); font: 700 clamp(2rem, 6vw, 3.5rem)/1.05 var(--serif-font); }.quiz-description { max-width: 48rem; margin: var(--space-4) 0 var(--space-8); color: var(--text-secondary); }
+.quiz-btn-primary, .quiz-enter-button { min-height: var(--control-height); border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--accent); color: #fff; font-weight: 700; }.quiz-btn-primary:hover, .quiz-enter-button:hover { background: var(--accent-strong); }
+.quiz-select-group { display: grid; grid-template-columns: 1fr auto auto; gap: var(--space-3); align-items: center; margin: var(--space-6) 0; }.quiz-select-group label:first-child { grid-column: 1 / -1; color: var(--text-secondary); font-weight: 700; }.quiz-select-group select, .quiz-input-group input { min-height: var(--control-height); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); }
+.timer-checkbox { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }.timer-label { color: var(--text-secondary); }.quiz-input-group { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); width: 100%; }.quiz-input-group input { width: 100%; padding: .5rem .75rem; }.quiz-error { margin: var(--space-3) 0; color: var(--error); }.quiz-actions { display: none; }
+@media (max-width: 767px) { .quiz-container { width: min(100% - 1rem, 680px); min-height: auto; padding: var(--space-6) 0; } .quiz-select-group { grid-template-columns: 1fr auto; }.quiz-select-group select { grid-column: 1 / -1; } .quiz-input-group { grid-template-columns: 1fr; } }
 </style>
