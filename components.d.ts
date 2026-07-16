@@ -43,6 +43,7 @@ declare module 'vue' {
     IMaterialSymbolsTimer: typeof import('~icons/material-symbols/timer')['default']
     LanguageSelector: typeof import('./src/components/Query/LanguageSelector.vue')['default']
     NotFoundPage: typeof import('./src/components/NotFoundPage.vue')['default']
+    PageNav: typeof import('./src/components/PageNav.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TableHeader: typeof import('./src/components/Table/TableHeader.vue')['default']
