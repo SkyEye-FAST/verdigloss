@@ -73,7 +73,7 @@
     <main id="main-content" class="app-main">
       <router-view v-slot="{ Component, route: activeRoute }">
         <Transition :name="hasRenderedRoute ? 'route' : ''" mode="out-in">
-          <component :is="Component" :key="activeRoute.name" @vnode-mounted="markRouteRendered" />
+            <component :is="Component" :key="activeRoute.name" @vue:mounted="markRouteRendered" />
         </Transition>
       </router-view>
     </main>

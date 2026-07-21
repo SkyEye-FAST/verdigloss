@@ -33,11 +33,11 @@ const definitions: Omit<
   'dataSource' | 'availableInQuery' | 'availableInTable' | 'quiz'
 >[] = [
   ['en_us', 'English (United States)', 'en-US'],
-  ['zh_cn', '简体中文（中国大陆）', 'zh-Hans-CN'],
-  ['zh_hk', '繁體中文（香港特別行政區）', 'zh-Hant-HK'],
-  ['zh_tw', '繁體中文（台灣）', 'zh-Hant-TW'],
-  ['lzh', '文言（華夏）', 'lzh'],
-  ['ja_jp', '日本語（日本）', 'ja-JP'],
+  ['zh_cn', '简体中文 (中国大陆)', 'zh-Hans-CN'],
+  ['zh_hk', '繁體中文 (香港特別行政區)', 'zh-Hant-HK'],
+  ['zh_tw', '繁體中文 (台灣)', 'zh-Hant-TW'],
+  ['lzh', '文言 (華夏)', 'lzh'],
+  ['ja_jp', '日本語 (日本)', 'ja-JP'],
   ['ko_kr', '한국어(대한민국)', 'ko-KR'],
   ['vi_vn', 'Tiếng Việt (Việt Nam)', 'vi-VN'],
   ['de_de', 'Deutsch (Deutschland)', 'de-DE'],

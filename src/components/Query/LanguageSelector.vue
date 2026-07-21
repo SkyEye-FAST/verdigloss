@@ -1,8 +1,8 @@
 <template>
-  <div ref="root" class="language-selector">
+  <div ref="root" class="relative z-20 min-w-0 w-full max-w-full">
     <button
       ref="trigger"
-      class="language-selector__trigger interactive-control"
+      class="interactive-control flex min-h-[var(--control-height)] w-full items-center justify-between gap-2 overflow-hidden rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 py-2 text-left text-content shadow-app-sm"
       type="button"
       :aria-expanded="isOpen"
       :aria-controls="popupId"
@@ -10,38 +10,71 @@
       @click="toggleDropdown"
       @keydown.escape="closeDropdown"
     >
-      <span class="language-selector__summary">{{ selectedSummary }}</span>
-      <i-material-symbols-expand-more aria-hidden="true" :class="{ 'is-rotated': isOpen }" />
+      <span class="flex min-w-0 flex-1 flex-wrap gap-1">
+        <template v-if="selectedOptions.length">
+          <span
+            v-for="option in selectedOptions"
+            :key="option.value"
+            class="rounded bg-accent-soft px-1.5 py-0.5 text-[0.8rem] leading-none text-accent-strong"
+          >
+            {{ summaryMode === 'codes' ? option.value : option.label }}
+          </span>
+        </template>
+        <span v-else class="truncate text-muted">{{ resolvedPlaceholder }}</span>
+      </span>
+      <i-material-symbols-expand-more
+        class="shrink-0 transition-transform duration-[var(--motion-fast)] ease-[var(--ease-standard)]"
+        aria-hidden="true"
+        :class="{ 'rotate-180': isOpen }"
+      />
     </button>
     <Transition name="motion-popover">
       <div
         v-if="isOpen"
         :id="popupId"
-        class="language-selector__popover"
+        class="absolute z-[100] top-[calc(100%+0.35rem)] right-0 left-0 overflow-hidden rounded-[var(--radius-md)] border border-border-strong bg-surface-raised shadow-app-md max-[800px]:fixed max-[800px]:z-[110] max-[800px]:inset-[auto_var(--space-4)_calc(70px+var(--safe-bottom))] max-[800px]:w-auto max-[800px]:max-w-none"
         role="group"
         :aria-label="resolvedLabel"
         @keydown.esc.stop.prevent="closeAndRestoreFocus"
       >
-        <div class="language-selector__actions">
-          <button class="interactive-control" type="button" @click="selectAll">
+        <div class="flex justify-between border-b border-border p-2">
+          <button
+            class="interactive-control min-h-9 rounded-[var(--radius-sm)] px-2 font-bold text-accent-strong hover:bg-accent-soft"
+            type="button"
+            @click="selectAll"
+          >
             {{ $t('language_selector.select_all') }}
           </button>
-          <button class="interactive-control" type="button" @click="clearAll">
+          <button
+            class="interactive-control min-h-9 rounded-[var(--radius-sm)] px-2 font-bold text-accent-strong hover:bg-accent-soft"
+            type="button"
+            @click="clearAll"
+          >
             {{ $t('language_selector.clear') }}
           </button>
         </div>
-        <div class="language-selector__options">
-          <label v-for="option in options" :key="option.value" class="language-selector__option">
+        <div
+          class="max-h-[min(45dvh,320px)] overflow-auto overscroll-contain max-[800px]:max-h-[min(48dvh,360px)]"
+        >
+          <label
+            v-for="option in options"
+            :key="option.value"
+            class="grid min-h-11 grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-[0.65rem] border-b border-border px-3 py-[0.45rem] hover:bg-surface-subtle"
+          >
             <input
               type="checkbox"
               :value="option.value"
               :checked="modelValue.includes(option.value)"
+              class="size-[1.125rem] accent-accent"
               @change="toggleOption(option.value)"
             />
-            <span :lang="option.htmlLang" :class="[option.value.replace(/_/, '-'), 'sans']">{{
-              option.label
-            }}</span>
-            <code>{{ option.value }}</code>
+            <span
+              class="min-w-0 truncate"
+              :lang="option.htmlLang"
+              :class="[option.value.replace(/_/, '-'), 'sans']"
+              >{{ option.label }}</span
+            >
+            <code class="font-mono text-[0.75rem] text-muted">{{ option.value }}</code>
           </label>
         </div>
       </div>
@@ -76,9 +109,11 @@ const isOpen = ref(false)
 const popupId = `language-selector-${Math.random().toString(36).slice(2)}`
 const resolvedLabel = computed(() => props.label ?? t('language_selector.selected'))
 const resolvedPlaceholder = computed(() => props.placeholder ?? t('language_selector.choose'))
+const selectedOptions = computed(() =>
+  props.options.filter((option) => props.modelValue.includes(option.value)),
+)
 const selectedSummary = computed(() => {
-  const selectedOptions = props.options.filter((option) => props.modelValue.includes(option.value))
-  const summary = selectedOptions.map((option) =>
+  const summary = selectedOptions.value.map((option) =>
     props.summaryMode === 'codes' ? option.value : option.label,
   )
   return summary.length ? summary.join(', ') : resolvedPlaceholder.value
@@ -118,113 +153,3 @@ function handlePointerDown(event: PointerEvent) {
 onMounted(() => document.addEventListener('pointerdown', handlePointerDown))
 onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown))
 </script>
-
-<style scoped>
-.language-selector {
-  position: relative;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-}
-.language-selector__trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  width: 100%;
-  min-height: var(--control-height);
-  padding: 0.5rem 0.75rem;
-  overflow: hidden;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  text-align: left;
-}
-.language-selector__summary {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.language-selector__trigger svg {
-  flex: none;
-  transition: transform var(--motion-fast) var(--ease-standard);
-}
-.is-rotated {
-  transform: rotate(180deg);
-}
-.language-selector__popover {
-  position: absolute;
-  z-index: 80;
-  top: calc(100% + 0.35rem);
-  right: 0;
-  left: 0;
-  overflow: hidden;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-  box-shadow: var(--shadow-md);
-}
-.language-selector__actions {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--border);
-}
-.language-selector__actions button {
-  min-height: 36px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--accent-strong);
-  font-weight: 700;
-}
-.language-selector__actions button:hover {
-  background: var(--accent-soft);
-}
-.language-selector__options {
-  max-height: min(45dvh, 320px);
-  overflow: auto;
-  overscroll-behavior: contain;
-}
-.language-selector__option {
-  display: grid;
-  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
-  gap: 0.65rem;
-  align-items: center;
-  min-height: 44px;
-  padding: 0.45rem 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-.language-selector__option > span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.language-selector__option:hover {
-  background: var(--surface-subtle);
-}
-.language-selector__option input {
-  inline-size: 1.125rem;
-  block-size: 1.125rem;
-  accent-color: var(--accent);
-}
-.language-selector__option code {
-  color: var(--muted);
-  font: 0.75rem var(--monospace-font);
-}
-@media (max-width: 800px) {
-  .language-selector__popover {
-    position: fixed;
-    z-index: 100;
-    inset: auto var(--space-4) calc(70px + var(--safe-bottom)) var(--space-4);
-    width: auto;
-    min-width: 0;
-    max-width: none;
-  }
-  .language-selector__options {
-    max-height: min(48dvh, 360px);
-  }
-}
-</style>

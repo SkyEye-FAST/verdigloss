@@ -51,7 +51,7 @@
                   <i-material-symbols-language class="label-icon" />
                   {{ $t('query.query_lang') }}
                 </label>
-                <select id="queryLang" v-model="queryLang">
+                <select id="queryLang" class="!font-mono" v-model="queryLang">
                   <option
                     v-for="lang in filteredLanguages"
                     :key="lang.code"
@@ -91,6 +91,7 @@
                   <input
                     id="localeKey"
                     ref="keyInput"
+                    class="!font-mono"
                     v-model="localeKey"
                     role="combobox"
                     aria-autocomplete="list"
@@ -131,6 +132,7 @@
                   {{ $t('query.select_languages') }}
                 </label>
                 <LanguageSelector
+                  class="font-mono"
                   v-model="selectedLanguages"
                   summary-mode="codes"
                   :options="
@@ -186,7 +188,7 @@
               </tr>
             </tbody>
           </table>
-          <footer class="minecraft-title" :class="currentLang.toLowerCase()">
+          <footer class="minecraft-title font-app-serif">
             {{ $t('query.title') }}<br />
             {{ $t('query.java_edition') }}{{ minecraftVersion }}
           </footer>
@@ -638,7 +640,7 @@ onMounted(async () => {
 }
 
 .sidebar-layout {
-  --sidebar-track: 21rem;
+  --sidebar-track: 24rem;
   display: grid;
   grid-template-columns: var(--sidebar-track) minmax(0, 1fr);
   gap: var(--space-8);
@@ -666,7 +668,7 @@ onMounted(async () => {
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .form-container {
@@ -746,8 +748,8 @@ onMounted(async () => {
   position: absolute;
   z-index: 30;
   top: calc(100% + var(--space-1));
-  right: 0;
   left: 0;
+  width: min(42rem, calc(100vw - 2rem));
   max-height: min(44dvh, 24rem);
   margin: 0;
   padding: var(--space-1);
@@ -899,7 +901,7 @@ onMounted(async () => {
 
 @media (max-width: 900px) {
   .sidebar-layout {
-    --sidebar-track: 18rem;
+    --sidebar-track: 21rem;
     gap: var(--space-4);
   }
 }

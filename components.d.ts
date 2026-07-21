@@ -19,6 +19,7 @@ declare module 'vue' {
     IFa6BrandsGithub: typeof import('~icons/fa6-brands/github')['default']
     IMaterialSymbolsArrowBack: typeof import('~icons/material-symbols/arrow-back')['default']
     IMaterialSymbolsArrowForward: typeof import('~icons/material-symbols/arrow-forward')['default']
+    IMaterialSymbolsBrightnessAuto: typeof import('~icons/material-symbols/brightness-auto')['default']
     IMaterialSymbolsCheck: typeof import('~icons/material-symbols/check')['default']
     IMaterialSymbolsChevronLeft: typeof import('~icons/material-symbols/chevron-left')['default']
     IMaterialSymbolsContentCopy: typeof import('~icons/material-symbols/content-copy')['default']

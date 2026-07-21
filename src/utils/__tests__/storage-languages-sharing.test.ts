@@ -69,10 +69,10 @@ describe('safe persistence and language registry', () => {
       languageRegistry.length,
     )
     expect(languageRegistry.find((language) => language.code === 'zh_cn')?.gameName).toBe(
-      '简体中文（中国大陆）',
+      '简体中文 (中国大陆)',
     )
     expect(languageRegistry.find((language) => language.code === 'zh_hk')?.gameName).toBe(
-      '繁體中文（香港特別行政區）',
+      '繁體中文 (香港特別行政區)',
     )
     expect(new Set(languageRegistry.map((language) => language.htmlLang)).size).toBe(
       languageRegistry.length,
