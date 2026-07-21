@@ -204,6 +204,7 @@ import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 import { useLocale } from '@/composables/useLocale'
 import { type LanguageCode, languageList, languageRegistry } from '@/data/languages'
 import { getSearchIndex, type QueryMode } from '@/features/query/search-index'
@@ -414,13 +415,7 @@ function closeKeyList() {
   activeKeyIndex.value = -1
 }
 
-function handleKeyListPointerDown(event: PointerEvent) {
-  if (isKeyListOpen.value && keyListRoot.value && !keyListRoot.value.contains(event.target as Node))
-    closeKeyList()
-}
-
-onMounted(() => document.addEventListener('pointerdown', handleKeyListPointerDown))
-onUnmounted(() => document.removeEventListener('pointerdown', handleKeyListPointerDown))
+useDismissiblePopover(keyListRoot, isKeyListOpen, closeKeyList)
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang.code))

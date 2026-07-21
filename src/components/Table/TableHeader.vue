@@ -48,7 +48,12 @@
           type="checkbox"
         /><span>{{ $t('table.use_pagination') }}</span></label
       >
-      <details ref="exportMenu" class="relative" @keydown.escape.stop.prevent="closeExportMenu">
+      <details
+        ref="exportMenu"
+        class="relative"
+        @toggle="syncExportMenuState"
+        @keydown.escape.stop.prevent="closeExportMenu"
+      >
         <summary
           class="interactive-control flex min-h-[var(--control-height)] list-none items-center gap-[0.35rem] rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 font-bold shadow-app-sm [&::-webkit-details-marker]:hidden"
         >
@@ -85,7 +90,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 import type { LanguageMetadata } from '@/data/languages'
 import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 import LanguageSelector from '../Query/LanguageSelector.vue'
@@ -108,6 +114,7 @@ const downloadAllData = defineModel('downloadAllData', {
 })
 const formats = ['tsv', 'csv', 'json', 'xml', 'xlsx'] as const
 const exportMenu = ref<HTMLDetailsElement | null>(null)
+const isExportMenuOpen = ref(false)
 const languageOptions = computed(() =>
   props.languages.map((language) => ({
     value: language.code,
@@ -118,10 +125,11 @@ const languageOptions = computed(() =>
 
 function closeExportMenu() {
   exportMenu.value?.removeAttribute('open')
+  isExportMenuOpen.value = false
 }
 
-function handlePointerDown(event: PointerEvent) {
-  if (exportMenu.value?.open && !exportMenu.value.contains(event.target as Node)) closeExportMenu()
+function syncExportMenuState() {
+  isExportMenuOpen.value = exportMenu.value?.open ?? false
 }
 
 function emitDownload(type: (typeof formats)[number]) {
@@ -129,7 +137,6 @@ function emitDownload(type: (typeof formats)[number]) {
   emit('download', { type, all: downloadAllData.value })
 }
 
-onMounted(() => document.addEventListener('pointerdown', handlePointerDown))
-onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown))
+useDismissiblePopover(exportMenu, isExportMenuOpen, closeExportMenu)
 watch(downloadAllData, (value) => writeStoredValue('table:downloadAllData', value))
 </script>

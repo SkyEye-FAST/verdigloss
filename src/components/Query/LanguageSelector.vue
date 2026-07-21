@@ -83,8 +83,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 
 interface Option {
   value: string
@@ -146,10 +147,5 @@ function selectAll() {
 function clearAll() {
   update([])
 }
-function handlePointerDown(event: PointerEvent) {
-  if (isOpen.value && root.value && !root.value.contains(event.target as Node))
-    void closeAndRestoreFocus()
-}
-onMounted(() => document.addEventListener('pointerdown', handlePointerDown))
-onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown))
+useDismissiblePopover(root, isOpen, closeAndRestoreFocus)
 </script>

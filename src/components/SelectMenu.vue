@@ -37,7 +37,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 type Option = { value: string; label: string; htmlLang?: string; typographyClass?: string }
 const props = defineProps<{ modelValue: string; options: readonly Option[] }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string]; change: [value: string] }>()
@@ -52,9 +53,5 @@ function select(value: string) {
 function close() {
   open.value = false
 }
-function outside(event: PointerEvent) {
-  if (open.value && root.value && !root.value.contains(event.target as Node)) close()
-}
-onMounted(() => document.addEventListener('pointerdown', outside))
-onUnmounted(() => document.removeEventListener('pointerdown', outside))
+useDismissiblePopover(root, open, close)
 </script>
