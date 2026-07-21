@@ -17,6 +17,7 @@ Verdigloss is a Vue 3 single-page application for searching, comparing, exportin
 You can use Verdigloss at the following links:
 
 - <https://mcst.teahouse.team/>
+- <https://mcst.skyeyefast.top/>
 - <https://verdigloss.vercel.app/>
 
 ## Features
