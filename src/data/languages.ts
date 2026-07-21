@@ -38,7 +38,7 @@ const definitions: Omit<
   ['zh_tw', '繁體中文 (台灣)', 'zh-Hant-TW'],
   ['lzh', '文言 (華夏)', 'lzh'],
   ['ja_jp', '日本語 (日本)', 'ja-JP'],
-  ['ko_kr', '한국어(대한민국)', 'ko-KR'],
+  ['ko_kr', '한국어 (대한민국)', 'ko-KR'],
   ['vi_vn', 'Tiếng Việt (Việt Nam)', 'vi-VN'],
   ['de_de', 'Deutsch (Deutschland)', 'de-DE'],
   ['es_es', 'Español (España)', 'es-ES'],

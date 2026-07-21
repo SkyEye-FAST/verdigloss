@@ -26,7 +26,7 @@
           >
           <button
             v-else
-            class="interactive-control min-h-[var(--control-height)] min-w-[var(--control-height)] rounded-[var(--radius-sm)] border border-border bg-surface px-[0.4rem] text-content aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-white max-[560px]:min-h-[2.25rem] max-[560px]:min-w-[2.25rem]"
+            class="interactive-control min-h-[var(--control-height)] min-w-[var(--control-height)] rounded-[var(--radius-sm)] border border-border bg-surface px-[0.4rem] text-content aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-on-accent max-[560px]:min-h-[2.25rem] max-[560px]:min-w-[2.25rem]"
             type="button"
             :aria-current="currentPage === page ? 'page' : undefined"
             :aria-label="$t('table.pagination.page', { page })"

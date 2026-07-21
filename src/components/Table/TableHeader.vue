@@ -34,6 +34,7 @@
           @input="emit('update:searchQuery', ($event.target as HTMLInputElement).value)"
       /></label>
       <LanguageSelector
+        class="font-mono"
         v-model="selectedLanguages"
         :label="$t('table.displayed_languages')"
         :placeholder="$t('language_selector.choose')"

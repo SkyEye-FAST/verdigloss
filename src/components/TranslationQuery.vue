@@ -135,11 +135,13 @@
                   v-model="selectedLanguages"
                   summary-mode="codes"
                   :options="
-                    languages.map((lang) => ({
-                      value: lang.code,
-                      label: lang.gameName,
-                      htmlLang: lang.htmlLang,
-                    }))
+                    languages
+                      .filter((lang) => lang.code !== 'en_us')
+                      .map((lang) => ({
+                        value: lang.code,
+                        label: lang.gameName,
+                        htmlLang: lang.htmlLang,
+                      }))
                   "
                   @change="search"
                 />
@@ -421,7 +423,7 @@ const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang.code))
 })
 
-const filteredLanguages = computed(() => languages)
+const filteredLanguages = computed(() => languages.filter((language) => language.code !== 'en_us'))
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
@@ -717,7 +719,7 @@ onMounted(async () => {
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .toggle-button:not(.is-collapsed) {

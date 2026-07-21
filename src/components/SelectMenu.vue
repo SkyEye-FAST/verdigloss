@@ -11,7 +11,11 @@
       <span class="min-w-0 truncate" :lang="current?.htmlLang" :class="current?.typographyClass">{{
         current?.label
       }}</span
-      ><i-material-symbols-expand-more class="shrink-0" :class="{ 'rotate-180': open }" />
+      ><i-material-symbols-expand-more
+        class="shrink-0"
+        :class="{ 'rotate-180': open }"
+        aria-hidden="true"
+      />
     </button>
     <Transition name="motion-popover"
       ><div

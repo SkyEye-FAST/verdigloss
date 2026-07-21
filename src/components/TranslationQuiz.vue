@@ -247,7 +247,7 @@ const startQuiz = () => {
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 700;
 }
 

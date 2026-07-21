@@ -39,7 +39,7 @@
       >
         <div class="flex justify-between border-b border-border p-2">
           <button
-            class="interactive-control min-h-9 rounded-[var(--radius-sm)] bg-accent px-3 font-bold text-white shadow-app-sm hover:bg-accent-strong"
+            class="interactive-control min-h-9 rounded-[var(--radius-sm)] bg-accent px-3 font-bold text-on-accent shadow-app-sm hover:bg-accent-strong"
             type="button"
             @click="selectAll"
           >
