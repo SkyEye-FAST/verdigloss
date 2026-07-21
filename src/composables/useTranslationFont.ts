@@ -2,7 +2,7 @@ import { ref, watch } from 'vue'
 
 import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 
-const useSansFont = ref(readBooleanPreference('table:useSansFont', true))
+const useSansFont = ref(readBooleanPreference('table:useSansFont', false))
 let fontChangeTimer: number | undefined
 
 function applyFontPreference() {

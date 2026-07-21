@@ -323,6 +323,18 @@ body.translation-font-sans
   ) {
   font-family: var(--sans-font);
 }
+body.translation-font-sans .zh-cn {
+  font-family: var(--zh-hans-sans-font);
+}
+body.translation-font-sans .lzh {
+  font-family: var(--lzh-sans-font);
+}
+body.translation-font-sans :is(.zh-hk, .zh-tw) {
+  font-family: var(--zh-hant-sans-font);
+}
+body.translation-font-sans .ja-jp {
+  font-family: var(--jp-sans-font);
+}
 body.translation-font-changing
   :is(
     .en-us,

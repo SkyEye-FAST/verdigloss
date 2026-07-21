@@ -132,6 +132,21 @@ test('summarizes multi-language selections with technical codes', async ({ page 
   await expect(selector.locator('.language-selector__summary')).toContainText('zh_cn')
 })
 
+test('uses serif by default and switches each language to its matching sans-serif stack', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const chineseLanguage = page.locator('.lang-name').first()
+
+  await expect(page.locator('body')).not.toHaveClass(/translation-font-sans/)
+  await expect(chineseLanguage).toHaveCSS('font-family', /Noto Serif SC/)
+
+  await page.getByRole('button', { name: 'Use sans-serif translation font' }).click()
+
+  await expect(page.locator('body')).toHaveClass(/translation-font-sans/)
+  await expect(chineseLanguage).toHaveCSS('font-family', /Noto Sans SC/)
+})
+
 test('keeps quiz progress concise and shows time only for timed quizzes', async ({ page }) => {
   await page.goto(`/quiz/${deterministicQuizCode}?l=zh_cn&t=1`)
   await expect(page.locator('.quiz-input')).toBeVisible()
