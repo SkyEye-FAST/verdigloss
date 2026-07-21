@@ -7,17 +7,17 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   update:
-    name: Update language data and open a pull request
+    name: Update language data on master
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Check out source and current language data
         uses: actions/checkout@v4
         with:
+          ref: master
           submodules: recursive
           fetch-depth: 0
 
@@ -64,18 +64,14 @@ jobs:
       - name: Run essential end-to-end tests
         run: pnpm test:e2e
 
-      - name: Summarize the update
-        run: node scripts/write-language-update-summary.js .github/language-update-pr.md
-
-      - name: Create update pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: 'chore(data): update Minecraft language data'
-          branch: automation/language-data-update
-          delete-branch: true
-          title: 'chore(data): update Minecraft language data'
-          body-path: .github/language-update-pr.md
-          labels: automated, language-data
-          add-paths: |
-            src/assets/mc_lang
-            src/assets/data/quiz-id-map.json
+      - name: Commit and push updated language data
+        run: |
+          git add src/assets/mc_lang src/assets/data/quiz-id-map.json
+          if git diff --cached --quiet; then
+            echo "Language data is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(data): update Minecraft language data"
+          git push origin HEAD:master

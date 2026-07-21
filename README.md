@@ -28,7 +28,7 @@ You can use Verdigloss at the following links:
 - [x] Quiz hints, timer mode, summaries, and resilient browser preference storage
 - [x] Colour translation reference with Korean mixed-script and Vietnamese Chữ Nôm variants
 - [x] Responsive navigation, dark mode, semantic tables, keyboard-friendly controls, and automated accessibility checks
-- [x] Scheduled language-data updates that open a reviewable pull request instead of committing to the default branch
+- [x] Scheduled language-data updates that validate and commit directly to `master`
 
 ## Development
 
@@ -120,7 +120,7 @@ pnpm test:e2e
 
 `CI` runs for every push and pull request with read-only permissions. It checks the submodule checkout, frozen install, generated data, formatting, lint, types, unit tests, production bundle, bundle budgets, and Playwright tests. Failed browser tests retain their trace, screenshot, video, and HTML report.
 
-The scheduled **Update language data** workflow can also be run manually. It updates the submodule, regenerates and formats only the quiz map, runs the complete validation sequence, then opens a pull request rather than committing to the default branch. Its PR body records the submodule revision, Minecraft version, changed language files, key delta, quiz-map delta, and validation status.
+The scheduled **Update language data** workflow can also be run manually. It updates the submodule, regenerates and formats only the quiz map, runs the complete validation sequence, then commits and pushes the changed language data directly to `master`. If the language data is already current, it exits without creating a commit.
 
 Vercel serves the Vite SPA via `vercel.json`; application routes such as `/table`, `/table/color`, `/quiz`, and `/quiz/:code` are safe to open directly or refresh. No service worker is installed because offline behavior is not implemented or tested.
 
