@@ -32,7 +32,7 @@
           $t('table.use_pagination')
         }}</span></label
       >
-      <details class="export-menu">
+      <details ref="exportMenu" class="export-menu" @keydown.escape.stop.prevent="closeExportMenu">
         <summary class="interactive-control">
           <i-material-symbols-download aria-hidden="true" /> {{ $t('table.export.label') }}
         </summary>
@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { LanguageMetadata } from '@/data/languages'
 import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 import LanguageSelector from '../Query/LanguageSelector.vue'
@@ -82,6 +82,7 @@ const downloadAllData = defineModel('downloadAllData', {
   default: readBooleanPreference('table:downloadAllData', true),
 })
 const formats = ['tsv', 'csv', 'json', 'xml', 'xlsx'] as const
+const exportMenu = ref<HTMLDetailsElement | null>(null)
 const languageOptions = computed(() =>
   props.languages.map((language) => ({
     value: language.code,
@@ -89,9 +90,22 @@ const languageOptions = computed(() =>
     htmlLang: language.htmlLang,
   })),
 )
+
+function closeExportMenu() {
+  exportMenu.value?.removeAttribute('open')
+}
+
+function handlePointerDown(event: PointerEvent) {
+  if (exportMenu.value?.open && !exportMenu.value.contains(event.target as Node)) closeExportMenu()
+}
+
 function emitDownload(type: (typeof formats)[number]) {
+  closeExportMenu()
   emit('download', { type, all: downloadAllData.value })
 }
+
+onMounted(() => document.addEventListener('pointerdown', handlePointerDown))
+onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown))
 watch(downloadAllData, (value) => writeStoredValue('table:downloadAllData', value))
 </script>
 

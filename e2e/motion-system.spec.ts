@@ -28,6 +28,27 @@ test('keeps the query sidebar and popover usable with reduced motion', async ({ 
   await expect(page.locator('.translation-table tbody tr').first()).toBeVisible()
 })
 
+test('dismisses dropdown menus when focus moves away', async ({ page }) => {
+  await page.goto('/table')
+
+  const exportMenu = page.locator('.export-menu')
+  await exportMenu.locator('summary').click()
+  await expect(exportMenu).toHaveAttribute('open', '')
+  await page.locator('.table-header__title').click()
+  await expect(exportMenu).not.toHaveAttribute('open', '')
+
+  await exportMenu.locator('summary').click()
+  await exportMenu.locator('summary').press('Escape')
+  await expect(exportMenu).not.toHaveAttribute('open', '')
+
+  await page.goto('/')
+  const keyInput = page.locator('#localeKey')
+  await keyInput.click()
+  await expect(page.locator('.query-key-results')).toBeVisible()
+  await page.locator('#queryContent').click()
+  await expect(page.locator('.query-key-results')).toHaveCount(0)
+})
+
 test('advances a question without replacing the answer input and uses transform timer progress', async ({
   page,
 }) => {

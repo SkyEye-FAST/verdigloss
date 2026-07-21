@@ -87,7 +87,7 @@
                   <i-material-symbols-key class="label-icon" />
                   {{ $t('query.locale_key') }}
                 </label>
-                <div class="query-combobox">
+                <div ref="keyListRoot" class="query-combobox">
                   <input
                     id="localeKey"
                     ref="keyInput"
@@ -197,7 +197,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 
@@ -352,6 +352,7 @@ async function ensureLanguages(codes: readonly LanguageCode[]) {
 }
 
 const keyInput = ref<HTMLInputElement | null>(null)
+const keyListRoot = ref<HTMLElement | null>(null)
 const isKeyListOpen = ref(false)
 const activeKeyIndex = ref(-1)
 const availableKeys = computed(() => {
@@ -405,6 +406,19 @@ function handleKeyListKeydown(event: KeyboardEvent) {
     if (key) selectKey(key)
   }
 }
+
+function closeKeyList() {
+  isKeyListOpen.value = false
+  activeKeyIndex.value = -1
+}
+
+function handleKeyListPointerDown(event: PointerEvent) {
+  if (isKeyListOpen.value && keyListRoot.value && !keyListRoot.value.contains(event.target as Node))
+    closeKeyList()
+}
+
+onMounted(() => document.addEventListener('pointerdown', handleKeyListPointerDown))
+onUnmounted(() => document.removeEventListener('pointerdown', handleKeyListPointerDown))
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang.code))
