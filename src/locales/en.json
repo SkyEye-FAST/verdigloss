@@ -17,8 +17,10 @@
     "theme": {
       "dark": "Dark",
       "light": "Light",
+      "system": "System",
       "use_dark": "Use dark theme",
-      "use_light": "Use light theme"
+      "use_light": "Use light theme",
+      "use_system": "Follow system theme"
     }
   },
   "error_boundary": {

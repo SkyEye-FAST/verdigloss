@@ -37,13 +37,24 @@
         <button
           class="utility-button interactive-control"
           type="button"
-          :aria-label="isDarkMode ? $t('app.theme.use_light') : $t('app.theme.use_dark')"
-          @click="toggleDarkMode"
+          :aria-label="
+            mode === 'system'
+              ? $t('app.theme.use_dark')
+              : mode === 'dark'
+                ? $t('app.theme.use_light')
+                : $t('app.theme.use_system')
+          "
+          @click="cycleTheme"
         >
-          <i-material-symbols-dark-mode v-if="isDarkMode" aria-hidden="true" />
+          <i-material-symbols-brightness-auto v-if="mode === 'system'" aria-hidden="true" />
+          <i-material-symbols-dark-mode v-else-if="isDarkMode" aria-hidden="true" />
           <i-material-symbols-light-mode v-else aria-hidden="true" />
           <span class="utility-button__label">{{
-            isDarkMode ? $t('app.theme.dark') : $t('app.theme.light')
+            mode === 'system'
+              ? $t('app.theme.system')
+              : isDarkMode
+                ? $t('app.theme.dark')
+                : $t('app.theme.light')
           }}</span>
         </button>
         <button
@@ -101,6 +112,10 @@ const hasRenderedRoute = ref(false)
 const markRouteRendered = () => {
   hasRenderedRoute.value = true
 }
-const { isDarkMode, toggleDarkMode } = useDarkMode()
+const { mode, isDarkMode, setMode } = useDarkMode()
+
+function cycleTheme() {
+  setMode(mode.value === 'system' ? 'dark' : mode.value === 'dark' ? 'light' : 'system')
+}
 const { useSansFont, toggleTranslationFont } = useTranslationFont()
 </script>

@@ -17,8 +17,10 @@
     "theme": {
       "dark": "深色",
       "light": "浅色",
+      "system": "系统",
       "use_dark": "使用深色主题",
-      "use_light": "使用浅色主题"
+      "use_light": "使用浅色主题",
+      "use_system": "跟随系统主题"
     }
   },
   "error_boundary": {

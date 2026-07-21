@@ -111,6 +111,12 @@ test('color route, shell navigation, dark mode, and SPA fallbacks work', async (
   await expect(page).toHaveURL(/\/quiz$/)
   await page.getByRole('button', { name: /Use dark theme/i }).click()
   await expect(page.locator('body')).toHaveClass(/dark-mode/)
+  await page.getByRole('button', { name: /Use light theme/i }).click()
+  await page.getByRole('button', { name: /Follow system theme/i }).click()
+  await expect(page.getByRole('button', { name: /Follow system theme/i })).toHaveCount(0)
+  await expect
+    .poll(() => page.evaluate(() => window.localStorage.getItem('darkMode')))
+    .toBe('"system"')
   await page.reload()
   await expect(page.locator('body')).toHaveClass(/dark-mode/)
   await page.goto('/not-a-route')
