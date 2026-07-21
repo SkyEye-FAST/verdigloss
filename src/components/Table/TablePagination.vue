@@ -1,15 +1,15 @@
 <template>
   <nav
-    class="pagination-controls"
+    class="grid w-full justify-items-center gap-[0.65rem] mx-auto my-[var(--space-5)] [width:min(100%,var(--content-max))] max-[560px]:[&.pagination-controls--top]:my-[var(--space-3)] max-[560px]:[&.pagination-controls--top_.pagination-buttons]:hidden max-[560px]:[&.pagination-controls--bottom]:sticky max-[560px]:[&.pagination-controls--bottom]:z-20 max-[560px]:[&.pagination-controls--bottom]:bottom-[calc(70px+var(--safe-bottom)+var(--space-2))] max-[560px]:[&.pagination-controls--bottom]:w-fit max-[560px]:[&.pagination-controls--bottom]:max-w-[calc(100%-1rem)] max-[560px]:[&.pagination-controls--bottom]:mb-[var(--space-3)] max-[560px]:[&.pagination-controls--bottom]:overflow-x-auto max-[560px]:[&.pagination-controls--bottom]:rounded-[var(--radius-md)] max-[560px]:[&.pagination-controls--bottom]:border max-[560px]:[&.pagination-controls--bottom]:border-border max-[560px]:[&.pagination-controls--bottom]:bg-surface-raised max-[560px]:[&.pagination-controls--bottom]:p-[0.35rem] max-[560px]:[&.pagination-controls--bottom]:shadow-app-sm"
     :class="`pagination-controls--${position}`"
     :aria-label="$t('table.pagination.label')"
   >
-    <p v-if="showInfo" class="pagination-info" aria-live="polite">
+    <p v-if="showInfo" class="m-0 text-[0.9rem] text-muted" aria-live="polite">
       {{ $t('table.pagination.total_rows') }}{{ totalItems }}
     </p>
-    <div class="pagination-buttons">
+    <div class="pagination-buttons flex items-center gap-[0.35rem] max-[560px]:gap-[0.2rem]">
       <button
-        class="page-button interactive-control"
+        class="interactive-control inline-flex min-h-[var(--control-height)] items-center gap-[0.35rem] rounded-[var(--radius-sm)] border border-border bg-surface px-[0.7rem] text-content max-[560px]:min-h-[2.4rem] max-[560px]:min-w-[2.4rem] max-[560px]:px-[0.45rem] max-[560px]:[&>span]:hidden"
         type="button"
         :disabled="currentPage <= 1 || !totalItems"
         :aria-label="$t('table.pagination.previous')"
@@ -19,13 +19,14 @@
           $t('table.pagination.previous_short')
         }}</span>
       </button>
-      <div class="page-numbers">
+      <div class="flex items-center gap-[0.35rem]">
         <template v-for="(page, index) in displayedPages" :key="`${page}-${index}`">
-          <span v-if="page === 'ellipsis'" class="ellipsis" aria-hidden="true">…</span>
+          <span v-if="page === 'ellipsis'" class="min-w-6 text-center text-muted" aria-hidden="true"
+            >…</span
+          >
           <button
             v-else
-            class="page-number interactive-control"
-            :class="{ active: currentPage === page }"
+            class="interactive-control min-h-[var(--control-height)] min-w-[var(--control-height)] rounded-[var(--radius-sm)] border border-border bg-surface px-[0.4rem] text-content aria-[current=page]:border-accent aria-[current=page]:bg-accent aria-[current=page]:text-white max-[560px]:min-h-[2.25rem] max-[560px]:min-w-[2.25rem]"
             type="button"
             :aria-current="currentPage === page ? 'page' : undefined"
             :aria-label="$t('table.pagination.page', { page })"
@@ -35,10 +36,11 @@
           </button>
         </template>
       </div>
-      <label class="page-jump"
+      <label class="max-[560px]:hidden"
         ><span class="sr-only">{{ $t('table.pagination.jump') }}</span
         ><input
           v-model="jumpPage"
+          class="min-h-[var(--control-height)] w-[3.25rem] rounded-[var(--radius-sm)] border border-border bg-surface px-[0.45rem] py-[0.25rem] text-center text-content"
           type="number"
           min="1"
           :max="totalPages || 1"
@@ -48,7 +50,7 @@
           @change="jump"
       /></label>
       <button
-        class="page-button interactive-control"
+        class="interactive-control inline-flex min-h-[var(--control-height)] items-center gap-[0.35rem] rounded-[var(--radius-sm)] border border-border bg-surface px-[0.7rem] text-content max-[560px]:min-h-[2.4rem] max-[560px]:min-w-[2.4rem] max-[560px]:px-[0.45rem] max-[560px]:[&>span]:hidden"
         type="button"
         :disabled="currentPage >= totalPages || !totalItems"
         :aria-label="$t('table.pagination.next')"
@@ -87,104 +89,3 @@ function jump() {
   jumpPage.value = ''
 }
 </script>
-
-<style scoped>
-.pagination-controls {
-  display: grid;
-  gap: 0.65rem;
-  justify-items: center;
-  width: min(100%, var(--content-max));
-  margin: var(--space-5) auto;
-}
-.pagination-info {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-.pagination-buttons,
-.page-numbers {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-.page-button,
-.page-number,
-.page-jump input {
-  min-height: var(--control-height);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-}
-.page-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0 0.7rem;
-}
-.page-number {
-  min-width: var(--control-height);
-  padding: 0 0.4rem;
-}
-.page-number.active {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: #fff;
-}
-.page-jump input {
-  width: 3.25rem;
-  padding: 0.25rem 0.45rem;
-  text-align: center;
-}
-.ellipsis {
-  min-width: 1.5rem;
-  color: var(--muted);
-  text-align: center;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-@media (max-width: 560px) {
-  .pagination-controls--top .pagination-buttons {
-    display: none;
-  }
-  .pagination-controls--top {
-    margin-block: var(--space-3);
-  }
-  .pagination-controls--bottom {
-    position: sticky;
-    z-index: 20;
-    bottom: calc(70px + var(--safe-bottom) + var(--space-2));
-    width: fit-content;
-    max-width: calc(100% - 1rem);
-    margin-bottom: var(--space-3);
-    padding: 0.35rem;
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface-raised);
-    box-shadow: var(--shadow-sm);
-  }
-  .pagination-buttons {
-    gap: 0.2rem;
-  }
-  .page-button span,
-  .page-jump {
-    display: none;
-  }
-  .page-button {
-    min-width: 2.4rem;
-    min-height: 2.4rem;
-    padding: 0 0.45rem;
-  }
-  .page-number {
-    min-width: 2.25rem;
-    min-height: 2.25rem;
-  }
-}
-</style>

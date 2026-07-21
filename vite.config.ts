@@ -3,6 +3,7 @@ import { resolve, dirname } from 'node:path'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 
@@ -21,6 +22,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    tailwindcss(),
     vue(),
     vueDevTools(),
     VueI18nPlugin({

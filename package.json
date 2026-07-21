@@ -3,10 +3,8 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.10.0",
   "engines": {
-    "node": ">=24 <25",
-    "pnpm": "11.10.0"
+    "node": ">=24 <25"
   },
   "scripts": {
     "dev": "vite",
@@ -42,6 +40,7 @@
     "@iconify-json/material-symbols": "^1.2.85",
     "@intlify/unplugin-vue-i18n": "^11.2.4",
     "@playwright/test": "1.61.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@tsconfig/node24": "24.0.4",
     "@types/node": "^24.10.0",
     "@typescript-eslint/utils": "^8.64.0",
@@ -55,6 +54,7 @@
     "jsdom": "^29.1.1",
     "npm-run-all2": "^9.0.2",
     "prettier": "3.9.5",
+    "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",

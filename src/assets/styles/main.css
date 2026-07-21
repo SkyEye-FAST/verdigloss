@@ -1,3 +1,26 @@
+@import 'tailwindcss';
+
+/* Tailwind utilities use the existing CSS variables so light/dark mode has one source of truth. */
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-content: var(--text);
+  --color-content-secondary: var(--text-secondary);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-focus: var(--focus);
+  --font-app-sans: var(--font-ui);
+  --font-app-serif: var(--serif-font);
+  --shadow-app-sm: var(--shadow-sm);
+  --shadow-app-md: var(--shadow-md);
+}
+
 :root {
   color-scheme: light;
   --font-ui:
