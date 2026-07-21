@@ -33,17 +33,15 @@
                   <i-material-symbols-settings-outline class="label-icon" />
                   {{ $t('query.query_mode') }}
                 </label>
-                <select id="queryMode" v-model="queryMode" @change="onQueryInput">
-                  <option value="source">
-                    {{ $t('query.query_modes.source') }}
-                  </option>
-                  <option value="key">
-                    {{ $t('query.query_modes.key') }}
-                  </option>
-                  <option value="translation">
-                    {{ $t('query.query_modes.translation') }}
-                  </option>
-                </select>
+                <SelectMenu
+                  v-model="queryMode"
+                  :options="[
+                    { value: 'source', label: $t('query.query_modes.source') },
+                    { value: 'key', label: $t('query.query_modes.key') },
+                    { value: 'translation', label: $t('query.query_modes.translation') },
+                  ]"
+                  @change="onQueryInput"
+                />
               </div>
 
               <div class="input-group" v-show="queryMode === 'translation'">
@@ -51,17 +49,18 @@
                   <i-material-symbols-language class="label-icon" />
                   {{ $t('query.query_lang') }}
                 </label>
-                <select id="queryLang" class="!font-mono" v-model="queryLang">
-                  <option
-                    v-for="lang in filteredLanguages"
-                    :key="lang.code"
-                    :value="lang.code"
-                    :lang="lang.htmlLang"
-                    :class="lang.typographyClass"
-                  >
-                    {{ lang.gameName }}
-                  </option>
-                </select>
+                <SelectMenu
+                  class="font-mono"
+                  v-model="queryLang"
+                  :options="
+                    filteredLanguages.map((lang) => ({
+                      value: lang.code,
+                      label: lang.gameName,
+                      htmlLang: lang.htmlLang,
+                      typographyClass: lang.typographyClass,
+                    }))
+                  "
+                />
               </div>
 
               <div class="input-group">
@@ -217,6 +216,7 @@ import {
 } from '@/utils/storage'
 
 import LanguageSelector from './Query/LanguageSelector.vue'
+import SelectMenu from './SelectMenu.vue'
 
 const { t } = useI18n()
 const minecraftVersion = ref(mcVersion)

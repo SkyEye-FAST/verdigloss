@@ -39,14 +39,14 @@
       >
         <div class="flex justify-between border-b border-border p-2">
           <button
-            class="interactive-control min-h-9 rounded-[var(--radius-sm)] px-2 font-bold text-accent-strong hover:bg-accent-soft"
+            class="interactive-control min-h-9 rounded-[var(--radius-sm)] bg-accent px-3 font-bold text-white shadow-app-sm hover:bg-accent-strong"
             type="button"
             @click="selectAll"
           >
             {{ $t('language_selector.select_all') }}
           </button>
           <button
-            class="interactive-control min-h-9 rounded-[var(--radius-sm)] px-2 font-bold text-accent-strong hover:bg-accent-soft"
+            class="interactive-control min-h-9 rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 font-bold text-content-secondary hover:bg-surface-subtle"
             type="button"
             @click="clearAll"
           >

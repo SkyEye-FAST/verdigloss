@@ -44,6 +44,7 @@ declare module 'vue' {
     NotFoundPage: typeof import('./src/components/NotFoundPage.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SelectMenu: typeof import('./src/components/SelectMenu.vue')['default']
     TableHeader: typeof import('./src/components/Table/TableHeader.vue')['default']
     TablePagination: typeof import('./src/components/Table/TablePagination.vue')['default']
     TableSectionNav: typeof import('./src/components/Table/TableSectionNav.vue')['default']

@@ -8,21 +8,17 @@
       <section class="quiz-generator">
         <label class="quiz-field" for="query-lang">
           <span>{{ $t('quiz.language') }}</span>
-          <select
-            :class="`${queryLang.replace('_', '-')} sans`"
+          <SelectMenu
             v-model="queryLang"
-            id="query-lang"
-          >
-            <option
-              v-for="language in quizLanguages"
-              :key="language.code"
-              :value="language.code"
-              :class="[language.typographyClass, 'sans']"
-              :lang="language.htmlLang"
-            >
-              {{ language.gameName }}
-            </option>
-          </select>
+            :options="
+              quizLanguages.map((language) => ({
+                value: language.code,
+                label: language.gameName,
+                htmlLang: language.htmlLang,
+                typographyClass: `${language.typographyClass} sans`,
+              }))
+            "
+          />
         </label>
         <label for="timer-mode" class="timer-control">
           <input type="checkbox" id="timer-mode" v-model="timerMode" />
@@ -108,6 +104,7 @@ import {
 import { decodeQuizCode, encodeQuizCode } from '@/domain/quiz-code'
 import { shuffle } from '@/domain/shuffle'
 import { loadLanguages, type LanguageFile } from '@/services/translation-data'
+import SelectMenu from './SelectMenu.vue'
 
 const router = useRouter()
 const { t } = useI18n()
