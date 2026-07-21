@@ -9,6 +9,7 @@
         <label class="quiz-field" for="query-lang">
           <span>{{ $t('quiz.language') }}</span>
           <SelectMenu
+            id="query-lang"
             v-model="queryLang"
             :options="
               quizLanguages.map((language) => ({

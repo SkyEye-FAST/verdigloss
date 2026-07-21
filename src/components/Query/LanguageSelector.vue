@@ -1,8 +1,9 @@
 <template>
-  <div ref="root" class="relative z-20 min-w-0 w-full max-w-full">
+  <div ref="root" class="language-selector relative z-20 min-w-0 w-full max-w-full">
     <button
       ref="trigger"
-      class="interactive-control flex min-h-[var(--control-height)] w-full items-center justify-between gap-2 overflow-hidden rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 py-2 text-left text-content shadow-app-sm"
+      :id="id"
+      class="language-selector__trigger interactive-control flex min-h-[var(--control-height)] w-full items-center justify-between gap-2 overflow-hidden rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 py-2 text-left text-content shadow-app-sm"
       type="button"
       :aria-expanded="isOpen"
       :aria-controls="popupId"
@@ -10,7 +11,7 @@
       @click="toggleDropdown"
       @keydown.escape="closeDropdown"
     >
-      <span class="flex min-w-0 flex-1 flex-wrap gap-1">
+      <span class="language-selector__summary flex min-w-0 flex-1 flex-wrap gap-1">
         <template v-if="selectedOptions.length">
           <span
             v-for="option in selectedOptions"
@@ -32,7 +33,7 @@
       <div
         v-if="isOpen"
         :id="popupId"
-        class="absolute z-[100] top-[calc(100%+0.35rem)] right-0 left-0 overflow-hidden rounded-[var(--radius-md)] border border-border-strong bg-surface-raised shadow-app-md max-[800px]:fixed max-[800px]:z-[110] max-[800px]:inset-[auto_var(--space-4)_calc(70px+var(--safe-bottom))] max-[800px]:w-auto max-[800px]:max-w-none"
+        class="language-selector__popover absolute z-[100] top-[calc(100%+0.35rem)] right-0 left-0 overflow-hidden rounded-[var(--radius-md)] border border-border-strong bg-surface-raised shadow-app-md max-[800px]:fixed max-[800px]:z-[110] max-[800px]:inset-[auto_var(--space-4)_calc(70px+var(--safe-bottom))] max-[800px]:w-auto max-[800px]:max-w-none"
         role="group"
         :aria-label="resolvedLabel"
         @keydown.esc.stop.prevent="closeAndRestoreFocus"
@@ -94,6 +95,7 @@ interface Option {
 }
 const props = defineProps<{
   modelValue: string[]
+  id?: string
   options: Option[]
   placeholder?: string
   label?: string

@@ -6,7 +6,7 @@
       class="flex items-baseline justify-between gap-[var(--space-4)] pb-[var(--space-4)] max-[640px]:block"
     >
       <h1
-        class="m-0 font-app-serif text-[clamp(1.5rem,3vw,2.25rem)] leading-[1.1] font-bold tracking-[-0.025em]"
+        class="table-header__title m-0 font-app-serif text-[clamp(1.5rem,3vw,2.25rem)] leading-[1.1] font-bold tracking-[-0.025em]"
       >
         {{ $t('table.title') }}
       </h1>
@@ -20,7 +20,7 @@
       </p>
     </div>
     <div
-      class="grid items-center gap-[var(--space-3)] pb-[var(--space-4)] [grid-template-columns:minmax(220px,1.4fr)_minmax(220px,1fr)_auto_auto] max-[1023px]:grid-cols-[minmax(220px,1fr)_minmax(220px,1fr)] max-[640px]:grid-cols-1"
+      class="table-toolbar grid items-center gap-[var(--space-3)] pb-[var(--space-4)] [grid-template-columns:minmax(220px,1.4fr)_minmax(220px,1fr)_auto_auto] max-[1023px]:grid-cols-[minmax(220px,1fr)_minmax(220px,1fr)] max-[640px]:grid-cols-1"
       :aria-label="$t('table.controls_label')"
     >
       <label
@@ -51,7 +51,7 @@
       >
       <details
         ref="exportMenu"
-        class="relative"
+        class="export-menu relative"
         @toggle="syncExportMenuState"
         @keydown.escape.stop.prevent="closeExportMenu"
       >

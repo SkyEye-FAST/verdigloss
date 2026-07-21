@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="flex flex-wrap gap-[var(--space-2)] mx-auto mb-[var(--space-4)] [width:min(calc(100%-2rem),var(--content-max))] max-[640px]:[width:min(calc(100%-1rem),var(--content-max))]"
+    class="table-section-nav flex flex-wrap gap-[var(--space-2)] mx-auto mb-[var(--space-4)] [width:min(calc(100%-2rem),var(--content-max))] max-[640px]:[width:min(calc(100%-1rem),var(--content-max))]"
     :aria-label="$t('table.sections.label')"
   >
     <router-link

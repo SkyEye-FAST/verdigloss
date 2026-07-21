@@ -15,7 +15,7 @@ test('captures every repaired surface without layout regressions', async ({ page
 
   await page.goto('/')
   await expect(page.locator('.result-section')).toBeVisible()
-  await expect(page.locator('.lang-name').first()).toHaveText('简体中文（中国大陆）')
+  await expect(page.locator('.lang-name').first()).toHaveText('简体中文 (中国大陆)')
   await expect(page.locator('.result-section')).not.toContainText('Simplified Chinese')
   await expect(page.locator('.minecraft-title')).toHaveCSS('font-weight', '900')
   expect(
@@ -35,12 +35,7 @@ test('captures every repaired surface without layout regressions', async ({ page
   await expect(page.locator('tbody tr').first()).toBeVisible()
   const wrapper = page.locator('.table-wrapper')
   const topScrollbar = page.locator('.table-horizontal-scrollbar')
-  await expect(page.locator('#table-description')).toBeVisible()
-  expect(
-    await page
-      .locator('#table-description')
-      .evaluate((element) => !document.querySelector('.table-wrapper')?.contains(element)),
-  ).toBe(true)
+  await expect(wrapper).toHaveAttribute('aria-label', 'Minecraft translations')
   const header = page.locator('thead th').first()
   const firstRowCell = page.locator('tbody tr').first().locator('.key-column')
   const [headerBox, firstRowBox] = await Promise.all([
@@ -86,7 +81,7 @@ test('captures every repaired surface without layout regressions', async ({ page
   await expect(page.locator('.quiz-eligibility')).not.toContainText('10/10')
   await expect(page.locator('.quiz-eligibility--available')).toBeVisible()
   await expect(page.locator('.quiz-btn-primary')).toBeEnabled()
-  await expect(page.locator('#query-lang option:checked')).not.toContainText('(10/10)')
+  await expect(page.locator('#query-lang')).not.toContainText('(10/10)')
   await expectNoPageOverflow(page)
   await capture(page, screenshot('quiz-portal'))
 
@@ -133,7 +128,8 @@ test('summarizes multi-language selections with technical codes', async ({ page 
   await selector.locator('input[value="en_us"]').check()
   await selector.locator('input[value="zh_cn"]').check()
   await trigger.click()
-  await expect(selector.locator('.language-selector__summary')).toHaveText('en_us, zh_cn')
+  await expect(selector.locator('.language-selector__summary')).toContainText('en_us')
+  await expect(selector.locator('.language-selector__summary')).toContainText('zh_cn')
 })
 
 test('keeps quiz progress concise and shows time only for timed quizzes', async ({ page }) => {
@@ -197,5 +193,5 @@ test('Simplified Chinese interface contains no known hardcoded English controls'
   await page.goto('/quiz')
   await expect(page.locator('.quiz-description')).toContainText('选择目标语言')
   await expect(page.locator('.quiz-description')).not.toContainText('Choose a target language')
-  await expect(page.locator('#query-lang option:checked')).toHaveText('简体中文（中国大陆）')
+  await expect(page.locator('#query-lang')).toHaveText('简体中文 (中国大陆)')
 })

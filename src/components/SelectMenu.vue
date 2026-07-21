@@ -2,9 +2,12 @@
   <div ref="root" class="relative min-w-0">
     <button
       ref="trigger"
+      :id="id"
       class="interactive-control flex min-h-[var(--control-height)] w-full items-center justify-between gap-2 rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 py-2 text-left shadow-app-sm"
       type="button"
       :aria-expanded="open"
+      :aria-controls="popupId"
+      aria-haspopup="listbox"
       @click="open = !open"
       @keydown.escape="close"
     >
@@ -20,6 +23,7 @@
     <Transition name="motion-popover"
       ><div
         v-if="open"
+        :id="popupId"
         class="absolute z-[100] top-[calc(100%+0.35rem)] right-0 left-0 max-h-72 overflow-auto rounded-[var(--radius-md)] border border-border-strong bg-surface-raised p-1 shadow-app-md"
         role="listbox"
       >
@@ -44,10 +48,11 @@
 import { computed, ref } from 'vue'
 import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 type Option = { value: string; label: string; htmlLang?: string; typographyClass?: string }
-const props = defineProps<{ modelValue: string; options: readonly Option[] }>()
+const props = defineProps<{ id?: string; modelValue: string; options: readonly Option[] }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string]; change: [value: string] }>()
 const root = ref<HTMLElement | null>(null)
 const open = ref(false)
+const popupId = `select-menu-${Math.random().toString(36).slice(2)}`
 const current = computed(() => props.options.find((option) => option.value === props.modelValue))
 function select(value: string) {
   emit('update:modelValue', value)

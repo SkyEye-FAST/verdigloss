@@ -34,6 +34,7 @@
                   {{ $t('query.query_mode') }}
                 </label>
                 <SelectMenu
+                  id="queryMode"
                   v-model="queryMode"
                   :options="[
                     { value: 'source', label: $t('query.query_modes.source') },
@@ -50,6 +51,7 @@
                   {{ $t('query.query_lang') }}
                 </label>
                 <SelectMenu
+                  id="queryLang"
                   class="font-mono"
                   v-model="queryLang"
                   :options="
@@ -131,6 +133,7 @@
                   {{ $t('query.select_languages') }}
                 </label>
                 <LanguageSelector
+                  id="selectedLanguages"
                   class="font-mono"
                   v-model="selectedLanguages"
                   summary-mode="codes"
