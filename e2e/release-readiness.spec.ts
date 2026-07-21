@@ -101,6 +101,7 @@ test('quiz portal and deterministic active quiz handle invalid and completed rou
 })
 
 test('color route, shell navigation, dark mode, and SPA fallbacks work', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
   await page.goto('/table/color')
   await expect(page.getByRole('heading', { name: /colou?r translation table/i })).toBeVisible()
   await page.getByLabel(/Korean Mixed/i).uncheck()
