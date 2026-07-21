@@ -1,6 +1,6 @@
+@import url('https://cdn.jsdelivr.net/npm/@hanzi.pro/webfonts-shanggu-serif@0.1.0/swap.css');
+@import url('https://cdn.jsdelivr.net/npm/@hanzi.pro/webfonts-shanggu-sans@0.1.0/swap.css');
 @import 'tailwindcss';
-@import '../fonts/shanggu/serif/swap.css';
-@import '../fonts/shanggu/sans/swap.css';
 
 /* Tailwind utilities use the existing CSS variables so light/dark mode has one source of truth. */
 @theme inline {
