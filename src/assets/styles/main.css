@@ -36,12 +36,12 @@
   --zh-hant-sans-font: 'Noto Sans TC', 'Noto Sans CJK TC', sans-serif;
   --lzh-serif-font:
     'Shanggu Serif', 'Shanggu Serif VF', 'I.Ming', 'Noto Serif TC Light', 'Noto Serif CJK TC Light',
-    'Source Han Serif TC Light', 'Source Han Serif TW Light', '思源宋體 Light',
-    var(--serif-font), serif;
+    'Source Han Serif TC Light', 'Source Han Serif TW Light', '思源宋體 Light', var(--serif-font),
+    serif;
   --lzh-sans-font:
     'Shanggu Sans', 'Shanggu Sans VF', 'I.Ming', 'Noto Sans TC Light', 'Noto Sans CJK TC Light',
-    'Source Han Sans TC Light', 'Source Han Sans TW Light', '思源黑體 Light',
-    var(--sans-font), sans-serif;
+    'Source Han Sans TC Light', 'Source Han Sans TW Light', '思源黑體 Light', var(--sans-font),
+    sans-serif;
   --jp-serif-font: 'Noto Serif JP', 'Noto Serif CJK JP', serif;
   --jp-sans-font: 'Noto Sans JP', 'Noto Sans CJK JP', sans-serif;
   --monospace-font: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;

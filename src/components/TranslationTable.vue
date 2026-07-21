@@ -27,9 +27,6 @@
         position="top"
       />
 
-      <p id="table-description" class="table-description">
-        {{ $t('table.caption') }}
-      </p>
       <div
         v-show="hasHorizontalOverflow"
         ref="topScrollbar"
@@ -44,7 +41,7 @@
         class="table-wrapper"
         role="region"
         tabindex="0"
-        :aria-labelledby="'table-description'"
+        :aria-label="$t('table.caption')"
         @scroll="syncFromTable"
       >
         <table ref="tableElement">
@@ -320,17 +317,9 @@ watch(
   scroll-margin-top: var(--app-bar-offset);
 }
 
-.table-description,
 .table-horizontal-scrollbar {
   width: min(calc(100% - 2rem), var(--content-max));
   margin-inline: auto;
-}
-
-.table-description {
-  margin-top: 0;
-  margin-bottom: var(--space-2);
-  color: var(--muted);
-  font-size: 0.9rem;
 }
 
 .table-horizontal-scrollbar {
@@ -457,7 +446,6 @@ watch(
     max-height: calc(100dvh - var(--app-bar-offset) - 78px);
   }
 
-  .table-description,
   .table-horizontal-scrollbar {
     width: 100%;
   }
