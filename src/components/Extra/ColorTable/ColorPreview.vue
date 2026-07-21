@@ -1,6 +1,6 @@
 <template>
   <span
-    class="color-preview"
+    class="size-4 shrink-0 rounded-[2px] border border-border-strong"
     :style="{ backgroundColor: color }"
     :aria-label="$t('table.colors.color_value', { color })"
     role="img"
@@ -11,13 +11,3 @@
 <script setup lang="ts">
 defineProps<{ color: string }>()
 </script>
-
-<style scoped>
-.color-preview {
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-</style>
