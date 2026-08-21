@@ -61,7 +61,7 @@
     "unplugin-icons": "^23.0.1",
     "unplugin-vue-components": "^32.1.0",
     "vite": "^8.1.4",
-    "vite-plugin-vue-devtools": "^8.1.5",
+    "vite-plugin-vue-devtools": "^8.2.1",
     "vitest": "^4.1.10",
     "vue-tsc": "^3.3.7"
   }
