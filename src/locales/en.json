@@ -6,7 +6,7 @@
       "use_sans": "Use sans-serif translation font",
       "use_serif": "Use serif translation font"
     },
-    "github": "Verdigloss on GitHub",
+    "github_new_window": "Verdigloss on GitHub (opens in a new window)",
     "home": "Verdigloss home",
     "nav": {
       "query": "Query",
@@ -14,6 +14,7 @@
       "table": "Table"
     },
     "primary_navigation": "Primary navigation",
+    "skip_to_content": "Skip to main content",
     "theme": {
       "dark": "Dark",
       "light": "Light",
@@ -32,11 +33,13 @@
   "language_selector": {
     "choose": "Choose languages",
     "clear": "Clear",
+    "list_separator": ", ",
     "select_all": "Select all",
     "selected": "Selected languages"
   },
   "not_found": {
     "description": "This page does not exist.",
+    "heading": "404 · Page not found",
     "return_home": "Back to Verdigloss",
     "title": "Page not found"
   },
@@ -85,10 +88,19 @@
       "share_result": "Share quiz result"
     },
     "active": {
+      "answer_for": "Translation answer for {source}",
+      "blank_character": "blank character",
+      "character_feedback": "{correct} correct, {present} present elsewhere, {absent} incorrect, {hinted} hinted.",
+      "character_state_separator": " — ",
       "character_states": "Answer character states",
       "loading": "Loading quiz questions…",
-      "state_legend": "Character state legend"
+      "question_position": "Question {current} of {total}:",
+      "rating": "Difficulty rating {rating}",
+      "state_legend": "Character state legend",
+      "time_remaining": "{time} remaining",
+      "timer": "Quiz time remaining"
     },
+    "answer_label": "Translation answer",
     "answer_placeholder": "Enter translation here…",
     "character_state": {
       "absent": "Incorrect",
@@ -98,6 +110,7 @@
       "hinted-correct": "Hinted and correct",
       "present": "Present elsewhere"
     },
+    "code_label": "Question group code",
     "code_placeholder": "Enter question group code…",
     "complete": "All questions completed!",
     "completion": {
@@ -173,7 +186,8 @@
       "caption": "Colour names and identifiers across Minecraft translations",
       "color_id": "Colour / ID",
       "color_value": "Colour value {color}",
-      "dye_icon": "Minecraft dye icon",
+      "dye_icon_current": "Current Minecraft dye icon for {color}",
+      "dye_icon_legacy": "Legacy Minecraft dye icon for {color}",
       "region": "Colour translation table (horizontally scrollable)",
       "show_chu_nom": "Show Chữ Nôm",
       "show_korean_mixed": "Show Korean mixed script",
@@ -195,16 +209,20 @@
     "keys": "Keys",
     "loading": "Loading…",
     "pagination": {
+      "bottom_label": "Table pagination after results",
+      "current": "Page {current} of {total}",
       "jump": "Jump to page",
-      "label": "Table pagination",
       "next": "Next page",
       "next_short": "Next",
       "page": "Page {page}",
       "previous": "Previous page",
       "previous_short": "Previous",
+      "top_label": "Table pagination before results",
       "total_rows": "Total number of strings: "
     },
     "search_placeholder": "Search content…",
+    "results_status_all": "Showing all {total} matching translation keys.",
+    "results_status_page": "Showing translation keys {start} to {end} of {total}, page {page} of {pages}.",
     "sections": {
       "colors": "Colours",
       "label": "Table sections",

@@ -6,7 +6,7 @@
       "use_sans": "译名改用无衬线字体",
       "use_serif": "译名改用衬线字体"
     },
-    "github": "Verdigloss 的 GitHub 仓库",
+    "github_new_window": "Verdigloss 的 GitHub 仓库（在新窗口中打开）",
     "home": "Verdigloss 首页",
     "nav": {
       "query": "查询",
@@ -14,6 +14,7 @@
       "table": "表格"
     },
     "primary_navigation": "主导航",
+    "skip_to_content": "跳到主要内容",
     "theme": {
       "dark": "深色",
       "light": "浅色",
@@ -32,11 +33,13 @@
   "language_selector": {
     "choose": "选择语言",
     "clear": "清除",
+    "list_separator": "、",
     "select_all": "全选",
     "selected": "已选择的语言"
   },
   "not_found": {
     "description": "此页面不存在。",
+    "heading": "404 · 页面未找到",
     "return_home": "返回 Verdigloss",
     "title": "找不到页面"
   },
@@ -85,10 +88,19 @@
       "share_result": "分享测验结果"
     },
     "active": {
+      "answer_for": "{source} 的译名答案",
+      "blank_character": "空白字符",
+      "character_feedback": "{correct} 个正确，{present} 个位置错误，{absent} 个错误，{hinted} 个提示字符。",
+      "character_state_separator": "：",
       "character_states": "答案字符状态",
       "loading": "正在加载测验题目…",
-      "state_legend": "字符状态图例"
+      "question_position": "第 {current}/{total} 题：",
+      "rating": "难度评分 {rating}",
+      "state_legend": "字符状态图例",
+      "time_remaining": "剩余 {time}",
+      "timer": "测验剩余时间"
     },
+    "answer_label": "译名答案",
     "answer_placeholder": "在此输入译名…",
     "character_state": {
       "absent": "错误",
@@ -98,6 +110,7 @@
       "hinted-correct": "提示且正确",
       "present": "出现在其他位置"
     },
+    "code_label": "题组编号",
     "code_placeholder": "输入题组编号…",
     "complete": "已完成所有题目！",
     "completion": {
@@ -173,7 +186,8 @@
       "caption": "Minecraft 各语言的颜色名称与标识符",
       "color_id": "颜色 / 标识符",
       "color_value": "颜色值 {color}",
-      "dye_icon": "Minecraft 染料图标",
+      "dye_icon_current": "颜色 {color} 的当前版本 Minecraft 染料图标",
+      "dye_icon_legacy": "颜色 {color} 的旧版 Minecraft 染料图标",
       "region": "颜色译名表（可左右滚动）",
       "show_chu_nom": "显示喃字",
       "show_korean_mixed": "显示汉谚混写",
@@ -195,16 +209,20 @@
     "keys": "键名",
     "loading": "加载中…",
     "pagination": {
+      "bottom_label": "结果下方的表格分页",
+      "current": "第 {current}/{total} 页",
       "jump": "跳转到页面",
-      "label": "表格分页",
       "next": "下一页",
       "next_short": "下一页",
       "page": "第 {page} 页",
       "previous": "上一页",
       "previous_short": "上一页",
+      "top_label": "结果上方的表格分页",
       "total_rows": "字符串总数："
     },
     "search_placeholder": "搜索内容…",
+    "results_status_all": "正在显示全部 {total} 个匹配的本地化键名。",
+    "results_status_page": "正在显示第 {start} 至 {end} 个本地化键名，共 {total} 个；第 {page}/{pages} 页。",
     "sections": {
       "colors": "颜色",
       "label": "表格分区",

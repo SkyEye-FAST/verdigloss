@@ -6,7 +6,7 @@
       "use_sans": "譯名改用無襯線字型",
       "use_serif": "譯名改用襯線字型"
     },
-    "github": "Verdigloss 的 GitHub 儲存庫",
+    "github_new_window": "Verdigloss 的 GitHub 儲存庫（在新視窗中開啟）",
     "home": "Verdigloss 首頁",
     "nav": {
       "query": "查詢",
@@ -14,6 +14,7 @@
       "table": "表格"
     },
     "primary_navigation": "主導覽",
+    "skip_to_content": "跳至主要內容",
     "theme": {
       "dark": "深色",
       "light": "淺色",
@@ -32,11 +33,13 @@
   "language_selector": {
     "choose": "選擇語言",
     "clear": "清除",
+    "list_separator": "、",
     "select_all": "全選",
     "selected": "已選擇的語言"
   },
   "not_found": {
     "description": "此頁面不存在。",
+    "heading": "404 · 找不到頁面",
     "return_home": "返回 Verdigloss",
     "title": "找不到頁面"
   },
@@ -85,10 +88,19 @@
       "share_result": "分享測驗結果"
     },
     "active": {
+      "answer_for": "{source} 的譯名答案",
+      "blank_character": "空白字元",
+      "character_feedback": "{correct} 個正確，{present} 個位置錯誤，{absent} 個錯誤，{hinted} 個提示字元。",
+      "character_state_separator": "：",
       "character_states": "答案字元狀態",
       "loading": "正在載入測驗題目…",
-      "state_legend": "字元狀態圖例"
+      "question_position": "第 {current}/{total} 題：",
+      "rating": "難度評分 {rating}",
+      "state_legend": "字元狀態圖例",
+      "time_remaining": "剩餘 {time}",
+      "timer": "測驗剩餘時間"
     },
+    "answer_label": "譯名答案",
     "answer_placeholder": "在此輸入譯名…",
     "character_state": {
       "absent": "錯誤",
@@ -98,6 +110,7 @@
       "hinted-correct": "提示且正確",
       "present": "出現在其他位置"
     },
+    "code_label": "題組編號",
     "code_placeholder": "輸入題組編號…",
     "complete": "已完成所有題目！",
     "completion": {
@@ -173,7 +186,8 @@
       "caption": "Minecraft 各語言的顏色名稱與識別碼",
       "color_id": "顏色 / 識別碼",
       "color_value": "顏色值 {color}",
-      "dye_icon": "Minecraft 染料圖示",
+      "dye_icon_current": "顏色 {color} 的目前版本 Minecraft 染料圖示",
+      "dye_icon_legacy": "顏色 {color} 的舊版 Minecraft 染料圖示",
       "region": "顏色譯名表（可左右捲動）",
       "show_chu_nom": "顯示喃字",
       "show_korean_mixed": "顯示漢諺混寫",
@@ -195,16 +209,20 @@
     "keys": "鍵名",
     "loading": "載入中…",
     "pagination": {
+      "bottom_label": "結果下方的表格分頁",
+      "current": "第 {current}/{total} 頁",
       "jump": "跳至頁面",
-      "label": "表格分頁",
       "next": "下一頁",
       "next_short": "下一頁",
       "page": "第 {page} 頁",
       "previous": "上一頁",
       "previous_short": "上一頁",
+      "top_label": "結果上方的表格分頁",
       "total_rows": "字串總數："
     },
     "search_placeholder": "搜尋內容…",
+    "results_status_all": "正在顯示全部 {total} 個相符的本地化鍵名。",
+    "results_status_page": "正在顯示第 {start} 至 {end} 個本地化鍵名，共 {total} 個；第 {page}/{pages} 頁。",
     "sections": {
       "colors": "顏色",
       "label": "表格分區",
