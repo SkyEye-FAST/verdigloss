@@ -1,5 +1,6 @@
 <template>
   <div class="app-shell">
+    <a class="skip-link" href="#main-content">{{ $t('app.skip_to_content') }}</a>
     <header class="app-bar">
       <router-link class="brand interactive-control" to="/" :aria-label="$t('app.home')"
         >Verdigloss</router-link
@@ -14,6 +15,7 @@
           to="/table"
           class="primary-nav__link interactive-control"
           :class="{ 'is-active': route.path.startsWith('/table') }"
+          :aria-current="route.path.startsWith('/table') ? 'page' : undefined"
           ><i-material-symbols-table-view-outline aria-hidden="true" /><span>{{
             $t('app.nav.table')
           }}</span></router-link
@@ -30,7 +32,7 @@
           href="https://github.com/SkyEye-FAST/verdigloss"
           target="_blank"
           rel="noopener noreferrer"
-          :aria-label="$t('app.github')"
+          :aria-label="$t('app.github_new_window')"
         >
           <i-fa6-brands-github aria-hidden="true" />
         </a>
@@ -70,10 +72,10 @@
         </button>
       </div>
     </header>
-    <main id="main-content" class="app-main">
+    <main id="main-content" ref="mainContent" class="app-main" tabindex="-1">
       <router-view v-slot="{ Component, route: activeRoute }">
         <Transition :name="hasRenderedRoute ? 'route' : ''" mode="out-in">
-          <component :is="Component" :key="activeRoute.name" @vue:mounted="markRouteRendered" />
+          <component :is="Component" :key="activeRoute.name" @vue:mounted="handleRouteMounted" />
         </Transition>
       </router-view>
     </main>
@@ -87,6 +89,7 @@
         to="/table"
         class="mobile-nav__link interactive-control"
         :class="{ 'is-active': route.path.startsWith('/table') }"
+        :aria-current="route.path.startsWith('/table') ? 'page' : undefined"
         ><i-material-symbols-table-view-outline aria-hidden="true" /><span>{{
           $t('app.nav.table')
         }}</span></router-link
@@ -108,9 +111,12 @@ import { useDarkMode } from '@/composables/useDarkMode'
 import { useTranslationFont } from '@/composables/useTranslationFont'
 
 const route = useRoute()
+const mainContent = ref<HTMLElement | null>(null)
 const hasRenderedRoute = ref(false)
-const markRouteRendered = () => {
+const handleRouteMounted = () => {
+  const shouldMoveFocus = hasRenderedRoute.value
   hasRenderedRoute.value = true
+  if (shouldMoveFocus) mainContent.value?.focus({ preventScroll: true })
 }
 const { mode, isDarkMode, setMode } = useDarkMode()
 

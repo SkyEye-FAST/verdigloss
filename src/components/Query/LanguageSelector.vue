@@ -1,15 +1,31 @@
 <template>
   <div ref="root" class="language-selector relative z-20 min-w-0 w-full max-w-full">
+    <span :id="labelId" class="sr-only">{{ resolvedLabel }}</span>
+    <span :id="descriptionId" class="sr-only">
+      <template v-if="selectedOptions.length">
+        <template v-for="(option, index) in selectedOptions" :key="option.value">
+          <span
+            :lang="summaryMode === 'labels' ? option.htmlLang : undefined"
+            :class="summaryMode === 'labels' ? [option.value.replace(/_/, '-'), 'sans'] : undefined"
+            >{{ summaryMode === 'codes' ? option.value : option.label }}</span
+          ><span v-if="index < selectedOptions.length - 1">{{
+            $t('language_selector.list_separator')
+          }}</span>
+        </template>
+      </template>
+      <template v-else>{{ resolvedPlaceholder }}</template>
+    </span>
     <button
       ref="trigger"
       :id="id"
       class="language-selector__trigger interactive-control flex min-h-[var(--control-height)] w-full items-center justify-between gap-2 overflow-hidden rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 py-2 text-left text-content shadow-app-sm"
       type="button"
       :aria-expanded="isOpen"
-      :aria-controls="popupId"
-      :aria-label="`${resolvedLabel}: ${selectedSummary}`"
+      :aria-controls="isOpen ? popupId : undefined"
+      :aria-labelledby="labelId"
+      :aria-describedby="descriptionId"
       @click="toggleDropdown"
-      @keydown.escape="closeDropdown"
+      @keydown.escape.stop.prevent="closeAndRestoreFocus"
     >
       <span class="language-selector__summary flex min-w-0 flex-1 flex-wrap gap-1">
         <template v-if="selectedOptions.length">
@@ -17,6 +33,8 @@
             v-for="option in selectedOptions"
             :key="option.value"
             class="rounded bg-accent-soft px-1.5 py-0.5 text-[0.8rem] leading-none text-accent-strong"
+            :lang="summaryMode === 'labels' ? option.htmlLang : undefined"
+            :class="summaryMode === 'labels' ? [option.value.replace(/_/, '-'), 'sans'] : undefined"
           >
             {{ summaryMode === 'codes' ? option.value : option.label }}
           </span>
@@ -30,14 +48,13 @@
       />
     </button>
     <Transition name="motion-popover">
-      <div
+      <fieldset
         v-if="isOpen"
         :id="popupId"
-        class="language-selector__popover absolute z-[100] top-[calc(100%+0.35rem)] right-0 left-0 overflow-hidden rounded-[var(--radius-md)] border border-border-strong bg-surface-raised shadow-app-md max-[800px]:fixed max-[800px]:z-[110] max-[800px]:inset-[auto_var(--space-4)_calc(70px+var(--safe-bottom))] max-[800px]:w-auto max-[800px]:max-w-none"
-        role="group"
-        :aria-label="resolvedLabel"
+        class="language-selector__popover absolute z-[100] top-[calc(100%+0.35rem)] right-0 left-0 m-0 min-w-0 overflow-hidden rounded-[var(--radius-md)] border border-border-strong bg-surface-raised p-0 shadow-app-md max-[800px]:fixed max-[800px]:z-[110] max-[800px]:inset-[auto_var(--space-4)_calc(70px+var(--safe-bottom))] max-[800px]:w-auto max-[800px]:max-w-none"
         @keydown.esc.stop.prevent="closeAndRestoreFocus"
       >
+        <legend class="sr-only">{{ resolvedLabel }}</legend>
         <div class="flex justify-between border-b border-border p-2">
           <button
             class="interactive-control min-h-9 rounded-[var(--radius-sm)] bg-accent px-3 font-bold text-on-accent shadow-app-sm hover:bg-accent-strong"
@@ -78,13 +95,13 @@
             <code class="font-mono text-[0.75rem] text-muted">{{ option.value }}</code>
           </label>
         </div>
-      </div>
+      </fieldset>
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 
@@ -109,18 +126,15 @@ const emit = defineEmits<{
 const root = ref<HTMLElement | null>(null)
 const trigger = ref<HTMLButtonElement | null>(null)
 const isOpen = ref(false)
-const popupId = `language-selector-${Math.random().toString(36).slice(2)}`
+const instanceId = useId()
+const popupId = `language-selector-${instanceId}`
+const labelId = `language-selector-label-${instanceId}`
+const descriptionId = `language-selector-description-${instanceId}`
 const resolvedLabel = computed(() => props.label ?? t('language_selector.selected'))
 const resolvedPlaceholder = computed(() => props.placeholder ?? t('language_selector.choose'))
 const selectedOptions = computed(() =>
   props.options.filter((option) => props.modelValue.includes(option.value)),
 )
-const selectedSummary = computed(() => {
-  const summary = selectedOptions.value.map((option) =>
-    props.summaryMode === 'codes' ? option.value : option.label,
-  )
-  return summary.length ? summary.join(', ') : resolvedPlaceholder.value
-})
 function toggleDropdown() {
   isOpen.value = !isOpen.value
 }
@@ -149,5 +163,5 @@ function selectAll() {
 function clearAll() {
   update([])
 }
-useDismissiblePopover(root, isOpen, closeAndRestoreFocus)
+useDismissiblePopover(root, isOpen, closeDropdown)
 </script>
