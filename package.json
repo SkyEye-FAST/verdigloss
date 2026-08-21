@@ -38,7 +38,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@iconify-json/fa6-brands": "^1.2.6",
-    "@iconify-json/material-symbols": "^1.2.85",
+    "@iconify-json/material-symbols": "^1.2.89",
     "@intlify/unplugin-vue-i18n": "^11.2.4",
     "@playwright/test": "1.61.1",
     "@tailwindcss/vite": "^4.3.3",
