@@ -36,7 +36,7 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.12.1",
+    "@axe-core/playwright": "4.13.0",
     "@iconify-json/fa6-brands": "^1.2.6",
     "@iconify-json/material-symbols": "^1.2.85",
     "@intlify/unplugin-vue-i18n": "^11.2.4",
