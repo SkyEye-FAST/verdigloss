@@ -43,13 +43,21 @@ export async function expectNoPageOverflow(page: Page) {
   ).toBeLessThanOrEqual(dimensions.clientWidth)
 }
 
-export async function expectNoSeriousA11yViolations(page: Page) {
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
-  const serious = results.violations.filter(
-    (violation) => violation.impact === 'serious' || violation.impact === 'critical',
-  )
+export async function expectNoA11yViolations(page: Page) {
+  const results = await new AxeBuilder({ page })
+    .options({ rules: { 'target-size': { enabled: true } } })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
+    .analyze()
+  const violations = results.violations
   expect(
-    serious,
-    serious.map((violation) => `${violation.id}: ${violation.help}`).join('\n'),
+    violations,
+    violations
+      .map(
+        (violation) =>
+          `${violation.id}: ${violation.help}\n${violation.nodes
+            .map((node) => `  ${node.target.join(' > ')}\n  ${node.failureSummary ?? ''}`)
+            .join('\n')}`,
+      )
+      .join('\n\n'),
   ).toEqual([])
 }

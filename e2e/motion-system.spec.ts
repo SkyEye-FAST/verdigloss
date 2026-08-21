@@ -25,7 +25,7 @@ test('keeps the query sidebar and popover usable with reduced motion', async ({ 
   await expect(selector.locator('.language-selector__popover')).toHaveCount(0)
 
   await page.getByRole('link', { name: /table/i }).first().click()
-  await expect(page.locator('.translation-table tbody tr').first()).toBeVisible()
+  await expect(page.getByTestId('translation-row').first()).toBeVisible()
 })
 
 test('dismisses dropdown menus when focus moves away', async ({ page }) => {
@@ -40,13 +40,16 @@ test('dismisses dropdown menus when focus moves away', async ({ page }) => {
   await exportMenu.locator('summary').click()
   await exportMenu.locator('summary').press('Escape')
   await expect(exportMenu).not.toHaveAttribute('open', '')
+  await expect(exportMenu.locator('summary')).toBeFocused()
 
   await page.goto('/')
-  const keyInput = page.locator('#localeKey')
-  await keyInput.click()
-  await expect(page.locator('.query-key-results')).toBeVisible()
+  const languageTrigger = page.getByRole('button', {
+    name: /Selected languages/i,
+  })
+  await languageTrigger.click()
+  await expect(page.locator('.language-selector__popover')).toBeVisible()
   await page.locator('#queryContent').click()
-  await expect(page.locator('.query-key-results')).toHaveCount(0)
+  await expect(page.locator('.language-selector__popover')).toHaveCount(0)
 })
 
 test('advances a question without replacing the answer input and uses transform timer progress', async ({

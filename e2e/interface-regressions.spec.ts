@@ -32,47 +32,83 @@ test('captures every repaired surface without layout regressions', async ({ page
   await capture(page, screenshot('query'))
 
   await page.goto('/table')
-  await expect(page.locator('tbody tr').first()).toBeVisible()
-  const wrapper = page.locator('.table-wrapper')
-  const topScrollbar = page.locator('.table-horizontal-scrollbar')
-  await expect(wrapper).toHaveAttribute('aria-label', 'Minecraft translations')
-  const header = page.locator('thead th').first()
-  const firstRowCell = page.locator('tbody tr').first().locator('.key-column')
-  const [headerBox, firstRowBox] = await Promise.all([
-    header.boundingBox(),
-    firstRowCell.boundingBox(),
-  ])
-  expect(headerBox).not.toBeNull()
-  expect(firstRowBox).not.toBeNull()
-  expect(firstRowBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height - 1)
-  await wrapper.evaluate((element) => {
-    element.scrollLeft = Math.min(500, element.scrollWidth - element.clientWidth)
-  })
-  if ((await page.viewportSize())!.width > 800) {
-    await expect(topScrollbar).toHaveJSProperty(
-      'scrollLeft',
-      await wrapper.evaluate((element) => element.scrollLeft),
+  await expect(page.getByTestId('translation-row').first()).toBeVisible()
+  const compactTable = (await page.viewportSize())!.width <= 800
+  if (compactTable) {
+    await expect(page.getByTestId('translation-card-list')).toBeVisible()
+    await expect(page.locator('.translation-table .table-wrapper')).toHaveCount(0)
+    await expect(page.getByTestId('translation-row')).toHaveCount(10)
+    await expect(page.getByTestId('translation-row').first().getByRole('heading')).toBeVisible()
+  } else {
+    const wrapper = page.locator('.translation-table .table-wrapper')
+    await expect(wrapper).toHaveAttribute('aria-label', 'Minecraft translations')
+    await expect(page.locator('.table-horizontal-scrollbar')).toHaveCount(0)
+    const headerCells = page.locator('.translation-table thead th')
+    const firstRowCells = page.getByTestId('translation-row').first().locator('> *')
+    const headerBoxes = await headerCells.evaluateAll((cells) =>
+      cells.map((cell) => {
+        const box = cell.getBoundingClientRect()
+        return { left: box.left, top: box.top, width: box.width, height: box.height }
+      }),
     )
-  }
-  const stickyStyle = await firstRowCell.evaluate((element) => {
-    const style = getComputedStyle(element)
-    return { backgroundColor: style.backgroundColor, zIndex: style.zIndex }
-  })
-  expect(stickyStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
-  expect(stickyStyle.backgroundColor).not.toBe('transparent')
-  expect(Number(stickyStyle.zIndex)).toBeGreaterThan(0)
-  if ((await page.viewportSize())!.width > 800) {
+    const rowBoxes = await firstRowCells.evaluateAll((cells) =>
+      cells.map((cell) => {
+        const box = cell.getBoundingClientRect()
+        return { left: box.left, top: box.top, width: box.width }
+      }),
+    )
+    expect(rowBoxes).toHaveLength(headerBoxes.length)
+    for (const [index, headerBox] of headerBoxes.entries()) {
+      expect(Math.abs(headerBox.left - rowBoxes[index]!.left)).toBeLessThan(1)
+      expect(Math.abs(headerBox.width - rowBoxes[index]!.width)).toBeLessThan(1)
+    }
+    const naturalTableOrder = await page.locator('.translation-table table').evaluate((table) => {
+      const heading = table.tHead
+      const firstRow = table.tBodies[0]?.rows[0]
+      return {
+        headingBottom: (heading?.offsetTop ?? 0) + (heading?.offsetHeight ?? 0),
+        firstRowTop: firstRow?.offsetTop ?? -1,
+      }
+    })
+    expect(naturalTableOrder.firstRowTop).toBeGreaterThanOrEqual(
+      naturalTableOrder.headingBottom - 1,
+    )
+
+    const firstColumnStyle = await firstRowCells.first().evaluate((element) => {
+      const style = getComputedStyle(element)
+      return {
+        backgroundColor: style.backgroundColor,
+        position: style.position,
+        zIndex: style.zIndex,
+      }
+    })
+    expect(firstColumnStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    expect(firstColumnStyle.backgroundColor).not.toBe('transparent')
+    expect(firstColumnStyle.position).toBe('sticky')
+    expect(Number(firstColumnStyle.zIndex)).toBeGreaterThan(0)
+
+    await wrapper.evaluate((element) => {
+      element.scrollLeft = Math.min(500, element.scrollWidth - element.clientWidth)
+    })
+    const scrolledHeaderBoxes = await headerCells.evaluateAll((cells) =>
+      cells.map((cell) => {
+        const box = cell.getBoundingClientRect()
+        return { left: box.left, width: box.width }
+      }),
+    )
+    const scrolledRowBoxes = await firstRowCells.evaluateAll((cells) =>
+      cells.map((cell) => {
+        const box = cell.getBoundingClientRect()
+        return { left: box.left, width: box.width }
+      }),
+    )
+    for (const [index, headerBox] of scrolledHeaderBoxes.entries()) {
+      expect(Math.abs(headerBox.left - scrolledRowBoxes[index]!.left)).toBeLessThan(1)
+      expect(Math.abs(headerBox.width - scrolledRowBoxes[index]!.width)).toBeLessThan(1)
+    }
     await wrapper.evaluate((element) => {
       element.scrollLeft = 0
     })
-    await topScrollbar.evaluate((element) => {
-      element.scrollLeft = Math.min(300, element.scrollWidth - element.clientWidth)
-      element.dispatchEvent(new Event('scroll'))
-    })
-    await expect(wrapper).toHaveJSProperty(
-      'scrollLeft',
-      await topScrollbar.evaluate((element) => element.scrollLeft),
-    )
   }
   await expectNoPageOverflow(page)
   await capture(page, screenshot('table'))
@@ -110,7 +146,12 @@ test('captures every repaired surface without layout regressions', async ({ page
   await capture(page, screenshot('quiz-summary'))
 
   await page.goto('/table/color')
-  await expect(page.locator('.table-wrapper')).toBeVisible()
+  if ((await page.viewportSize())!.width <= 800) {
+    await expect(page.locator('.color-card-list')).toBeVisible()
+    await expect(page.locator('.page-content .table-wrapper')).toHaveCount(0)
+  } else {
+    await expect(page.locator('.page-content .table-wrapper')).toBeVisible()
+  }
   await expect(page.locator('.table-section-nav')).toBeVisible()
   await expect(page.locator('.primary-nav')).toContainText(/Query.*Table.*Quiz/)
   await expect(page.locator('.primary-nav')).not.toContainText(/Colours|颜色|顏色/)
@@ -208,5 +249,6 @@ test('Simplified Chinese interface contains no known hardcoded English controls'
   await page.goto('/quiz')
   await expect(page.locator('.quiz-description')).toContainText('选择目标语言')
   await expect(page.locator('.quiz-description')).not.toContainText('Choose a target language')
-  await expect(page.locator('#query-lang')).toHaveText('简体中文 (中国大陆)')
+  await expect(page.locator('#query-lang')).toHaveValue('zh_cn')
+  await expect(page.locator('#query-lang option:checked')).toHaveText('简体中文 (中国大陆)')
 })

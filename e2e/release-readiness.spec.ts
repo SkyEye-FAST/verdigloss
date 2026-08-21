@@ -3,8 +3,8 @@ import { expect, test } from '@playwright/test'
 import {
   answerForQuizKey,
   deterministicQuizCode,
+  expectNoA11yViolations,
   expectNoPageOverflow,
-  expectNoSeriousA11yViolations,
   resetBrowserState,
 } from './helpers'
 
@@ -19,23 +19,23 @@ test('query persists valid preferences and recovers from malformed storage', asy
   await page.goto('/')
   await expect(page.getByRole('main')).toContainText('Translation')
   await page.locator('#queryContent').fill('The End')
-  await page.locator('#localeKey').focus()
-  await expect(page.locator('#query-key-results [role="option"]').first()).toBeVisible()
-  await page.locator('#query-key-results [role="option"]').first().click()
+  await expect(page.locator('.result-count')).toContainText('matching translation key')
+  const keySelect = page.locator('#localeKey')
+  await expect.poll(() => keySelect.locator('option').count()).toBeGreaterThan(1)
+  await keySelect.selectOption({ index: 1 })
   await expect(page.locator('.subtitle')).toContainText('.')
-  await page.locator('#queryMode').click()
-  await page.getByRole('option', { name: 'Key' }).click()
+  await expectNoA11yViolations(page)
+  await page.locator('#queryMode').selectOption('key')
   await page.locator('#queryContent').fill('advancements.end')
-  await page.locator('#localeKey').focus()
-  await expect(page.locator('#query-key-results [role="option"]').first()).toBeVisible()
-  await page.locator('#localeKey').press('Escape')
+  await expect(page.locator('.result-count')).toContainText('matching translation key')
+  await expect.poll(() => keySelect.locator('option').count()).toBeGreaterThan(1)
   await page.getByRole('button', { name: /Selected languages/i }).click()
   await page.getByRole('button', { name: 'Clear' }).click()
   await page.getByRole('button', { name: /Selected languages/i }).press('Escape')
   await page.reload()
-  await expect(page.locator('#queryMode')).toHaveText('Query by translation key')
+  await expect(page.locator('#queryMode')).toHaveValue('key')
   await expectNoPageOverflow(page)
-  await expectNoSeriousA11yViolations(page)
+  await expectNoA11yViolations(page)
 })
 
 test('translation table supports direct routes, filtering, pagination, and exports', async ({
@@ -44,9 +44,36 @@ test('translation table supports direct routes, filtering, pagination, and expor
   await page.goto('/table')
   await expect(page.getByRole('heading', { name: /translation table/i })).toBeVisible()
   const search = page.getByRole('searchbox')
+  const compactLayout = await page.evaluate(() => matchMedia('(max-width: 800px)').matches)
+  if (compactLayout) {
+    await expect(page.getByTestId('translation-card-list')).toBeVisible()
+    await expect(page.locator('.translation-table .table-wrapper')).toHaveCount(0)
+  } else {
+    const headerCells = page.locator('.translation-table thead th')
+    const firstRowCells = page.locator('[data-testid="translation-row"]').first().locator('> *')
+    await expect(headerCells.first()).toBeVisible()
+    const headerBoxes = await headerCells.evaluateAll((cells) =>
+      cells.map((cell) => {
+        const box = cell.getBoundingClientRect()
+        return { left: box.left, width: box.width }
+      }),
+    )
+    const rowBoxes = await firstRowCells.evaluateAll((cells) =>
+      cells.map((cell) => {
+        const box = cell.getBoundingClientRect()
+        return { left: box.left, width: box.width }
+      }),
+    )
+    expect(rowBoxes).toHaveLength(headerBoxes.length)
+    for (const [index, headerBox] of headerBoxes.entries()) {
+      expect(Math.abs(headerBox.left - rowBoxes[index]!.left)).toBeLessThan(1)
+      expect(Math.abs(headerBox.width - rowBoxes[index]!.width)).toBeLessThan(1)
+    }
+  }
+  await expectNoA11yViolations(page)
   await page.getByLabel('Next page').last().click()
   await search.fill('advancements.end')
-  await expect(page.locator('tbody tr').first()).toBeVisible()
+  await expect(page.getByTestId('translation-row').first()).toBeVisible()
   await page.getByRole('button', { name: /Displayed languages/i }).click()
   await page.getByRole('button', { name: 'Clear' }).click()
   await page.locator('input[type="checkbox"][value="en_us"]').check()
@@ -56,9 +83,11 @@ test('translation table supports direct routes, filtering, pagination, and expor
   await page.getByRole('button', { name: 'TSV' }).click()
   await expect((await download).suggestedFilename()).toMatch(/\.tsv$/)
   await search.fill('this-key-does-not-exist')
-  await expect(page.getByText('No translation keys match the current filters.')).toBeVisible()
+  await expect(page.locator('.empty-results')).toHaveText(
+    'No translation keys match the current filters.',
+  )
   await expectNoPageOverflow(page)
-  await expectNoSeriousA11yViolations(page)
+  await expectNoA11yViolations(page)
 })
 
 test('quiz portal and deterministic active quiz handle invalid and completed routes', async ({
@@ -66,7 +95,7 @@ test('quiz portal and deterministic active quiz handle invalid and completed rou
 }) => {
   await page.goto('/quiz')
   await expect(page.getByRole('heading', { name: /translation quiz/i })).toBeVisible()
-  await expectNoSeriousA11yViolations(page)
+  await expectNoA11yViolations(page)
   await page.locator('#timer-mode').check()
   await page.locator('#quiz-code').fill('invalid-code')
   await page.getByRole('button', { name: 'Enter' }).click()
@@ -75,7 +104,7 @@ test('quiz portal and deterministic active quiz handle invalid and completed rou
   await page.getByRole('button', { name: 'Enter' }).click()
   await expect(page).toHaveURL(/\/quiz\/v1\./)
   await expect(page.locator('.quiz-input')).toBeVisible()
-  await expectNoSeriousA11yViolations(page)
+  await expectNoA11yViolations(page)
   const keyLocator = page.locator('.quiz-info .key').first()
   await expect(keyLocator).not.toBeEmpty()
   const questionKey = (await keyLocator.textContent())?.trim()
@@ -91,7 +120,7 @@ test('quiz portal and deterministic active quiz handle invalid and completed rou
   }
   await expect(page.getByText(/All questions completed/i)).toBeVisible()
   await expect(page.getByRole('button', { name: /Copy quiz code/i })).toBeVisible()
-  await expectNoSeriousA11yViolations(page)
+  await expectNoA11yViolations(page)
   await expectNoPageOverflow(page)
   await page.getByRole('button', { name: /One more group/i }).click()
   await expect(page).toHaveURL(/l=zh_cn&t=1/)
@@ -108,7 +137,7 @@ test('color route, shell navigation, dark mode, and SPA fallbacks work', async (
   await page.getByLabel(/Korean Mixed/i).uncheck()
   await page.getByLabel(/Chữ Nôm/i).uncheck()
   await expect(page.getByRole('img', { name: /Colour value/i }).first()).toBeVisible()
-  await expectNoSeriousA11yViolations(page)
+  await expectNoA11yViolations(page)
   await page.getByRole('link', { name: 'Quiz' }).first().click()
   await expect(page).toHaveURL(/\/quiz$/)
   await page.getByRole('button', { name: /Use dark theme/i }).click()
@@ -124,4 +153,5 @@ test('color route, shell navigation, dark mode, and SPA fallbacks work', async (
   await page.goto('/not-a-route')
   await expect(page.getByRole('heading', { name: '404' })).toBeVisible()
   await expectNoPageOverflow(page)
+  await expectNoA11yViolations(page)
 })
