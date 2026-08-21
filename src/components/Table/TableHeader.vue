@@ -21,13 +21,14 @@
     </div>
     <div
       class="table-toolbar grid items-center gap-[var(--space-3)] pb-[var(--space-4)] [grid-template-columns:minmax(220px,1.4fr)_minmax(220px,1fr)_auto_auto] max-[1023px]:grid-cols-[minmax(220px,1fr)_minmax(220px,1fr)] max-[640px]:grid-cols-1"
+      role="group"
       :aria-label="$t('table.controls_label')"
     >
       <label
         class="flex min-h-[var(--control-height)] items-center rounded-[var(--radius-sm)] border border-border-strong bg-surface shadow-app-sm"
         ><span class="sr-only">{{ $t('table.search_placeholder') }}</span
         ><i-material-symbols-search class="ml-[0.7rem] text-muted" aria-hidden="true" /><input
-          class="h-[42px] min-w-0 w-full border-0 bg-transparent px-[0.7rem] outline-0"
+          class="h-[42px] min-w-0 w-full border-0 bg-transparent px-[0.7rem]"
           :value="searchQuery"
           type="search"
           :placeholder="$t('table.search_placeholder')"
@@ -53,9 +54,10 @@
         ref="exportMenu"
         class="export-menu relative"
         @toggle="syncExportMenuState"
-        @keydown.escape.stop.prevent="closeExportMenu"
+        @keydown.escape.stop.prevent="closeExportMenu(true)"
       >
         <summary
+          ref="exportSummary"
           class="interactive-control flex min-h-[var(--control-height)] list-none items-center gap-[0.35rem] rounded-[var(--radius-sm)] border border-border-strong bg-surface px-3 font-bold shadow-app-sm [&::-webkit-details-marker]:hidden"
         >
           <i-material-symbols-download aria-hidden="true" /> {{ $t('table.export.label') }}
@@ -91,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 import type { LanguageMetadata } from '@/data/languages'
 import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
@@ -115,6 +117,7 @@ const downloadAllData = defineModel('downloadAllData', {
 })
 const formats = ['tsv', 'csv', 'json', 'xml', 'xlsx'] as const
 const exportMenu = ref<HTMLDetailsElement | null>(null)
+const exportSummary = ref<HTMLElement | null>(null)
 const isExportMenuOpen = ref(false)
 const languageOptions = computed(() =>
   props.languages.map((language) => ({
@@ -124,9 +127,13 @@ const languageOptions = computed(() =>
   })),
 )
 
-function closeExportMenu() {
+async function closeExportMenu(restoreFocus = false) {
   exportMenu.value?.removeAttribute('open')
   isExportMenuOpen.value = false
+  if (restoreFocus) {
+    await nextTick()
+    exportSummary.value?.focus()
+  }
 }
 
 function syncExportMenuState() {
@@ -134,10 +141,10 @@ function syncExportMenuState() {
 }
 
 function emitDownload(type: (typeof formats)[number]) {
-  closeExportMenu()
+  void closeExportMenu(true)
   emit('download', { type, all: downloadAllData.value })
 }
 
-useDismissiblePopover(exportMenu, isExportMenuOpen, closeExportMenu)
+useDismissiblePopover(exportMenu, isExportMenuOpen, () => closeExportMenu())
 watch(downloadAllData, (value) => writeStoredValue('table:downloadAllData', value))
 </script>

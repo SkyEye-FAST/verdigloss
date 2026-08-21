@@ -1,5 +1,6 @@
 <template>
   <div class="translation-query">
+    <h1 class="sr-only">{{ $t('query.title') }}</h1>
     <div class="sidebar-layout" :class="{ 'sidebar-collapsed': !isSidebarOpen }">
       <div class="sidebar">
         <button
@@ -7,7 +8,7 @@
           type="button"
           :class="{ 'is-collapsed': !isSidebarOpen }"
           :aria-expanded="isSidebarOpen"
-          aria-controls="query-settings"
+          :aria-controls="isSidebarOpen ? 'query-settings' : undefined"
           :aria-label="isSidebarOpen ? $t('query.controls.collapse') : $t('query.controls.expand')"
           @click="toggleSidebar"
         >
@@ -30,7 +31,7 @@
             <div class="form-container">
               <div class="input-group">
                 <label for="queryMode">
-                  <i-material-symbols-settings-outline class="label-icon" />
+                  <i-material-symbols-settings-outline class="label-icon" aria-hidden="true" />
                   {{ $t('query.query_mode') }}
                 </label>
                 <SelectMenu
@@ -39,7 +40,10 @@
                   :options="[
                     { value: 'source', label: $t('query.query_modes.source') },
                     { value: 'key', label: $t('query.query_modes.key') },
-                    { value: 'translation', label: $t('query.query_modes.translation') },
+                    {
+                      value: 'translation',
+                      label: $t('query.query_modes.translation'),
+                    },
                   ]"
                   @change="onQueryInput"
                 />
@@ -47,7 +51,7 @@
 
               <div class="input-group" v-show="queryMode === 'translation'">
                 <label for="queryLang">
-                  <i-material-symbols-language class="label-icon" />
+                  <i-material-symbols-language class="label-icon" aria-hidden="true" />
                   {{ $t('query.query_lang') }}
                 </label>
                 <SelectMenu
@@ -67,7 +71,7 @@
 
               <div class="input-group">
                 <label for="queryContent">
-                  <i-material-symbols-search class="label-icon" />
+                  <i-material-symbols-search class="label-icon" aria-hidden="true" />
                   {{ $t('query.query_content') }}
                 </label>
                 <input
@@ -77,7 +81,12 @@
                   @input="onQueryInput"
                 />
                 <Transition name="motion-status">
-                  <p v-if="resultAnnouncement" class="result-count" aria-live="polite">
+                  <p
+                    v-if="resultAnnouncement"
+                    class="result-count"
+                    role="status"
+                    aria-live="polite"
+                  >
                     {{ resultAnnouncement }}
                   </p>
                 </Transition>
@@ -85,51 +94,27 @@
 
               <div class="input-group" v-show="availableKeys.length">
                 <label for="localeKey">
-                  <i-material-symbols-key class="label-icon" />
+                  <i-material-symbols-key class="label-icon" aria-hidden="true" />
                   {{ $t('query.locale_key') }}
                 </label>
-                <div ref="keyListRoot" class="query-combobox">
-                  <input
-                    id="localeKey"
-                    ref="keyInput"
-                    class="!font-mono"
-                    v-model="localeKey"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    :aria-expanded="isKeyListOpen"
-                    aria-controls="query-key-results"
-                    :aria-activedescendant="
-                      activeKeyIndex >= 0 ? `query-key-${activeKeyIndex}` : undefined
-                    "
-                    @focus="isKeyListOpen = true"
-                    @keydown="handleKeyListKeydown"
-                  />
-                  <Transition name="motion-popover">
-                    <ul
-                      v-if="isKeyListOpen"
-                      id="query-key-results"
-                      class="query-key-results"
-                      role="listbox"
-                    >
-                      <li
-                        v-for="(key, index) in availableKeys"
-                        :id="`query-key-${index}`"
-                        :key="key"
-                        role="option"
-                        :aria-selected="index === activeKeyIndex"
-                        :class="{ active: index === activeKeyIndex }"
-                        @mousedown.prevent="selectKey(key)"
-                      >
-                        {{ key }}
-                      </li>
-                    </ul>
-                  </Transition>
-                </div>
+                <select
+                  id="localeKey"
+                  v-model="localeKey"
+                  class="!font-mono"
+                  @change="selectKey(localeKey)"
+                >
+                  <option value="" disabled>
+                    {{ $t('query.locale_key') }}
+                  </option>
+                  <option v-for="key in availableKeys" :key="key" :value="key">
+                    {{ key }}
+                  </option>
+                </select>
               </div>
 
               <div class="input-group">
                 <label for="selectedLanguages">
-                  <i-material-symbols-language class="label-icon" />
+                  <i-material-symbols-language class="label-icon" aria-hidden="true" />
                   {{ $t('query.select_languages') }}
                 </label>
                 <LanguageSelector
@@ -153,18 +138,26 @@
           </div>
         </Transition>
       </div>
-      <div class="main-content" tabindex="0">
+      <div class="main-content">
         <Transition name="motion-status">
           <div v-if="error" class="error" role="alert">{{ error }}</div>
         </Transition>
-        <div v-if="selectedTranslation" class="result-section" tabindex="0">
-          <div class="title">{{ selectedTranslation.source }}</div>
+        <section
+          v-if="selectedTranslation"
+          class="result-section"
+          aria-labelledby="query-result-title"
+        >
+          <h2 id="query-result-title" class="title en-us" lang="en-US">
+            {{ selectedTranslation.source }}
+          </h2>
           <p class="subtitle">{{ selectedTranslation.key }}</p>
           <table :class="'table-' + (selectedTranslation?.category || 'block')">
             <caption class="sr-only">
-              {{
-                $t('query.results.caption', { source: selectedTranslation.source })
-              }}
+              <i18n-t keypath="query.results.caption">
+                <template #source>
+                  <span class="en-us" lang="en-US">{{ selectedTranslation.source }}</span>
+                </template>
+              </i18n-t>
             </caption>
             <thead>
               <tr>
@@ -192,11 +185,11 @@
               </tr>
             </tbody>
           </table>
-          <footer class="minecraft-title font-app-serif">
+          <p class="minecraft-title font-app-serif">
             {{ $t('query.title') }}<br />
             {{ $t('query.java_edition') }}{{ minecraftVersion }}
-          </footer>
-        </div>
+          </p>
+        </section>
       </div>
     </div>
   </div>
@@ -209,7 +202,6 @@ import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
-import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 import { useLocale } from '@/composables/useLocale'
 import { type LanguageCode, languageList, languageRegistry } from '@/data/languages'
 import { getSearchIndex, type QueryMode } from '@/features/query/search-index'
@@ -260,7 +252,6 @@ const beforeSettingsEnter = (element: Element) => {
   const panel = element as HTMLElement
   clearSettingsTimer()
   panel.style.height = '0'
-  panel.style.opacity = '0'
   panel.style.transform = 'translateY(-4px)'
   panel.style.overflow = 'hidden'
 }
@@ -269,17 +260,15 @@ const enterSettings = (element: Element, done: () => void) => {
   const panel = element as HTMLElement
   if (prefersReducedMotion()) {
     panel.style.height = 'auto'
-    panel.style.opacity = '1'
     panel.style.transform = 'none'
     done()
     return
   }
   const height = panel.scrollHeight
   panel.style.transition =
-    'height var(--motion-slow) var(--ease-enter), opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter)'
+    'height var(--motion-slow) var(--ease-enter), transform var(--motion-base) var(--ease-enter)'
   window.requestAnimationFrame(() => {
     panel.style.height = `${height}px`
-    panel.style.opacity = '1'
     panel.style.transform = 'translateY(0)'
   })
   settingsTimer = window.setTimeout(done, 240)
@@ -298,7 +287,6 @@ const beforeSettingsLeave = (element: Element) => {
   const panel = element as HTMLElement
   clearSettingsTimer()
   panel.style.height = `${panel.scrollHeight}px`
-  panel.style.opacity = '1'
   panel.style.transform = 'translateY(0)'
   panel.style.overflow = 'hidden'
 }
@@ -310,10 +298,9 @@ const leaveSettings = (element: Element, done: () => void) => {
     return
   }
   panel.style.transition =
-    'height var(--motion-base) var(--ease-exit), opacity var(--motion-fast) var(--ease-exit), transform var(--motion-fast) var(--ease-exit)'
+    'height var(--motion-base) var(--ease-exit), transform var(--motion-fast) var(--ease-exit)'
   window.requestAnimationFrame(() => {
     panel.style.height = '0'
-    panel.style.opacity = '0'
     panel.style.transform = 'translateY(-2px)'
   })
   settingsTimer = window.setTimeout(done, 200)
@@ -323,7 +310,6 @@ const afterSettingsLeave = (element: Element) => {
   const panel = element as HTMLElement
   clearSettingsTimer()
   panel.style.height = ''
-  panel.style.opacity = ''
   panel.style.transform = ''
   panel.style.overflow = ''
   panel.style.transition = ''
@@ -359,10 +345,6 @@ async function ensureLanguages(codes: readonly LanguageCode[]) {
   langFiles.value = { ...langFiles.value, ...(await loadLanguages(missing)) }
 }
 
-const keyInput = ref<HTMLInputElement | null>(null)
-const keyListRoot = ref<HTMLElement | null>(null)
-const isKeyListOpen = ref(false)
-const activeKeyIndex = ref(-1)
 const availableKeys = computed(() => {
   if (!queryContent.value) return []
   const language = queryMode.value === 'translation' ? getLanguageCode(queryLang.value) : 'en_us'
@@ -384,43 +366,10 @@ const resultAnnouncement = computed(() => {
 })
 
 function selectKey(key: string) {
+  if (!key) return
   localeKey.value = key
-  isKeyListOpen.value = false
-  activeKeyIndex.value = -1
   void search()
-  keyInput.value?.focus()
 }
-
-function handleKeyListKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    isKeyListOpen.value = false
-    activeKeyIndex.value = -1
-    return
-  }
-  if (event.key === 'ArrowDown') {
-    event.preventDefault()
-    isKeyListOpen.value = true
-    activeKeyIndex.value = Math.min(activeKeyIndex.value + 1, availableKeys.value.length - 1)
-    return
-  }
-  if (event.key === 'ArrowUp') {
-    event.preventDefault()
-    activeKeyIndex.value = Math.max(activeKeyIndex.value - 1, 0)
-    return
-  }
-  if (event.key === 'Enter' && activeKeyIndex.value >= 0) {
-    event.preventDefault()
-    const key = availableKeys.value[activeKeyIndex.value]
-    if (key) selectKey(key)
-  }
-}
-
-function closeKeyList() {
-  isKeyListOpen.value = false
-  activeKeyIndex.value = -1
-}
-
-useDismissiblePopover(keyListRoot, isKeyListOpen, closeKeyList)
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang.code))
@@ -740,43 +689,8 @@ onMounted(async () => {
   transform: rotate(180deg);
 }
 
-.query-combobox {
-  position: relative;
-}
-
-.query-key-results {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + var(--space-1));
-  left: 0;
-  width: min(42rem, calc(100vw - 2rem));
-  max-height: min(44dvh, 24rem);
-  margin: 0;
-  padding: var(--space-1);
-  overflow: auto;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface-raised);
-  box-shadow: var(--shadow-md);
-  list-style: none;
-}
-
-.query-key-results li {
-  padding: 0.55rem 0.65rem;
-  border-radius: 4px;
-  overflow-wrap: anywhere;
-  font-family: var(--monospace-font);
-  font-size: 0.84rem;
-}
-
-.query-key-results li:hover,
-.query-key-results li.active {
-  background: var(--accent-soft);
-}
-
 .main-content {
   min-width: 0;
-  outline: none;
 }
 
 .result-count {
@@ -804,6 +718,7 @@ onMounted(async () => {
 }
 
 .title {
+  margin: 0;
   color: var(--text);
   font: 700 clamp(2rem, 5vw, 3.75rem)/1.08 var(--serif-font);
   text-align: center;
@@ -882,21 +797,12 @@ onMounted(async () => {
 }
 
 .minecraft-title {
-  margin-top: var(--space-6);
+  margin: var(--space-6) 0 0;
   color: var(--text);
   font-size: clamp(1.45rem, 2.6vw, 2.25rem);
   font-weight: 900;
   line-height: 1.18;
   text-align: center;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
 }
 
 @media (max-width: 900px) {

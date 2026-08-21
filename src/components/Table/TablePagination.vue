@@ -1,13 +1,21 @@
 <template>
   <nav
-    class="grid w-full justify-items-center gap-[0.65rem] mx-auto my-[var(--space-5)] [width:min(100%,var(--content-max))] max-[560px]:[&.pagination-controls--top]:my-[var(--space-3)] max-[560px]:[&.pagination-controls--top_.pagination-buttons]:hidden max-[560px]:[&.pagination-controls--bottom]:sticky max-[560px]:[&.pagination-controls--bottom]:z-20 max-[560px]:[&.pagination-controls--bottom]:bottom-[calc(70px+var(--safe-bottom)+var(--space-2))] max-[560px]:[&.pagination-controls--bottom]:w-fit max-[560px]:[&.pagination-controls--bottom]:max-w-[calc(100%-1rem)] max-[560px]:[&.pagination-controls--bottom]:mb-[var(--space-3)] max-[560px]:[&.pagination-controls--bottom]:overflow-x-auto max-[560px]:[&.pagination-controls--bottom]:rounded-[var(--radius-md)] max-[560px]:[&.pagination-controls--bottom]:border max-[560px]:[&.pagination-controls--bottom]:border-border max-[560px]:[&.pagination-controls--bottom]:bg-surface-raised max-[560px]:[&.pagination-controls--bottom]:p-[0.35rem] max-[560px]:[&.pagination-controls--bottom]:shadow-app-sm"
+    class="pagination-controls grid w-full justify-items-center gap-[0.65rem] mx-auto my-[var(--space-5)] [width:min(100%,var(--content-max))] max-[560px]:my-[var(--space-3)] max-[560px]:[&.pagination-controls--top_.pagination-buttons]:hidden"
     :class="`pagination-controls--${position}`"
-    :aria-label="$t('table.pagination.label')"
+    :aria-label="navigationLabel"
   >
-    <p v-if="showInfo" class="m-0 text-[0.9rem] text-muted" aria-live="polite">
+    <p v-if="showInfo" class="m-0 text-[0.9rem] text-muted">
       {{ $t('table.pagination.total_rows') }}{{ totalItems }}
     </p>
-    <div class="pagination-buttons flex items-center gap-[0.35rem] max-[560px]:gap-[0.2rem]">
+    <p class="sr-only">
+      {{
+        $t('table.pagination.current', {
+          current: currentPage,
+          total: totalPages || 1,
+        })
+      }}
+    </p>
+    <div class="pagination-buttons flex items-center gap-[0.35rem] max-[560px]:gap-[0.1rem]">
       <button
         class="interactive-control inline-flex min-h-[var(--control-height)] items-center gap-[0.35rem] rounded-[var(--radius-sm)] border border-border bg-surface px-[0.7rem] text-content max-[560px]:min-h-[2.4rem] max-[560px]:min-w-[2.4rem] max-[560px]:px-[0.45rem] max-[560px]:[&>span]:hidden"
         type="button"
@@ -19,7 +27,7 @@
           $t('table.pagination.previous_short')
         }}</span>
       </button>
-      <div class="flex items-center gap-[0.35rem]">
+      <div class="flex items-center gap-[0.35rem] max-[560px]:gap-[0.1rem]">
         <template v-for="(page, index) in displayedPages" :key="`${page}-${index}`">
           <span v-if="page === 'ellipsis'" class="min-w-6 text-center text-muted" aria-hidden="true"
             >…</span
@@ -46,7 +54,6 @@
           :max="totalPages || 1"
           inputmode="numeric"
           placeholder="#"
-          :aria-label="$t('table.pagination.jump')"
           @change="jump"
       /></label>
       <button
@@ -65,6 +72,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getPageWindow, type PageWindowEntry } from '@/features/table/pagination'
 const props = defineProps<{
   currentPage: number
@@ -74,11 +82,15 @@ const props = defineProps<{
   position?: 'top' | 'bottom'
 }>()
 const emit = defineEmits<{ 'update:currentPage': [page: number] }>()
+const { t } = useI18n()
 const jumpPage = ref('')
 const totalPages = computed(() =>
   props.totalItems ? Math.ceil(props.totalItems / props.itemsPerPage) : 0,
 )
 const position = computed(() => props.position ?? 'bottom')
+const navigationLabel = computed(() =>
+  t(position.value === 'top' ? 'table.pagination.top_label' : 'table.pagination.bottom_label'),
+)
 const displayedPages = computed<PageWindowEntry[]>(() =>
   getPageWindow(totalPages.value, props.currentPage),
 )

@@ -18,54 +18,107 @@
         {{ $t('table.colors.show_chu_nom') }}
       </label>
     </fieldset>
-    <div class="table-wrapper" role="region" tabindex="0" :aria-label="$t('table.colors.region')">
-      <table>
+    <div
+      v-if="!isCompactLayout"
+      class="table-wrapper"
+      role="region"
+      tabindex="0"
+      :aria-label="$t('table.colors.region')"
+    >
+      <table :style="{ width: `${13 + colorLanguages.length * 10}rem` }">
         <caption>
           {{
             $t('table.colors.caption')
           }}
         </caption>
+        <colgroup>
+          <col class="key-column-track" />
+          <col v-for="language in colorLanguages" :key="language.code" />
+        </colgroup>
         <thead>
           <tr>
-            <th scope="col">{{ $t('table.colors.color_id') }}</th>
-            <th v-for="lang in languages" :key="lang" scope="col">{{ lang }}</th>
+            <th scope="col" class="key-column">
+              {{ $t('table.colors.color_id') }}
+            </th>
+            <th v-for="language in colorLanguages" :key="language.code" scope="col">
+              <code aria-hidden="true">{{ language.code }}</code>
+              <span class="sr-only" :lang="language.htmlLang">{{ language.gameName }}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="color in colorDataset.colors" :key="color.key">
             <th scope="row" class="key-column">
               <div class="key-cell-content">
-                <ColorIcon :src="color.icon" />
-                <ColorIcon :src="color.iconNew" />
+                <ColorIcon
+                  :src="color.icon"
+                  :alt="$t('table.colors.dye_icon_legacy', { color: color.key })"
+                />
+                <ColorIcon
+                  :src="color.iconNew"
+                  :alt="$t('table.colors.dye_icon_current', { color: color.key })"
+                />
                 <ColorPreview :color="color.hex" />
                 <ColorPreview :color="color.textHex" />
                 {{ color.key }}
               </div>
             </th>
-            <td v-for="lang in languages" :key="lang" :class="lang.replace(/_/, '-')">
-              <template v-if="lang === 'ko_kr'">
-                <span>{{ color.korean.label }}</span>
-                <span v-if="showKoreanMixed"> {{ color.korean.annotation }}</span>
-              </template>
-              <template v-else-if="lang === 'vi_vn'">
-                <span>{{ color.chuNom.label }}</span>
-                <span v-if="showChuNom"> {{ color.chuNom.annotation }}</span>
-              </template>
-              <template v-else>
-                {{ color.translations[lang] || '' }}
-              </template>
+            <td
+              v-for="language in colorLanguages"
+              :key="language.code"
+              :class="language.typographyClass"
+              :lang="language.htmlLang"
+            >
+              {{ translationFor(color, language.code) }}
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <ol v-else class="color-card-list" :aria-label="$t('table.colors.caption')">
+      <li v-for="(color, colorIndex) in colorDataset.colors" :key="color.key">
+        <article :aria-labelledby="`color-key-${colorIndex}`">
+          <header class="color-card-header">
+            <div class="color-card-visuals">
+              <ColorIcon
+                :src="color.icon"
+                :alt="$t('table.colors.dye_icon_legacy', { color: color.key })"
+              />
+              <ColorIcon
+                :src="color.iconNew"
+                :alt="$t('table.colors.dye_icon_current', { color: color.key })"
+              />
+              <ColorPreview :color="color.hex" />
+              <ColorPreview :color="color.textHex" />
+            </div>
+            <h2 :id="`color-key-${colorIndex}`">{{ color.key }}</h2>
+          </header>
+          <dl>
+            <div v-for="language in colorLanguages" :key="language.code" class="color-translation">
+              <dt>
+                <span :class="language.typographyClass" :lang="language.htmlLang">{{
+                  language.gameName
+                }}</span>
+                <code>{{ language.code }}</code>
+              </dt>
+              <dd :class="language.typographyClass" :lang="language.htmlLang">
+                {{ translationFor(color, language.code) }}
+              </dd>
+            </div>
+          </dl>
+        </article>
+      </li>
+    </ol>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useMediaQuery } from '@vueuse/core'
 import { ref } from 'vue'
 
 import { useLocale } from '@/composables/useLocale'
+import { languageByCode } from '@/data/languages'
 import { colorDataset } from '@/features/colors/color-data'
 
 import ColorIcon from './ColorTable/ColorIcon.vue'
@@ -73,10 +126,13 @@ import ColorPreview from './ColorTable/ColorPreview.vue'
 import TableSectionNav from '../Table/TableSectionNav.vue'
 
 const { locale: currentLang } = useLocale()
+const isCompactLayout = useMediaQuery('(max-width: 800px)')
 
 const showKoreanMixed = ref(true)
 const showChuNom = ref(true)
-const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = [
+type ColorRow = (typeof colorDataset.colors)[number]
+type ColorLanguageCode = keyof ColorRow['translations']
+const languageCodes: ColorLanguageCode[] = [
   'en_us',
   'zh_cn',
   'zh_hk',
@@ -86,6 +142,17 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
   'ko_kr',
   'vi_vn',
 ]
+const colorLanguages = languageCodes.map((code) => languageByCode[code])
+
+function translationFor(color: ColorRow, language: ColorLanguageCode) {
+  if (language === 'ko_kr') {
+    return `${color.korean.label}${showKoreanMixed.value ? ` ${color.korean.annotation}` : ''}`
+  }
+  if (language === 'vi_vn') {
+    return `${color.chuNom.label}${showChuNom.value ? ` ${color.chuNom.annotation}` : ''}`
+  }
+  return color.translations[language] || ''
+}
 </script>
 
 <style scoped>
@@ -132,6 +199,8 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: var(--control-height);
+  padding-inline: var(--space-2);
 }
 
 .color-variants input {
@@ -151,12 +220,19 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
 }
 
 .table-wrapper table {
-  width: max-content;
-  min-width: 58rem;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: auto;
+  table-layout: fixed;
   font-size: 0.86rem;
+}
+
+.table-wrapper col {
+  width: 10rem;
+}
+
+.table-wrapper .key-column-track {
+  width: 13rem;
 }
 
 .table-wrapper caption {
@@ -167,7 +243,6 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
 
 .table-wrapper th,
 .table-wrapper td {
-  min-width: 8.5rem;
   padding: 0.48rem 0.58rem;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -187,28 +262,14 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
 }
 
 .table-wrapper .key-column {
-  position: sticky;
-  z-index: 2;
-  left: 0;
-  min-width: 12rem;
-  background: var(--surface);
-}
-
-.table-wrapper thead .key-column {
-  z-index: 5;
-  background: var(--surface-subtle);
+  border-right-color: var(--border-strong);
 }
 
 .table-wrapper tr:nth-child(even) > * {
   background: color-mix(in srgb, var(--surface-subtle) 72%, var(--surface));
 }
 
-.table-wrapper tr:nth-child(even) > .key-column {
-  background: color-mix(in srgb, var(--surface-subtle) 72%, var(--surface));
-}
-
-.table-wrapper tbody tr:hover > *,
-.table-wrapper tbody tr:hover > .key-column {
+.table-wrapper tbody tr:hover > * {
   background: var(--accent-soft);
 }
 
@@ -217,30 +278,95 @@ const languages: Array<keyof (typeof colorDataset.colors)[0]['translations']> = 
   align-items: center;
   gap: 0.35rem;
   font: 0.78rem var(--monospace-font);
+  overflow-wrap: anywhere;
+}
+
+.table-wrapper thead code {
+  color: inherit;
+  font: inherit;
+}
+
+.color-card-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.color-card-list > li {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.color-card-header {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 2px solid var(--accent);
+  background: var(--surface-subtle);
+}
+
+.color-card-visuals {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.color-card-header h2 {
+  margin: 0;
+  color: var(--text);
+  font: 700 0.8rem/1.45 var(--monospace-font);
+  overflow-wrap: anywhere;
+}
+
+.color-card-list dl {
+  margin: 0;
+}
+
+.color-translation + .color-translation {
+  border-top: 1px solid var(--border);
+}
+
+.color-translation dt {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.color-translation dt span {
+  min-width: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.color-translation dt code {
+  flex: none;
+  color: var(--muted);
+  font: 0.72rem var(--monospace-font);
+}
+
+.color-translation dd {
+  margin: 0;
+  padding: var(--space-1) var(--space-3) var(--space-3);
+  color: var(--text);
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 800px) {
   .page-content {
     width: calc(100% - 1rem);
     padding-top: var(--space-4);
-  }
-
-  .table-wrapper {
-    width: 100%;
-    margin: 0;
-  }
-
-  .table-wrapper table {
-    min-width: 54rem;
-  }
-
-  .table-wrapper th,
-  .table-wrapper td {
-    min-width: 7.5rem;
-  }
-
-  .table-wrapper .key-column {
-    min-width: 11.5rem;
   }
 }
 </style>

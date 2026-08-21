@@ -1,11 +1,13 @@
 <template>
   <div class="sans" :class="currentLang.toLowerCase()">
-    <main class="quiz-container">
-      <h1 class="quiz-title" :class="currentLang.toLowerCase()">{{ $t('quiz.title') }}</h1>
+    <section class="quiz-container" aria-labelledby="quiz-title">
+      <h1 id="quiz-title" class="quiz-title" :class="currentLang.toLowerCase()">
+        {{ $t('quiz.title') }}
+      </h1>
       <p class="quiz-description">
         {{ $t('quiz.portal_description') }}
       </p>
-      <section class="quiz-generator">
+      <div class="quiz-generator">
         <label class="quiz-field" for="query-lang">
           <span>{{ $t('quiz.language') }}</span>
           <SelectMenu
@@ -62,12 +64,13 @@
               : $t('quiz.random_quiz')
           }}
         </button>
-      </section>
-      <div class="quiz-separator" aria-hidden="true">
+      </div>
+      <div class="quiz-separator">
         <span>{{ $t('quiz.or') }}</span>
       </div>
-      <section class="quiz-code-entry">
+      <div class="quiz-code-entry">
         <div class="quiz-input-group">
+          <label class="sr-only" for="quiz-code">{{ $t('quiz.code_label') }}</label>
           <input
             v-model="inputCode"
             type="text"
@@ -82,8 +85,8 @@
         <Transition name="motion-status">
           <p v-if="quizError" role="alert" class="quiz-error">{{ quizError }}</p>
         </Transition>
-      </section>
-    </main>
+      </div>
+    </section>
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="translation-table">
+  <div class="translation-table" :aria-busy="loading">
     <Header
       v-model:search-query="searchQuery"
       v-model:selected-languages="selectedLanguages"
@@ -11,12 +11,10 @@
     />
     <TableSectionNav />
 
-    <Transition name="motion-fade">
-      <div v-if="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>{{ $t('table.loading') }}</p>
-      </div>
-    </Transition>
+    <div v-if="loading" class="loading-container" role="status" aria-live="polite">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p>{{ $t('table.loading') }}</p>
+    </div>
     <template v-if="!loading">
       <Pagination
         v-if="usePagination"
@@ -27,59 +25,110 @@
         position="top"
       />
 
+      <p class="sr-only" aria-live="polite">{{ tableStatus }}</p>
+
       <div
-        v-show="hasHorizontalOverflow"
-        ref="topScrollbar"
-        class="table-horizontal-scrollbar"
-        aria-hidden="true"
-        @scroll="syncFromTop"
-      >
-        <div ref="topScrollbarSpacer" class="table-horizontal-scrollbar__spacer"></div>
-      </div>
-      <div
-        ref="tableWrapper"
+        v-if="!isCompactLayout"
         class="table-wrapper"
         role="region"
         tabindex="0"
         :aria-label="$t('table.caption')"
-        @scroll="syncFromTable"
       >
-        <table ref="tableElement">
+        <table :style="{ width: `${16 + displayLanguageMetadata.length * 14}rem` }">
           <caption class="sr-only">
             {{
               $t('table.caption')
             }}
           </caption>
+          <colgroup>
+            <col class="key-column-track" />
+            <col
+              v-for="language in displayLanguageMetadata"
+              :key="language.code"
+              class="language-column-track"
+            />
+          </colgroup>
           <thead>
-            <tr v-memo="[displayLanguages]">
+            <tr v-memo="[displayLanguageMetadata]">
               <th scope="col" class="key-column">{{ $t('table.keys') }}</th>
               <th
-                v-for="lang in displayLanguages"
-                :key="lang"
+                v-for="language in displayLanguageMetadata"
+                :key="language.code"
                 scope="col"
-                :class="{ selected: selectedLanguages.includes(lang) }"
+                :class="{ selected: selectedLanguages.includes(language.code) }"
               >
-                {{ lang }}
+                <code aria-hidden="true">{{ language.code }}</code>
+                <span class="sr-only" :lang="language.htmlLang">{{ language.gameName }}</span>
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in displayData" :key="row.key" v-memo="[row, displayLanguages]">
+            <tr
+              v-for="row in displayData"
+              :key="row.key"
+              v-memo="[row, displayLanguages]"
+              data-testid="translation-row"
+            >
               <th scope="row" class="key-column">{{ row.key }}</th>
-              <td :class="lang.replace(/_/, '-')" v-for="lang in displayLanguages" :key="lang">
-                {{ row[lang] }}
+              <td
+                v-for="language in displayLanguageMetadata"
+                :key="language.code"
+                :class="language.typographyClass"
+                :lang="language.htmlLang"
+              >
+                {{ row[language.code] }}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <ol
+        v-else
+        class="mobile-table-list"
+        :aria-label="$t('table.caption')"
+        data-testid="translation-card-list"
+      >
+        <li
+          v-for="(row, rowIndex) in displayData"
+          :key="row.key"
+          class="mobile-table-card"
+          data-testid="translation-row"
+        >
+          <article :aria-labelledby="`translation-key-${currentPage}-${rowIndex}`">
+            <h2 :id="`translation-key-${currentPage}-${rowIndex}`">
+              {{ row.key }}
+            </h2>
+            <dl>
+              <div
+                v-for="language in displayLanguageMetadata"
+                :key="language.code"
+                class="mobile-translation"
+              >
+                <dt>
+                  <span :class="language.typographyClass" :lang="language.htmlLang">{{
+                    language.gameName
+                  }}</span>
+                  <code>{{ language.code }}</code>
+                </dt>
+                <dd :class="language.typographyClass" :lang="language.htmlLang">
+                  {{ row[language.code] }}
+                </dd>
+              </div>
+            </dl>
+          </article>
+        </li>
+      </ol>
+
       <Transition name="motion-status">
         <p v-if="filteredTableData.length === 0" class="empty-results" role="status">
           {{ $t('table.empty') }}
         </p>
       </Transition>
       <Transition name="motion-status">
-        <p v-if="exportFeedback" class="export-feedback" aria-live="polite">{{ exportFeedback }}</p>
+        <p v-if="exportFeedback" class="export-feedback" role="status" aria-live="polite">
+          {{ exportFeedback }}
+        </p>
       </Transition>
 
       <Pagination
@@ -94,7 +143,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
@@ -117,6 +167,7 @@ const minecraftVersion = ref(mcVersion)
 const { t } = useI18n()
 const languages = languageList
 const tableLanguages = languageRegistry.filter((language) => language.availableInTable)
+const isCompactLayout = useMediaQuery('(max-width: 800px)')
 const translations = shallowRef<Partial<Record<LanguageCode, LanguageFile>>>({})
 const orderedKeys = shallowRef<string[]>([])
 
@@ -139,63 +190,28 @@ const loading = ref(true)
 const usePagination = ref(true)
 const downloadAllData = ref(readBooleanPreference('table:downloadAllData', true))
 const exportFeedback = ref('')
-const tableWrapper = ref<HTMLElement | null>(null)
-const tableElement = ref<HTMLTableElement | null>(null)
-const topScrollbar = ref<HTMLElement | null>(null)
-const topScrollbarSpacer = ref<HTMLElement | null>(null)
-const hasHorizontalOverflow = ref(false)
-let resizeObserver: ResizeObserver | undefined
-let syncingScrollbar = false
-
-function updateHorizontalScrollbar() {
-  const wrapper = tableWrapper.value
-  const table = tableElement.value
-  const spacer = topScrollbarSpacer.value
-  if (!wrapper || !table || !spacer) return
-  spacer.style.width = `${table.scrollWidth}px`
-  hasHorizontalOverflow.value = wrapper.scrollWidth > wrapper.clientWidth + 1
-  if (topScrollbar.value) topScrollbar.value.scrollLeft = wrapper.scrollLeft
-}
-
-function syncScroll(target: HTMLElement | null, scrollLeft: number) {
-  if (!target || syncingScrollbar) return
-  syncingScrollbar = true
-  target.scrollLeft = scrollLeft
-  requestAnimationFrame(() => {
-    syncingScrollbar = false
-  })
-}
-
-function syncFromTop() {
-  syncScroll(tableWrapper.value, topScrollbar.value?.scrollLeft ?? 0)
-}
-
-function syncFromTable() {
-  syncScroll(topScrollbar.value, tableWrapper.value?.scrollLeft ?? 0)
-}
 
 async function ensureLanguages(codes: readonly LanguageCode[]) {
   const missing = codes.filter((code) => !translations.value[code])
   if (!missing.length) return
-  translations.value = { ...translations.value, ...(await loadLanguages(missing)) }
+  translations.value = {
+    ...translations.value,
+    ...(await loadLanguages(missing)),
+  }
   if (translations.value.en_us) orderedKeys.value = Object.keys(translations.value.en_us)
 }
 
 onMounted(async () => {
   await ensureLanguages(['en_us', ...selectedLanguages.value])
   loading.value = false
-  await nextTick()
-  updateHorizontalScrollbar()
-  resizeObserver = new ResizeObserver(updateHorizontalScrollbar)
-  if (tableWrapper.value) resizeObserver.observe(tableWrapper.value)
-  if (tableElement.value) resizeObserver.observe(tableElement.value)
 })
-
-onBeforeUnmount(() => resizeObserver?.disconnect())
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang))
 })
+const displayLanguageMetadata = computed(() =>
+  tableLanguages.filter((language) => selectedLanguages.value.includes(language.code)),
+)
 
 const filteredKeys = computed(() =>
   filterTranslationKeys(
@@ -208,7 +224,7 @@ const filteredKeys = computed(() =>
 const filteredTableData = computed(() => filteredKeys.value.map(createRow))
 
 const currentPage = ref(1)
-const itemsPerPage = TABLE_PAGE_SIZE
+const itemsPerPage = computed(() => (isCompactLayout.value ? 10 : TABLE_PAGE_SIZE))
 
 function createRow(key: string): TableRow {
   return {
@@ -226,16 +242,32 @@ const displayData = computed(() => {
   if (!usePagination.value) {
     return filteredKeys.value.map(createRow)
   }
-  return pageKeys(filteredKeys.value, currentPage.value, itemsPerPage).map(createRow)
+  return pageKeys(filteredKeys.value, currentPage.value, itemsPerPage.value).map(createRow)
+})
+
+const tableStatus = computed(() => {
+  const total = filteredTableData.value.length
+  if (!total) return ''
+  if (!usePagination.value) return t('table.results_status_all', { total })
+  const start = (currentPage.value - 1) * itemsPerPage.value + 1
+  const end = Math.min(currentPage.value * itemsPerPage.value, total)
+  return t('table.results_status_page', {
+    start,
+    end,
+    total,
+    page: currentPage.value,
+    pages: Math.ceil(total / itemsPerPage.value),
+  })
 })
 
 watch([filteredKeys, usePagination], () => {
   currentPage.value = usePagination.value
-    ? clampPage(currentPage.value, filteredKeys.value.length, itemsPerPage)
+    ? clampPage(currentPage.value, filteredKeys.value.length, itemsPerPage.value)
     : 1
 })
-
-watch([displayData, displayLanguages], () => void nextTick(updateHorizontalScrollbar))
+watch(itemsPerPage, () => {
+  currentPage.value = 1
+})
 
 const {
   downloadTsv,
@@ -317,34 +349,24 @@ watch(
   scroll-margin-top: var(--app-bar-offset);
 }
 
-.table-horizontal-scrollbar {
-  width: min(calc(100% - 2rem), var(--content-max));
-  margin-inline: auto;
-}
-
-.table-horizontal-scrollbar {
-  height: 1.1rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-gutter: stable;
-}
-
-.table-horizontal-scrollbar__spacer {
-  height: 1px;
-}
-
 .table-wrapper table {
-  width: max-content;
   min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: auto;
+  table-layout: fixed;
   font-size: 0.88rem;
+}
+
+.table-wrapper .key-column-track {
+  width: 16rem;
+}
+
+.table-wrapper .language-column-track {
+  width: 14rem;
 }
 
 .table-wrapper th,
 .table-wrapper td {
-  min-width: clamp(12rem, 14vw, 14rem);
   padding: 0.6rem 0.75rem;
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -377,12 +399,9 @@ watch(
   position: sticky;
   z-index: 2;
   left: 0;
-  inline-size: clamp(12rem, 17vw, 17rem);
-  min-inline-size: 12rem;
-  max-inline-size: 17rem;
   border-right: 1px solid var(--border-strong);
-  box-shadow: 5px 0 8px color-mix(in srgb, var(--text) 9%, transparent);
   background: var(--surface);
+  box-shadow: 5px 0 8px color-mix(in srgb, var(--text) 9%, transparent);
   font: 0.76rem/1.45 var(--monospace-font);
   overflow-wrap: anywhere;
 }
@@ -404,6 +423,78 @@ watch(
   color: var(--accent-strong);
 }
 
+.table-wrapper thead code {
+  color: inherit;
+  font: inherit;
+}
+
+.mobile-table-list {
+  display: grid;
+  gap: var(--space-3);
+  width: min(calc(100% - 1rem), var(--content-max));
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.mobile-table-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-table-card h2 {
+  margin: 0;
+  padding: var(--space-3);
+  border-bottom: 2px solid var(--accent);
+  background: var(--surface-subtle);
+  color: var(--text);
+  font: 700 0.78rem/1.45 var(--monospace-font);
+  overflow-wrap: anywhere;
+}
+
+.mobile-table-card dl {
+  margin: 0;
+}
+
+.mobile-translation + .mobile-translation {
+  border-top: 1px solid var(--border);
+}
+
+.mobile-translation dt {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) 0;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.mobile-translation dt span {
+  min-width: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.mobile-translation dt code {
+  flex: none;
+  color: var(--muted);
+  font: 0.72rem var(--monospace-font);
+}
+
+.mobile-translation dd {
+  margin: 0;
+  padding: var(--space-1) var(--space-3) var(--space-3);
+  color: var(--text);
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
 .empty-results {
   width: min(calc(100% - 2rem), var(--content-max));
   margin: var(--space-4) auto 0;
@@ -421,15 +512,6 @@ watch(
   font-size: 0.9rem;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -439,32 +521,6 @@ watch(
 @media (max-width: 800px) {
   .translation-table {
     --app-bar-offset: 56px;
-  }
-
-  .table-wrapper {
-    width: 100%;
-    max-height: calc(100dvh - var(--app-bar-offset) - 78px);
-  }
-
-  .table-horizontal-scrollbar {
-    width: 100%;
-  }
-
-  .table-horizontal-scrollbar {
-    display: none !important;
-  }
-
-  .table-wrapper th,
-  .table-wrapper td {
-    min-width: 12rem;
-    padding: 0.55rem 0.65rem;
-  }
-
-  .table-wrapper .key-column {
-    inline-size: clamp(9rem, 31vw, 12rem);
-    min-inline-size: 9rem;
-    max-inline-size: 12rem;
-    font-size: 0.7rem;
   }
 }
 

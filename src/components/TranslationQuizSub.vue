@@ -1,34 +1,79 @@
 <template>
   <div class="translation-quiz-sub">
-    <div class="progress-bar" v-if="isTimerMode">
-      <div class="progress-fill" :style="{ transform: `scaleX(${progressScale})` }"></div>
+    <h1 class="sr-only">{{ $t('quiz.title') }}</h1>
+    <div
+      v-if="isTimerMode"
+      class="progress-bar"
+      role="progressbar"
+      :aria-label="$t('quiz.active.timer')"
+      :aria-valuemin="0"
+      :aria-valuemax="QUIZ_DURATION_SECONDS"
+      :aria-valuenow="remainingTime"
+      :aria-valuetext="$t('quiz.active.time_remaining', { time: formatTime(remainingTime) })"
+    >
+      <div
+        class="progress-fill"
+        :style="{ transform: `scaleX(${progressScale})` }"
+        aria-hidden="true"
+      ></div>
     </div>
-    <div class="quiz-container">
+    <div class="quiz-container" :aria-busy="loadingQuestions">
       <p v-if="loadingQuestions" class="quiz-loading" role="status" aria-live="polite">
         {{ $t('quiz.active.loading') }}
       </p>
-      <p v-if="routeError" role="alert" class="quiz-route-error">{{ routeError }}</p>
+      <p v-if="routeError" role="alert" class="quiz-route-error">
+        {{ routeError }}
+      </p>
       <div class="quiz-info" v-show="!loadingQuestions && !showSummary && !routeError">
-        <div class="quiz-status" aria-live="polite">
-          <span class="quiz-progress">{{ progressDisplay }}</span>
-          <span v-if="isTimerMode" class="timer">{{ formatTime(remainingTime) }}</span>
+        <div class="quiz-status">
+          <span class="quiz-progress" aria-hidden="true">{{ progressDisplay }}</span>
+          <span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            {{
+              $t('quiz.active.question_position', {
+                current: currentIndex + 1,
+                total: questions.length,
+              })
+            }}
+            <span class="en-us" lang="en-US">{{ currentQuestion?.source }}</span>
+          </span>
+          <span
+            v-if="isTimerMode"
+            class="timer"
+            :aria-label="
+              $t('quiz.active.time_remaining', {
+                time: formatTime(remainingTime),
+              })
+            "
+            >{{ formatTime(remainingTime) }}</span
+          >
         </div>
         <Transition :name="shouldAnimateQuestion ? 'motion-replace' : ''" mode="out-in">
-          <div :key="currentQuestion?.key" class="quiz-question-content">
+          <section
+            :key="currentQuestion?.key"
+            class="quiz-question-content"
+            aria-labelledby="quiz-question-source"
+          >
             <div class="info">
-              <div class="source">{{ currentQuestion?.source }}</div>
-              <div class="key">{{ currentQuestion?.key }}</div>
-              <div class="key rating" v-if="currentQuestion?.rating !== undefined">
-                <span style="font-size: smaller; margin-right: 20px">
+              <h2 id="quiz-question-source" class="source en-us" lang="en-US">
+                {{ currentQuestion?.source }}
+              </h2>
+              <p class="key">{{ currentQuestion?.key }}</p>
+              <p class="key rating" v-if="currentQuestion?.rating !== undefined">
+                <span class="sr-only">{{
+                  $t('quiz.active.rating', {
+                    rating: currentQuestion.rating.toFixed(2),
+                  })
+                }}</span>
+                <span aria-hidden="true" style="font-size: smaller; margin-right: 20px">
                   <span v-for="i in fullStars" :key="i">
-                    <i-material-symbols-star />
+                    <i-material-symbols-star aria-hidden="true" />
                   </span>
                   <span v-if="hasHalfStar">
-                    <i-material-symbols-star-half />
+                    <i-material-symbols-star-half aria-hidden="true" />
                   </span>
                 </span>
-                <span>{{ currentQuestion?.rating.toFixed(2) }}</span>
-              </div>
+                <span aria-hidden="true">{{ currentQuestion?.rating.toFixed(2) }}</span>
+              </p>
             </div>
             <div
               class="quiz-boxes"
@@ -40,53 +85,93 @@
                 v-for="(box, index) in boxes"
                 :key="index"
                 class="translation-character"
-                :class="[queryLang.replace(/_/, '-'), box.state, { dark: isDarkMode }]"
+                :class="[targetLanguage.typographyClass, box.state, { dark: isDarkMode }]"
                 role="img"
-                :aria-label="$t(`quiz.character_state.${box.state}`)"
+                :aria-labelledby="`quiz-character-${currentIndex}-${index}`"
               >
-                {{ box.char }}
+                <span aria-hidden="true">{{ box.char }}</span>
+                <span :id="`quiz-character-${currentIndex}-${index}`" class="sr-only">
+                  <span v-if="box.char" :lang="targetLanguage.htmlLang">{{ box.char }}</span>
+                  <span v-else>{{ $t('quiz.active.blank_character') }}</span>
+                  <span
+                    >{{ $t('quiz.active.character_state_separator')
+                    }}{{ $t(`quiz.character_state.${box.state}`) }}</span
+                  >
+                </span>
               </div>
             </div>
+            <p
+              v-if="characterFeedback"
+              class="sr-only"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {{ characterFeedback }}
+            </p>
             <ul class="state-legend" :aria-label="$t('quiz.active.state_legend')">
               <li>
-                <span class="state-swatch correct"></span>{{ $t('quiz.character_state.correct') }}
+                <span class="state-swatch correct" aria-hidden="true"></span
+                >{{ $t('quiz.character_state.correct') }}
               </li>
               <li>
-                <span class="state-swatch present"></span>{{ $t('quiz.character_state.present') }}
+                <span class="state-swatch present" aria-hidden="true"></span
+                >{{ $t('quiz.character_state.present') }}
               </li>
               <li>
-                <span class="state-swatch hinted"></span>{{ $t('quiz.character_state.hinted') }}
+                <span class="state-swatch absent" aria-hidden="true"></span
+                >{{ $t('quiz.character_state.absent') }}
               </li>
               <li>
-                <span class="state-swatch hinted-correct"></span
+                <span class="state-swatch hinted" aria-hidden="true"></span
+                >{{ $t('quiz.character_state.hinted') }}
+              </li>
+              <li>
+                <span class="state-swatch hinted-correct" aria-hidden="true"></span
                 >{{ $t('quiz.character_state.hinted-correct') }}
               </li>
             </ul>
-          </div>
+          </section>
         </Transition>
       </div>
 
-      <input
-        v-if="!loadingQuestions && !showSummary && !routeError"
-        v-model="inputText"
-        autocomplete="off"
-        class="quiz-input"
-        :class="currentLang.toLowerCase()"
-        :placeholder="$t('quiz.answer_placeholder')"
-        @input="onInput"
-        @compositionstart="onCompositionStart"
-        @compositionend="onCompositionEnd"
-        ref="inputRef"
-        type="text"
-      />
+      <template v-if="!loadingQuestions && !showSummary && !routeError">
+        <label class="sr-only" for="quiz-answer">
+          <i18n-t keypath="quiz.active.answer_for">
+            <template #source>
+              <span class="en-us" lang="en-US">{{ currentQuestion?.source }}</span>
+            </template>
+          </i18n-t>
+        </label>
+        <input
+          id="quiz-answer"
+          ref="inputRef"
+          v-model="inputText"
+          autocomplete="off"
+          class="quiz-input"
+          :class="[targetLanguage.typographyClass, 'sans']"
+          :lang="targetLanguage.htmlLang"
+          :placeholder="$t('quiz.answer_placeholder')"
+          type="text"
+          @input="onInput"
+          @compositionstart="onCompositionStart"
+          @compositionend="onCompositionEnd"
+        />
+      </template>
 
       <div class="quiz-controls" v-if="!loadingQuestions && !showSummary && !routeError">
-        <button v-if="canHint" class="quiz-hint-btn interactive-control" @click="showHint">
+        <button
+          v-if="canHint"
+          class="quiz-hint-btn interactive-control"
+          type="button"
+          @click="showHint"
+        >
           {{ $t('quiz.hint') }}
         </button>
         <button
           v-if="canSkip"
           class="quiz-skip-btn interactive-control"
+          type="button"
           @click="skipQuestion"
           :disabled="isLocked"
         >
@@ -94,23 +179,23 @@
         </button>
       </div>
 
-      <div ref="summaryRef" class="quiz-summary" v-if="showSummary && !routeError">
-        <div class="quiz-title" :class="currentLang.toLowerCase()">
+      <div class="quiz-summary" v-if="showSummary && !routeError">
+        <h2 ref="summaryRef" class="quiz-title" :class="currentLang.toLowerCase()" tabindex="-1">
           {{ $t('quiz.complete') }}
-        </div>
+        </h2>
         <div class="summary-statistics">
           <div v-if="isTimerMode" class="summary-info">
-            <i-material-symbols-timer style="font-size: smaller" />
+            <i-material-symbols-timer style="font-size: smaller" aria-hidden="true" />
             <span class="summary-label">{{
               $t('quiz.summary.used_time', { time: formatTime(usedTime) })
             }}</span>
           </div>
           <div class="summary-info" v-if="queryLang === 'zh_cn'">
-            <i-material-symbols-star style="font-size: smaller" />
+            <i-material-symbols-star style="font-size: smaller" aria-hidden="true" />
             <span class="summary-label">{{
               $t('quiz.summary.level', { level: totalLevel.toFixed(2) })
             }}</span>
-            <i-material-symbols-stars style="font-size: smaller" />
+            <i-material-symbols-stars style="font-size: smaller" aria-hidden="true" />
             <span class="summary-label">{{
               $t('quiz.summary.score', { score: totalScore.toFixed(2) })
             }}</span>
@@ -142,8 +227,11 @@
             </thead>
             <tbody>
               <tr v-for="question in questions" :key="question.key">
-                <td class="en-us">{{ question.source }}</td>
-                <td :class="currentLang.toLowerCase()">
+                <td class="en-us" lang="en-US">{{ question.source }}</td>
+                <td
+                  :class="[targetLanguage.typographyClass, 'sans']"
+                  :lang="targetLanguage.htmlLang"
+                >
                   <span
                     v-for="(char, i) in question.translationChars"
                     :key="i"
@@ -163,7 +251,7 @@
           </table>
         </div>
         <div class="quiz-code-container">
-          <div class="quiz-code">{{ quizCode }}</div>
+          <code class="quiz-code">{{ quizCode }}</code>
           <span class="quiz-code-actions">
             <button
               class="interactive-control"
@@ -192,12 +280,14 @@
         <p class="quiz-feedback" aria-live="polite">
           {{ isCopied ? $t('quiz.feedback.code_copied') : '' }}
         </p>
-        <p v-if="actionError" role="alert" class="quiz-route-error">{{ actionError }}</p>
+        <p v-if="actionError" role="alert" class="quiz-route-error">
+          {{ actionError }}
+        </p>
         <div class="quiz-summary-buttons">
-          <button class="button interactive-control" @click="restartQuiz">
+          <button class="button interactive-control" type="button" @click="restartQuiz">
             {{ $t('quiz.restart') }}
           </button>
-          <button class="button interactive-control" @click="returnToPortal">
+          <button class="button interactive-control" type="button" @click="returnToPortal">
             {{ $t('quiz.return') }}
           </button>
         </div>
@@ -217,7 +307,7 @@ import quizIdData from '@/assets/data/quiz-id-map.json'
 import ratingData from '@/assets/data/rating.json'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useLocale } from '@/composables/useLocale'
-import { languageRegistry, type LanguageCode } from '@/data/languages'
+import { languageByCode, languageRegistry, type LanguageCode } from '@/data/languages'
 import { matchCharacters, type CharacterState } from '@/domain/matching'
 import {
   QUIZ_QUESTION_COUNT,
@@ -340,10 +430,29 @@ const startTimer = () => {
 }
 
 const queryLang = ref<LanguageCode>('zh_cn')
+const targetLanguage = computed(() => languageByCode[queryLang.value])
 const quizCode = computed(() => route.params.code as string)
 const questions = ref<Question[]>([])
 const currentQuestion = computed(() => questions.value[currentIndex.value])
 const boxes = computed(() => getBoxes())
+const characterFeedback = computed(() => {
+  if (!inputText.value && !boxes.value.some((box) => box.state.startsWith('hinted'))) return ''
+  const counts: Record<CharacterState, number> = {
+    empty: 0,
+    correct: 0,
+    present: 0,
+    absent: 0,
+    hinted: 0,
+    'hinted-correct': 0,
+  }
+  for (const box of boxes.value) counts[box.state] += 1
+  return t('quiz.active.character_feedback', {
+    correct: counts.correct,
+    present: counts.present,
+    absent: counts.absent,
+    hinted: counts.hinted + counts['hinted-correct'],
+  })
+})
 const canHint = computed(
   () =>
     !showSummary.value &&
@@ -413,7 +522,10 @@ const showHint = () => {
 
   if (hintIndex !== -1) {
     const currentHints = hintsByQuestion.value[cq.key] ?? []
-    hintsByQuestion.value = { ...hintsByQuestion.value, [cq.key]: [...currentHints, hintIndex] }
+    hintsByQuestion.value = {
+      ...hintsByQuestion.value,
+      [cq.key]: [...currentHints, hintIndex],
+    }
   }
 }
 
@@ -444,7 +556,7 @@ const advanceQuestion = () => {
   if (currentIndex.value >= questions.value.length - 1) {
     stopTimer()
     showSummary.value = true
-    void nextTick(() => summaryRef.value?.scrollIntoView({ block: 'start' }))
+    void focusSummary()
     return
   }
   shouldAnimateQuestion.value = true
@@ -471,7 +583,13 @@ const finishTimedQuiz = () => {
   }
   stopTimer()
   showSummary.value = true
-  void nextTick(() => summaryRef.value?.scrollIntoView({ block: 'start' }))
+  void focusSummary()
+}
+
+async function focusSummary() {
+  await nextTick()
+  summaryRef.value?.focus()
+  summaryRef.value?.scrollIntoView({ block: 'start' })
 }
 
 const copyCode = async () => {
@@ -695,6 +813,7 @@ onUnmounted(() => {
 
 .source {
   max-width: 100%;
+  margin: 0;
   font: 700 clamp(2rem, 6vw, 4.25rem)/1.08 var(--serif-font);
   overflow-wrap: anywhere;
 }
@@ -848,6 +967,7 @@ onUnmounted(() => {
 }
 
 .quiz-title {
+  margin: 0;
   color: var(--text);
   font: 700 clamp(2rem, 5vw, 3rem)/1.1 var(--serif-font);
   text-align: center;
@@ -980,15 +1100,6 @@ onUnmounted(() => {
 
 .quiz-summary-buttons .button {
   padding: 0.6rem 1rem;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
 }
 
 @media (max-width: 800px) {
