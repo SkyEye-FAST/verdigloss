@@ -1,6 +1,6 @@
 import { onMounted, onUnmounted, type Ref } from 'vue'
 
-/** Closes an open popover when a pointer lands outside its owning element. */
+/** Closes an open popover when pointer or keyboard focus leaves its owning element. */
 export function useDismissiblePopover(
   root: Ref<HTMLElement | null>,
   isOpen: Ref<boolean>,
@@ -10,6 +10,16 @@ export function useDismissiblePopover(
     if (isOpen.value && root.value && !root.value.contains(event.target as Node)) void dismiss()
   }
 
-  onMounted(() => document.addEventListener('pointerdown', handlePointerDown))
-  onUnmounted(() => document.removeEventListener('pointerdown', handlePointerDown))
+  function handleFocusIn(event: FocusEvent) {
+    if (isOpen.value && root.value && !root.value.contains(event.target as Node)) void dismiss()
+  }
+
+  onMounted(() => {
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('focusin', handleFocusIn)
+  })
+  onUnmounted(() => {
+    document.removeEventListener('pointerdown', handlePointerDown)
+    document.removeEventListener('focusin', handleFocusIn)
+  })
 }

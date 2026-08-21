@@ -87,19 +87,14 @@
 }
 
 .motion-popover-enter-active {
-  transition:
-    opacity 170ms var(--ease-enter),
-    transform 170ms var(--ease-enter);
+  transition: transform 170ms var(--ease-enter);
 }
 .motion-popover-leave-active {
   pointer-events: none;
-  transition:
-    opacity 110ms var(--ease-exit),
-    transform 110ms var(--ease-exit);
+  transition: transform 110ms var(--ease-exit);
 }
 .motion-popover-enter-from,
 .motion-popover-leave-to {
-  opacity: 0;
   transform: translateY(calc(-1 * var(--motion-distance-sm))) scale(0.985);
 }
 

@@ -134,7 +134,11 @@
   }
   button:disabled {
     cursor: not-allowed;
-    opacity: 0.55;
+    border-color: var(--border);
+    background: var(--surface-subtle);
+    color: var(--muted);
+    box-shadow: none;
+    opacity: 1;
   }
   a {
     color: inherit;
@@ -147,6 +151,40 @@
     color: var(--on-accent);
     background: var(--accent);
   }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: var(--space-2);
+  left: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0.65rem 0.9rem;
+  border: 2px solid var(--focus);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  transform: translateY(calc(-100% - var(--space-4)));
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 .app-shell {
@@ -243,6 +281,7 @@
 }
 .app-main {
   width: 100%;
+  scroll-margin-top: 64px;
 }
 .mobile-nav {
   display: none;
@@ -335,29 +374,6 @@ body.translation-font-sans :is(.zh-hk, .zh-tw) {
 body.translation-font-sans .ja-jp {
   font-family: var(--jp-sans-font);
 }
-body.translation-font-changing
-  :is(
-    .en-us,
-    .de-de,
-    .es-es,
-    .fr-fr,
-    .it-it,
-    .nl-nl,
-    .pt-br,
-    .ru-ru,
-    .uk-ua,
-    .vi-vn,
-    .zh-cn,
-    .zh-hk,
-    .zh-tw,
-    .lzh,
-    .ja-jp,
-    .ko-kr,
-    .th-th
-  ) {
-  opacity: 0.8;
-  transition: opacity var(--motion-fast) var(--ease-standard);
-}
 
 @media (max-width: 800px) {
   .app-bar {
@@ -424,6 +440,7 @@ body.translation-font-changing
   }
   .app-main {
     padding-bottom: calc(70px + var(--safe-bottom));
+    scroll-margin-top: 56px;
   }
 }
 @media (max-width: 420px) {
