@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const currentDrive = process.cwd().match(/^[A-Za-z]:/)?.[0]
+if (process.platform === 'win32' && currentDrive && !process.env.SystemDrive) {
+  process.env.SystemDrive = currentDrive
+}
+
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:4173'
 
 export default defineConfig({
@@ -12,6 +17,7 @@ export default defineConfig({
     : 'list',
   use: {
     baseURL,
+    locale: 'en-US',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

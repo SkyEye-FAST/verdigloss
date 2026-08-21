@@ -12,7 +12,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   build: {
     manifest: true,
     rollupOptions: {
@@ -24,7 +24,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     vue(),
-    vueDevTools(),
+    mode === 'development' && process.env.VERDIGLOSS_E2E !== '1' && vueDevTools(),
     VueI18nPlugin({
       include: resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
     }),
@@ -48,4 +48,4 @@ export default defineConfig({
       '@#': fileURLToPath(new URL('./src/assets/mc_lang/valid', import.meta.url)),
     },
   },
-})
+}))
