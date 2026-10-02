@@ -22,16 +22,12 @@ export interface LanguageMetadata {
   gameName: string
   htmlLang: string
   typographyClass: string
-  dataSource: 'mc_lang/valid'
   availableInQuery: boolean
   availableInTable: boolean
   quiz: { enabled: boolean; minimumQuestions: number }
 }
 
-const definitions: Omit<
-  LanguageMetadata,
-  'dataSource' | 'availableInQuery' | 'availableInTable' | 'quiz'
->[] = [
+const definitions: Omit<LanguageMetadata, 'availableInQuery' | 'availableInTable' | 'quiz'>[] = [
   ['en_us', 'English (United States)', 'en-US'],
   ['zh_cn', '简体中文 (中国大陆)', 'zh-Hans-CN'],
   ['zh_hk', '繁體中文 (香港特別行政區)', 'zh-Hant-HK'],
@@ -54,11 +50,10 @@ const definitions: Omit<
   gameName,
   htmlLang,
   typographyClass: code.replace('_', '-'),
-})) as Omit<LanguageMetadata, 'dataSource' | 'availableInQuery' | 'availableInTable' | 'quiz'>[]
+})) as Omit<LanguageMetadata, 'availableInQuery' | 'availableInTable' | 'quiz'>[]
 
 export const languageRegistry: readonly LanguageMetadata[] = definitions.map((language) => ({
   ...language,
-  dataSource: 'mc_lang/valid',
   availableInQuery: true,
   availableInTable: true,
   quiz: { enabled: language.code !== 'en_us', minimumQuestions: 10 },

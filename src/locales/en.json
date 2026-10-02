@@ -1,5 +1,6 @@
 {
   "app": {
+    "use_full_language_files": "Use full language files",
     "font": {
       "sans": "Sans serif",
       "serif": "Serif",

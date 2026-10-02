@@ -39,6 +39,18 @@ describe('phase-two data boundaries', () => {
     expect(getSearchIndex('en_us', { stone: 'Stone' }).search('key', 'stone')).toHaveLength(1)
   })
 
+  it('keeps filtered and full language data and search indexes separate', async () => {
+    const valid = await loadLanguage('en_us', 'valid')
+    const full = await loadLanguage('en_us', 'full')
+    expect(full['gui.done']).toBe('Done')
+    expect(valid['gui.done']).toBeUndefined()
+    expect(loadLanguage('en_us', 'full')).toBe(loadLanguage('en_us', 'full'))
+    expect(full).not.toBe(valid)
+    expect(getSearchIndex('en_us', valid).search('key', 'gui.done')).toEqual([])
+    expect(getSearchIndex('en_us', full).search('key', 'gui.done')).toHaveLength(1)
+    expect(getSearchIndex('en_us', valid).search('key', 'gui.done')).toEqual([])
+  })
+
   it('filters only selected loaded columns and clamps pagination without page zero', () => {
     const dictionaries = {
       en_us: { apple: 'Apple', stone: 'Stone' },

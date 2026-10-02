@@ -82,8 +82,10 @@ describe('safe persistence and language registry', () => {
         /^[a-z]{2,3}(?:-[A-Za-z0-9]+)*$/.test(language.htmlLang),
       ),
     ).toBe(true)
-    const files = await loadLanguages(languageList)
-    expect(languageRegistry.every((language) => files[language.code] !== undefined)).toBe(true)
+    for (const source of ['valid', 'full'] as const) {
+      const files = await loadLanguages(languageList, source)
+      expect(languageRegistry.every((language) => files[language.code] !== undefined)).toBe(true)
+    }
     expect(new Set(languageRegistry.map((language) => language.code)).size).toBe(
       languageList.length,
     )

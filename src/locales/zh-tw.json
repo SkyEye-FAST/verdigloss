@@ -1,5 +1,6 @@
 {
   "app": {
+    "use_full_language_files": "使用完整語言檔案",
     "font": {
       "sans": "無襯線體",
       "serif": "襯線體",

@@ -88,6 +88,7 @@
           </div>
         </div>
       </details>
+      <FullLanguageFilesOption v-model="useFullLanguageFiles" class="col-span-full" />
     </div>
   </header>
 </template>
@@ -98,6 +99,7 @@ import { useDismissiblePopover } from '@/composables/useDismissiblePopover'
 import type { LanguageMetadata } from '@/data/languages'
 import { readBooleanPreference, writeStoredValue } from '@/utils/storage'
 import LanguageSelector from '../Query/LanguageSelector.vue'
+import FullLanguageFilesOption from '../FullLanguageFilesOption.vue'
 
 const props = defineProps<{
   searchQuery: string
@@ -112,6 +114,7 @@ const selectedLanguages = defineModel<string[]>('selectedLanguages', {
   default: () => ['en_us', 'zh_cn', 'zh_hk', 'zh_tw', 'lzh'],
 })
 const usePagination = defineModel('usePagination', { default: true })
+const useFullLanguageFiles = defineModel<boolean>('useFullLanguageFiles', { required: true })
 const downloadAllData = defineModel('downloadAllData', {
   default: readBooleanPreference('table:downloadAllData', true),
 })

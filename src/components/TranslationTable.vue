@@ -4,6 +4,7 @@
       v-model:search-query="searchQuery"
       v-model:selected-languages="selectedLanguages"
       v-model:use-pagination="usePagination"
+      v-model:use-full-language-files="useFullLanguageFiles"
       :minecraft-version="minecraftVersion"
       :languages="tableLanguages"
       v-model:download-all-data="downloadAllData"
@@ -144,11 +145,12 @@
 
 <script setup lang="ts">
 import { useMediaQuery } from '@vueuse/core'
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDownload } from '@/composables/useDownload'
+import { useTranslationData } from '@/composables/useTranslationData'
 import { type LanguageCode, languageList, languageRegistry } from '@/data/languages'
 import {
   clampPage,
@@ -156,7 +158,6 @@ import {
   pageKeys,
   TABLE_PAGE_SIZE,
 } from '@/features/table/table-data'
-import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import { readBooleanPreference, readLanguageList, writeStoredValue } from '@/utils/storage'
 
 import Header from './Table/TableHeader.vue'
@@ -168,8 +169,8 @@ const { t } = useI18n()
 const languages = languageList
 const tableLanguages = languageRegistry.filter((language) => language.availableInTable)
 const isCompactLayout = useMediaQuery('(max-width: 800px)')
-const translations = shallowRef<Partial<Record<LanguageCode, LanguageFile>>>({})
-const orderedKeys = shallowRef<string[]>([])
+const { files: translations, useFullLanguageFiles, ensureLanguages } = useTranslationData()
+const orderedKeys = computed(() => Object.keys(translations.value.en_us ?? {}))
 
 const searchQuery = ref('')
 
@@ -190,21 +191,6 @@ const loading = ref(true)
 const usePagination = ref(true)
 const downloadAllData = ref(readBooleanPreference('table:downloadAllData', true))
 const exportFeedback = ref('')
-
-async function ensureLanguages(codes: readonly LanguageCode[]) {
-  const missing = codes.filter((code) => !translations.value[code])
-  if (!missing.length) return
-  translations.value = {
-    ...translations.value,
-    ...(await loadLanguages(missing)),
-  }
-  if (translations.value.en_us) orderedKeys.value = Object.keys(translations.value.en_us)
-}
-
-onMounted(async () => {
-  await ensureLanguages(['en_us', ...selectedLanguages.value])
-  loading.value = false
-})
 
 const displayLanguages = computed(() => {
   return languages.filter((lang) => selectedLanguages.value.includes(lang))
@@ -301,13 +287,19 @@ function handleDownload({ type, all }: { type: string; all: boolean }) {
   })
 }
 
+let loadRevision = 0
 watch(
-  selectedLanguages,
-  (newValue) => {
+  [selectedLanguages, useFullLanguageFiles],
+  async ([newValue]) => {
+    const revision = ++loadRevision
+    loading.value = true
     writeStoredValue('verdigloss:table:selectedLanguages:v1', newValue)
-    void ensureLanguages(['en_us', ...newValue])
+    await ensureLanguages(['en_us', ...newValue])
+    if (revision !== loadRevision) return
+    currentPage.value = 1
+    loading.value = false
   },
-  { deep: true },
+  { deep: true, immediate: true, flush: 'sync' },
 )
 </script>
 

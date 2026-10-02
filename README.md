@@ -23,6 +23,7 @@ You can use Verdigloss at the following links:
 ## Features
 
 - [x] Search by English source text, translation key, or a selected target language
+- [x] Switch query and table pages between filtered and full language files with a shared, saved preference
 - [x] Compare selected language columns, filter results, paginate, and export CSV, TSV, JSON, XML, or XLSX
 - [x] Shareable, versioned quiz codes with legacy-code compatibility
 - [x] Quiz hints, timer mode, summaries, and resilient browser preference storage
@@ -98,7 +99,7 @@ Language JSON is loaded only when a page needs it. XLSX is dynamically imported 
 
 ### Translation data and quiz codes
 
-The `src/assets/mc_lang` submodule downloads Minecraft language assets and provides the `valid/` language files used by the application. `src/assets/data/quiz-id-map.json` maps every English translation key to a deterministic, collision-checked seven-character base-62 ID.
+The `src/assets/mc_lang` submodule downloads Minecraft language assets. Query and table pages use filtered `valid/` files by default; enable **Use full language files** on either page to search, compare, and export all entries from `full/`. The preference is shared between both pages and saved in the browser. Quiz data continues to use `valid/`. `src/assets/data/quiz-id-map.json` maps every filtered English translation key to a deterministic, collision-checked seven-character base-62 ID.
 
 New links use `v1.<id>.<id>...`. They can be decoded without random state; legacy 30-character links continue to use the preserved legacy map where available. A quiz question is eligible only when its target-language value is non-empty and differs from English.
 

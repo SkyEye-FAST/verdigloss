@@ -14,6 +14,7 @@ const budgets = {
   initialJavaScript: 350 * KiB,
   largestJavaScriptChunk: 700 * KiB,
   languageChunk: 250 * KiB,
+  fullLanguageChunk: 1000 * KiB,
   xlsxChunk: 550 * KiB,
   css: 120 * KiB,
   remoteFontRequests: approvedRemoteFontUrls.size,
@@ -40,6 +41,9 @@ async function main() {
   const allJs = entries.map(([, chunk]) => chunk.file).filter((file) => file.endsWith('.js'))
   const languageFiles = entries
     .filter(([key]) => key.includes('/mc_lang/valid/'))
+    .map(([, chunk]) => chunk.file)
+  const fullLanguageFiles = entries
+    .filter(([key]) => key.includes('/mc_lang/full/'))
     .map(([, chunk]) => chunk.file)
   const xlsxFiles = entries
     .filter(([key, chunk]) => key.includes('xlsx') || chunk.file.includes('xlsx'))
@@ -69,8 +73,14 @@ async function main() {
       (total, size) => total + size,
       0,
     ),
-    largestJavaScriptChunk: Math.max(0, ...(await Promise.all(allJs.map(fileSize)))),
+    largestJavaScriptChunk: Math.max(
+      0,
+      ...(await Promise.all(
+        allJs.filter((file) => !fullLanguageFiles.includes(file)).map(fileSize),
+      )),
+    ),
     largestLanguageChunk: Math.max(0, ...(await Promise.all(languageFiles.map(fileSize)))),
+    largestFullLanguageChunk: Math.max(0, ...(await Promise.all(fullLanguageFiles.map(fileSize)))),
     largestXlsxChunk: Math.max(0, ...(await Promise.all(xlsxFiles.map(fileSize)))),
     css: (await Promise.all(cssFiles.map(fileSize))).reduce((total, size) => total + size, 0),
     remoteFontRequests: remoteFontUrls.length,
@@ -80,6 +90,7 @@ async function main() {
     ['initialJavaScript', measurements.initialJavaScript, budgets.initialJavaScript],
     ['largestJavaScriptChunk', measurements.largestJavaScriptChunk, budgets.largestJavaScriptChunk],
     ['largestLanguageChunk', measurements.largestLanguageChunk, budgets.languageChunk],
+    ['largestFullLanguageChunk', measurements.largestFullLanguageChunk, budgets.fullLanguageChunk],
     ['largestXlsxChunk', measurements.largestXlsxChunk, budgets.xlsxChunk],
     ['css', measurements.css, budgets.css],
     ['remoteFontRequests', measurements.remoteFontRequests, budgets.remoteFontRequests],
@@ -92,8 +103,14 @@ async function main() {
   }
   if (xlsxFiles.some((file) => initialFiles.includes(file)))
     throw new Error('XLSX is included in initial route JavaScript.')
+  if ([...languageFiles, ...fullLanguageFiles].some((file) => initialFiles.includes(file)))
+    throw new Error('Language data is included in initial route JavaScript.')
   console.log(
-    JSON.stringify({ budgets, measurements, initialFiles, languageFiles, xlsxFiles }, null, 2),
+    JSON.stringify(
+      { budgets, measurements, initialFiles, languageFiles, fullLanguageFiles, xlsxFiles },
+      null,
+      2,
+    ),
   )
 }
 

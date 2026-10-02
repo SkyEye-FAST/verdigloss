@@ -35,7 +35,6 @@ async function readJson(relativePath) {
 }
 
 async function main() {
-  const validDirectory = fromRoot('src', 'assets', 'mc_lang', 'valid')
   const english = await readJson('src/assets/mc_lang/valid/en_us.json')
   const generated = await readJson('src/assets/data/quiz-id-map.json')
   const rating = await readJson('src/assets/data/rating.json')
@@ -78,15 +77,17 @@ async function main() {
   const registryCodes = [...registrySource.matchAll(/\['([a-z]{2,3}(?:_[a-z]{2})?)',/g)].map(
     (match) => match[1],
   )
-  const dataFiles = (await fs.readdir(validDirectory))
-    .filter((file) => file.endsWith('.json'))
-    .map((file) => file.slice(0, -5))
-    .sort()
-  if (
-    !registryCodes.length ||
-    [...new Set(registryCodes)].sort().join('\n') !== dataFiles.join('\n')
-  ) {
-    fail('Language registry entries must refer exactly to language data files in valid/.')
+  for (const source of ['valid', 'full']) {
+    const dataFiles = (await fs.readdir(fromRoot('src', 'assets', 'mc_lang', source)))
+      .filter((file) => file.endsWith('.json'))
+      .map((file) => file.slice(0, -5))
+      .sort()
+    if (
+      !registryCodes.length ||
+      [...new Set(registryCodes)].sort().join('\n') !== dataFiles.join('\n')
+    ) {
+      fail(`Language registry entries must refer exactly to language data files in ${source}/.`)
+    }
   }
 
   const [en, zhCn, zhTw] = await Promise.all([

@@ -29,6 +29,7 @@
             :class="currentLang.toLowerCase()"
           >
             <div class="form-container">
+              <FullLanguageFilesOption v-model="useFullLanguageFiles" />
               <div class="input-group">
                 <label for="queryMode">
                   <i-material-symbols-settings-outline class="label-icon" aria-hidden="true" />
@@ -196,16 +197,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 
 import mcVersion from '@/assets/mc_lang/version.txt?raw'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useLocale } from '@/composables/useLocale'
+import { useTranslationData } from '@/composables/useTranslationData'
 import { type LanguageCode, languageList, languageRegistry } from '@/data/languages'
 import { getSearchIndex, type QueryMode } from '@/features/query/search-index'
-import { loadLanguages, type LanguageFile } from '@/services/translation-data'
 import {
   readLanguageList,
   readStringPreference,
@@ -215,6 +216,7 @@ import {
 
 import LanguageSelector from './Query/LanguageSelector.vue'
 import SelectMenu from './SelectMenu.vue'
+import FullLanguageFilesOption from './FullLanguageFilesOption.vue'
 
 const { t } = useI18n()
 const minecraftVersion = ref(mcVersion)
@@ -335,15 +337,9 @@ onMounted(() => {
   document.body.classList.toggle('dark-mode', isDarkMode.value)
 })
 
-const langFiles = shallowRef<Partial<Record<LanguageCode, LanguageFile>>>({})
+const { files: langFiles, useFullLanguageFiles, ensureLanguages } = useTranslationData()
 const { locale: currentLang } = useLocale()
 let searchRevision = 0
-
-async function ensureLanguages(codes: readonly LanguageCode[]) {
-  const missing = codes.filter((code) => !langFiles.value[code])
-  if (!missing.length) return
-  langFiles.value = { ...langFiles.value, ...(await loadLanguages(missing)) }
-}
 
 const availableKeys = computed(() => {
   if (!queryContent.value) return []
@@ -554,6 +550,19 @@ const onQueryInput = debounce(() => {
 
   void search()
 }, 300)
+
+watch(
+  useFullLanguageFiles,
+  () => {
+    onQueryInput.cancel()
+    selectedTranslation.value = null
+    translations.value = []
+    error.value = ''
+    localeKey.value = ''
+    void search()
+  },
+  { flush: 'sync' },
+)
 
 watch(
   [queryMode, queryLang, queryContent, localeKey, selectedLanguages],

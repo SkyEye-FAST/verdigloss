@@ -36,12 +36,12 @@ export class SearchIndex {
   }
 }
 
-const indexes = new Map<LanguageCode, SearchIndex>()
+const indexes = new Map<LanguageCode, { data: LanguageFile; index: SearchIndex }>()
 export function getSearchIndex(language: LanguageCode, data: LanguageFile) {
   const cached = indexes.get(language)
-  if (cached) return cached
+  if (cached?.data === data) return cached.index
   const index = new SearchIndex(language, data)
-  indexes.set(language, index)
+  indexes.set(language, { data, index })
   return index
 }
 
