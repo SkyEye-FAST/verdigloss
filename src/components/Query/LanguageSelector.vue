@@ -77,9 +77,11 @@
           <label
             v-for="option in options"
             :key="option.value"
-            class="grid min-h-11 grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-[0.65rem] border-b border-border px-3 py-[0.45rem] hover:bg-surface-subtle"
+            :for="`${popupId}-${option.value}`"
+            class="grid min-h-11 cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-center gap-[0.65rem] border-b border-border px-3 py-[0.45rem] hover:bg-surface-subtle"
           >
             <input
+              :id="`${popupId}-${option.value}`"
               type="checkbox"
               :value="option.value"
               :checked="modelValue.includes(option.value)"
