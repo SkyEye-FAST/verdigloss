@@ -33,7 +33,7 @@ You can use Verdigloss at the following links:
 
 ## Development
 
-Verdigloss supports Node.js 24 and uses pnpm 11.10.0 through Corepack. Git with submodule support is required for the Minecraft language data.
+Verdigloss supports Node.js 24.15 or later in the Node.js 24 release line and uses pnpm 11.10.0 through Corepack. Git with submodule support is required for the Minecraft language data.
 
 1. Clone this repository and its language-data submodule:
 
