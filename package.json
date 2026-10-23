@@ -31,7 +31,7 @@
   "dependencies": {
     "@vueuse/core": "^15.0.0",
     "vue": "^3.5.40",
-    "vue-i18n": "^11.4.14",
+    "vue-i18n": "^11.4.16",
     "vue-router": "^5.3.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
